@@ -21,16 +21,11 @@ jobs:
         run: python -m ruff check src tests
       - name: Run tests
         run: python -m pytest
-      - name: Regenerate deterministic artifacts
+      - name: Regenerate and verify deterministic artifacts
         env:
           MPLBACKEND: Agg
           MPLCONFIGDIR: .matplotlib-cache
-        run: |
-          python -m src.run_with_log src.generate_artifacts
-          python -m src.run_with_log src.generate_days08_12
-          python -m src.run_with_log src.generate_paper_assets
-          python -m src.run_with_log src.generate_runtime_report
-          python -m src.run_with_log src.generate_audit_manifest
+        run: python -m src.verify_generated_artifacts --run-log-output results/runs
       - name: Upload generation run logs
         if: always()
         uses: actions/upload-artifact@v4
@@ -38,5 +33,3 @@ jobs:
           name: generation-run-logs
           path: results/runs/
           retention-days: 30
-      - name: Verify committed data artifacts
-        run: git diff --exit-code -- results experiments/manifests paper/generated paper/figures figures docs/day08_12_runtime_report.pdf
