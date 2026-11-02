@@ -22,4 +22,6 @@
 | Raw, calibration, and corrected evidence retained | `results/day07_readout_calibration_budget-4096_repeats-30.csv`, `results/day07_readout_mitigation_budget-4096_repeats-30.csv` | Complete |
 | Raw-versus-corrected figure | `figures/day07_readout_raw_vs_corrected.png` | Complete |
 
-No task in the authoritative batch requires additional information. ZNE begins in the next batch and was intentionally not introduced here.
+No task in the authoritative batch requires additional information. Subsequent work added
+fixed-budget gate folding and linear ZNE, the frozen volumetric manifest, the repeat-level
+pilot and GHZ benchmark, and the reproducible paper assets documented in the repository root.

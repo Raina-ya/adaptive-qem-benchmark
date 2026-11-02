@@ -11,3 +11,8 @@ tmp/
 dist/
 build/
 *.egg-info/
+paper/*.aux
+paper/*.bbl
+paper/*.blg
+paper/*.log
+paper/*.out

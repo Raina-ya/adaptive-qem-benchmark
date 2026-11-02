@@ -166,7 +166,6 @@ def generate_day11() -> None:
     results = run_manifest(pilot)
     results.to_csv(RAW / "day11_pilot_repeats-20.csv", index=False)
     audit = coverage_audit(results)
-    audit["total_runtime_seconds"] = results.runtime_seconds.sum()
     audit["raw_file_bytes"] = results.to_csv(index=False).encode("utf-8").__len__()
     audit.to_csv(PROCESSED / "day11_pilot_audit.csv", index=False)
     _plot_rmse_heatmap(results, FIGURES / "day11_pilot_rmse_heatmap.png")

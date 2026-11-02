@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 import json
-import time
 from dataclasses import asdict
 
 import pandas as pd
@@ -65,13 +64,11 @@ def execute_row(row: pd.Series) -> dict[str, object]:
             "result_label": "noisy_simulated",
             "estimate": None,
             "raw_payload_json": None,
-            "runtime_seconds": 0.0,
             "error": None,
         }
     )
     if row.status == "not_applicable":
         return output
-    started = time.perf_counter()
     try:
         circuit = ghz_circuit(int(row.width))
         spec = noise_spec("mixed", str(row.noise))
@@ -113,7 +110,6 @@ def execute_row(row: pd.Series) -> dict[str, object]:
     except Exception as error:  # row-level audit must retain failures
         output["status"] = "failed"
         output["error"] = f"{type(error).__name__}: {error}"
-    output["runtime_seconds"] = time.perf_counter() - started
     return output
 
 

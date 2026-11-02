@@ -25,6 +25,9 @@ jobs:
         env:
           MPLBACKEND: Agg
           MPLCONFIGDIR: .matplotlib-cache
-        run: python -m src.generate_artifacts
+        run: |
+          python -m src.generate_artifacts
+          python -m src.generate_days08_12
+          python -m src.generate_paper_assets
       - name: Verify committed data artifacts
-        run: git diff --exit-code -- results
+        run: git diff --exit-code -- results experiments/manifests paper/generated paper/figures
