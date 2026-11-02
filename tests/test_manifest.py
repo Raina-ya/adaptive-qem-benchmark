@@ -11,7 +11,7 @@ from src.benchmark_runner import (
 )
 from src.config import DEPTHS, NOISE_LEVELS, SHOT_BUDGETS, WIDTHS
 from src.generate_audit_manifest import MANIFEST_COLUMNS as AUDIT_COLUMNS
-from src.generate_audit_manifest import OUTPUT_PATH, ROOT, build_audit_manifest
+from src.generate_audit_manifest import OUTPUT_PATH, ROOT, _canonical_bytes, build_audit_manifest
 
 
 def test_manifest_contains_complete_declared_grid() -> None:
@@ -62,3 +62,12 @@ def test_audit_manifest_csv_row_counts_match_files() -> None:
         with (ROOT / row.path).open("r", encoding="utf-8", newline="") as handle:
             actual_rows = max(sum(1 for _ in csv.reader(handle)) - 1, 0)
         assert int(row.csv_data_rows) == actual_rows
+
+
+def test_audit_manifest_normalizes_text_line_endings(tmp_path) -> None:
+    crlf = tmp_path / "windows.csv"
+    lf = tmp_path / "linux.csv"
+    crlf.write_bytes(b"column\r\nvalue\r\n")
+    lf.write_bytes(b"column\nvalue\n")
+
+    assert _canonical_bytes(crlf) == _canonical_bytes(lf)

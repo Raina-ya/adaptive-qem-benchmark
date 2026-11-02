@@ -13,14 +13,16 @@ OUTPUT_PATH = ROOT / "results/processed/day08_12_audit_manifest.csv"
 SEARCH_ROOTS = ("results", "figures", "docs", "experiments")
 DAY_TOKENS = ("day08", "day09", "day10", "day11", "day12", "day08_12", "volumetric_v1")
 MANIFEST_COLUMNS = ("path", "artifact_kind", "size_bytes", "sha256", "csv_data_rows")
+TEXT_SUFFIXES = {".bib", ".csv", ".json", ".md", ".tex", ".txt", ".yaml", ".yml"}
 
 
-def _sha256(path: Path) -> str:
-    digest = hashlib.sha256()
-    with path.open("rb") as handle:
-        for chunk in iter(lambda: handle.read(1024 * 1024), b""):
-            digest.update(chunk)
-    return digest.hexdigest()
+def _canonical_bytes(path: Path) -> bytes:
+    """Return platform-stable bytes while preserving binary artifacts exactly."""
+
+    content = path.read_bytes()
+    if path.suffix.lower() in TEXT_SUFFIXES:
+        return content.replace(b"\r\n", b"\n").replace(b"\r", b"\n")
+    return content
 
 
 def _csv_data_rows(path: Path) -> int | None:
@@ -49,12 +51,13 @@ def build_audit_manifest() -> pd.DataFrame:
         for path in sorted(directory.rglob("*")):
             if not path.is_file() or not _is_audit_artifact(path):
                 continue
+            canonical = _canonical_bytes(path)
             rows.append(
                 {
                     "path": path.relative_to(ROOT).as_posix(),
                     "artifact_kind": path.suffix.lower().lstrip(".") or "file",
-                    "size_bytes": path.stat().st_size,
-                    "sha256": _sha256(path),
+                    "size_bytes": len(canonical),
+                    "sha256": hashlib.sha256(canonical).hexdigest(),
                     "csv_data_rows": _csv_data_rows(path),
                 }
             )
