@@ -1,0 +1,10 @@
+family,circuit_id,width,depth_parameter,observable_q0_first,noiseless_statevector_reference,result_label,logical_depth,logical_gate_count,logical_two_qubit_gate_count
+hardware_efficient,he_w2_d1,2,1,XZ,0.0044576002918485375,noiseless_simulated,3,5,1
+hardware_efficient,he_w2_d3,2,3,XZ,0.03604622469130714,noiseless_simulated,9,15,3
+hardware_efficient,he_w2_d6,2,6,XZ,0.13915473761866692,noiseless_simulated,18,30,6
+hardware_efficient,he_w4_d1,4,1,XZXZ,-0.020419421301099167,noiseless_simulated,5,11,3
+hardware_efficient,he_w4_d3,4,3,XZXZ,0.3965125792622167,noiseless_simulated,15,34,10
+hardware_efficient,he_w4_d6,4,6,XZXZ,0.41181202597561783,noiseless_simulated,30,69,21
+hardware_efficient,he_w6_d1,6,1,XZXZXZ,0.0009016690227331033,noiseless_simulated,7,17,5
+hardware_efficient,he_w6_d3,6,3,XZXZXZ,0.04180233265277913,noiseless_simulated,19,52,16
+hardware_efficient,he_w6_d6,6,6,XZXZXZ,-0.05380086079993311,noiseless_simulated,36,105,33

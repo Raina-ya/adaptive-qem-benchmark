@@ -1,0 +1,8 @@
+matplotlib==3.10.7
+numpy==2.3.4
+pandas==2.3.3
+pytest==8.4.2
+qiskit==2.2.3
+qiskit-aer==0.17.2
+ruff==0.14.3
+scipy==1.16.3

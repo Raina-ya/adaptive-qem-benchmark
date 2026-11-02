@@ -1,0 +1,35 @@
+[build-system]
+requires = ["setuptools>=75"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "adaptive-qem-benchmark"
+version = "0.1.0"
+description = "A reproducible simulator benchmark for quantum error mitigation under fixed shot budgets."
+requires-python = ">=3.11,<3.13"
+dependencies = [
+  "matplotlib>=3.9,<4",
+  "numpy>=2.0,<3",
+  "pandas>=2.2,<3",
+  "qiskit>=2.2,<3",
+  "qiskit-aer>=0.17,<1",
+  "scipy>=1.14,<2",
+]
+
+[project.optional-dependencies]
+test = ["pytest>=8,<9", "ruff>=0.9,<1"]
+
+[tool.setuptools.packages.find]
+include = ["src*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-q --basetemp=.pytest-tmp -p no:cacheprovider"
+
+[tool.ruff]
+target-version = "py311"
+line-length = 100
+extend-exclude = [".obsidian", "outputs", "work"]
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B"]

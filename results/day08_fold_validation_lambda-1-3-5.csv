@@ -1,0 +1,10 @@
+circuit_id,width,noise_factor,result_label,logical_depth,transpiled_depth,transpiled_two_qubit_gate_count
+bell,2,1,noiseless_simulated_resource_validation,2,2,1
+bell,2,3,noiseless_simulated_resource_validation,6,6,3
+bell,2,5,noiseless_simulated_resource_validation,10,10,5
+ghz_w4,4,1,noiseless_simulated_resource_validation,4,4,3
+ghz_w4,4,3,noiseless_simulated_resource_validation,12,12,9
+ghz_w4,4,5,noiseless_simulated_resource_validation,20,20,15
+he_w4_d3,4,1,noiseless_simulated_resource_validation,15,15,10
+he_w4_d3,4,3,noiseless_simulated_resource_validation,45,45,30
+he_w4_d3,4,5,noiseless_simulated_resource_validation,75,75,50

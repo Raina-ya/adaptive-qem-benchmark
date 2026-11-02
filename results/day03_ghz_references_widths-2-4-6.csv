@@ -1,0 +1,13 @@
+family,circuit_id,width,depth_parameter,observable_q0_first,analytic_reference,noiseless_statevector_reference,result_label,logical_depth,logical_gate_count,logical_two_qubit_gate_count
+ghz,ghz_w2,2,1,XX,1.0,0.9999999999999998,analytic_and_noiseless_simulated,2,2,1
+ghz,ghz_w2,2,1,ZZ,1.0,0.9999999999999998,analytic_and_noiseless_simulated,2,2,1
+ghz,ghz_w4,4,1,XXXX,1.0,0.9999999999999998,analytic_and_noiseless_simulated,4,4,3
+ghz,ghz_w4,4,1,ZZII,1.0,0.9999999999999998,analytic_and_noiseless_simulated,4,4,3
+ghz,ghz_w4,4,1,IZZI,1.0,0.9999999999999998,analytic_and_noiseless_simulated,4,4,3
+ghz,ghz_w4,4,1,IIZZ,1.0,0.9999999999999998,analytic_and_noiseless_simulated,4,4,3
+ghz,ghz_w6,6,1,XXXXXX,1.0,0.9999999999999998,analytic_and_noiseless_simulated,6,6,5
+ghz,ghz_w6,6,1,ZZIIII,1.0,0.9999999999999998,analytic_and_noiseless_simulated,6,6,5
+ghz,ghz_w6,6,1,IZZIII,1.0,0.9999999999999998,analytic_and_noiseless_simulated,6,6,5
+ghz,ghz_w6,6,1,IIZZII,1.0,0.9999999999999998,analytic_and_noiseless_simulated,6,6,5
+ghz,ghz_w6,6,1,IIIZZI,1.0,0.9999999999999998,analytic_and_noiseless_simulated,6,6,5
+ghz,ghz_w6,6,1,IIIIZZ,1.0,0.9999999999999998,analytic_and_noiseless_simulated,6,6,5

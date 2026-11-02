@@ -1,0 +1,30 @@
+name: Reproducibility checks
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  test-and-regenerate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install locked dependencies
+        run: python -m pip install --requirement requirements-ci.txt
+      - name: Lint project sources
+        run: python -m ruff check src tests
+      - name: Run tests
+        run: python -m pytest
+      - name: Regenerate deterministic artifacts
+        env:
+          MPLBACKEND: Agg
+          MPLCONFIGDIR: .matplotlib-cache
+        run: python -m src.generate_artifacts
+      - name: Verify committed data artifacts
+        run: git diff --exit-code -- results

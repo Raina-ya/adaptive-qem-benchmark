@@ -1,0 +1,12 @@
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.pytest-tmp/
+.ruff_cache/
+.venv/
+.matplotlib-cache/
+.obsidian/
+work/
+dist/
+build/
+*.egg-info/
