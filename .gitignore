@@ -16,3 +16,7 @@ paper/*.bbl
 paper/*.blg
 paper/*.log
 paper/*.out
+outputs/
+*.pyc
+*.log
+.env
