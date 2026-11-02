@@ -1,17 +1,17 @@
 # Day 8-12 Runtime Summary
 
-| Stage | Day | Wall seconds | Cells | Simulations |
-|---|---:|---:|---:|---:|
-| day08_artifacts | 8 | 4.950 | 9 | 0 |
-| day09_artifacts | 9 | 15.343 | 60 | 180 |
-| day10_manifest | 10 | 2.508 | 16200 | 0 |
-| day11_first_run | 11 | 103.800 | 240 | 3120 |
-| readout_optimization | 11 | 3.700 | 0 | 0 |
-| day11_rerun | 11 | 28.000 | 240 | 3120 |
-| day12_aborted | 12 | 306.000 |  |  |
-| day12_final | 12 | 942.000 | 5400 | 59400 |
-| pytest | all | 54.370 |  |  |
-| ruff | all | 6.600 |  |  |
+| Stage | Day | Wall seconds | Timing | Cells | Simulations |
+|---|---:|---:|---|---:|---:|
+| day08_artifacts | 8 | 4.950 | estimated | 9 | 0 |
+| day09_artifacts | 9 | 15.343 | estimated | 60 | 180 |
+| day10_manifest | 10 | 2.508 | estimated | 16200 | 0 |
+| day11_first_run | 11 | 103.800 | measured | 240 | 3120 |
+| readout_optimization | 11 | 3.700 | measured | 0 | 0 |
+| day11_rerun | 11 | 28.000 | estimated | 240 | 3120 |
+| day12_aborted | 12 | 306.000 | estimated |  |  |
+| day12_final | 12 | 942.000 | measured | 5400 | 59400 |
+| pytest | all | 54.370 | estimated |  |  |
+| ruff | all | 6.600 | estimated |  |  |
 
 - The final Day 12 GHZ run dominated measured wall time at 942.0 seconds.
 - Readout calibration optimization reduced the comparable Day 11 pilot from 103.8 to 28.0 seconds (73.0% lower wall time).

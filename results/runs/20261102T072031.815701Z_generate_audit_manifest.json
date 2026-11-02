@@ -1,0 +1,28 @@
+{
+  "run_id": "20aec68d-9d01-49bb-be15-17d274fbab70",
+  "script": "src.generate_audit_manifest",
+  "started_at_utc": "2026-11-02T07:20:30.418547Z",
+  "finished_at_utc": "2026-11-02T07:20:31.815701Z",
+  "wall_seconds": 1.470677,
+  "python_version": "3.12.14",
+  "package_versions": {
+    "qiskit": "2.2.3",
+    "qiskit-aer": "0.17.2",
+    "numpy": "2.3.4",
+    "pandas": "2.3.3",
+    "matplotlib": "3.10.7",
+    "scipy": "1.16.3"
+  },
+  "git_commit_before": "275614a93a7a7dd42c8d77e6d7e88e7dd30581b2",
+  "git_dirty_before": true,
+  "git_commit_after": "275614a93a7a7dd42c8d77e6d7e88e7dd30581b2",
+  "git_dirty_after": true,
+  "host": "TP-1302774-NB",
+  "args": [],
+  "seed_root": 20261102,
+  "output_hashes": {
+    "results/processed/day08_12_audit_manifest.csv": "11109448952a48fad09b43b248b503a5a5cbe2042c1fe0b23fffcfe2d433977c"
+  },
+  "status": "ok",
+  "error": null
+}
