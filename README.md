@@ -51,9 +51,9 @@ $env:MPLBACKEND = "Agg"
 $env:MPLCONFIGDIR = ".matplotlib-cache"
 
 .\.venv\Scripts\python.exe -m pytest
-.\.venv\Scripts\python.exe -m src.generate_artifacts
-.\.venv\Scripts\python.exe -m src.generate_days08_12
-.\.venv\Scripts\python.exe -m src.generate_paper_assets
+.\.venv\Scripts\python.exe -m src.run_with_log src.generate_artifacts
+.\.venv\Scripts\python.exe -m src.run_with_log src.generate_days08_12
+.\.venv\Scripts\python.exe -m src.run_with_log src.generate_paper_assets
 tectonic paper/main.tex --outdir paper
 ```
 
@@ -61,6 +61,16 @@ Verify committed deterministic outputs:
 
 ```powershell
 git diff --exit-code -- results experiments/manifests paper/generated paper/figures
+```
+
+## Generation run logs
+
+Each wrapped generation command writes a compact JSON record under `results/runs/`.
+The record contains timing, environment and Git metadata, status, and SHA-256 hashes
+for files written under `results/` and `figures/`; it does not embed result data.
+
+```powershell
+ls results/runs/
 ```
 
 ## Limitations
@@ -80,6 +90,7 @@ tests/                       Analytic, statistical, and reproducibility invarian
 experiments/                 Frozen configuration and manifest
 results/raw/                 Immutable repeat-level benchmark rows
 results/processed/           Coverage and runtime summaries
+results/runs/                Per-run generation metadata and output hashes
 figures/                     Generated project figures
 paper/main.tex               Technical paper source
 paper/main.pdf               Compiled paper

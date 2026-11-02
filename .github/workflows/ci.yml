@@ -26,8 +26,15 @@ jobs:
           MPLBACKEND: Agg
           MPLCONFIGDIR: .matplotlib-cache
         run: |
-          python -m src.generate_artifacts
-          python -m src.generate_days08_12
-          python -m src.generate_paper_assets
+          python -m src.run_with_log src.generate_artifacts
+          python -m src.run_with_log src.generate_days08_12
+          python -m src.run_with_log src.generate_paper_assets
+      - name: Upload generation run logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: generation-run-logs
+          path: results/runs/
+          retention-days: 30
       - name: Verify committed data artifacts
         run: git diff --exit-code -- results experiments/manifests paper/generated paper/figures
