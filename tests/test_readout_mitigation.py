@@ -1,3 +1,5 @@
+import os
+
 import numpy as np
 
 from src.circuits import bell_circuit
@@ -48,3 +50,31 @@ def test_readout_mitigation_preserves_raw_and_corrected_results() -> None:
     assert result.assignment_matrix_json
     assert result.target_shots + result.calibration_shots == 4096
     assert abs(1.0 - result.corrected_estimate) <= abs(1.0 - result.raw_estimate)
+
+
+def test_fixed_matrix_correction_is_bitwise_stable_across_thread_settings() -> None:
+    matrix = np.array(
+        [
+            [0.91, 0.08, 0.07, 0.01],
+            [0.04, 0.87, 0.01, 0.06],
+            [0.04, 0.01, 0.88, 0.07],
+            [0.01, 0.04, 0.04, 0.86],
+        ]
+    )
+    observed = np.array([0.47, 0.03, 0.04, 0.46])
+    original = os.environ.get("OPENBLAS_NUM_THREADS")
+    try:
+        os.environ["OPENBLAS_NUM_THREADS"] = "1"
+        first = constrained_readout_correction(matrix, observed)
+        os.environ["OPENBLAS_NUM_THREADS"] = "4"
+        second = constrained_readout_correction(matrix, observed)
+    finally:
+        if original is None:
+            os.environ.pop("OPENBLAS_NUM_THREADS", None)
+        else:
+            os.environ["OPENBLAS_NUM_THREADS"] = original
+
+    assert first[2] == second[2] == "ok"
+    assert first[1].hex() == second[1].hex()
+    assert first[0] is not None and second[0] is not None
+    assert first[0].tobytes() == second[0].tobytes()

@@ -52,7 +52,7 @@ $env:MPLCONFIGDIR = ".matplotlib-cache"
 
 .\.venv\Scripts\python.exe -m pytest
 .\.venv\Scripts\python.exe -m src.run_with_log src.generate_artifacts
-.\.venv\Scripts\python.exe -m src.run_with_log src.generate_days08_12
+.\.venv\Scripts\python.exe -m src.run_with_log src.regenerate_readout_affected
 .\.venv\Scripts\python.exe -m src.run_with_log src.generate_paper_assets
 .\.venv\Scripts\python.exe -m src.run_with_log src.generate_runtime_report
 .\.venv\Scripts\python.exe -m src.run_with_log src.generate_audit_manifest
@@ -62,7 +62,7 @@ tectonic paper/main.tex --outdir paper
 Verify committed deterministic outputs:
 
 ```powershell
-git diff --exit-code -- results experiments/manifests paper/generated paper/figures figures docs/day08_12_runtime_report.pdf
+python -m src.verify_generated_artifacts --current
 ```
 
 `results/processed/day08_12_audit_manifest.csv` is generated from the repository

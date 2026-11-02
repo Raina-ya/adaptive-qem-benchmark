@@ -3,11 +3,11 @@
 from __future__ import annotations
 
 import json
+import math
 from dataclasses import asdict, dataclass
 
 import numpy as np
 from qiskit import QuantumCircuit
-from scipy.optimize import lsq_linear
 
 from src.config import derive_seed
 from src.estimators.unmitigated import EstimationResult, estimate_pauli
@@ -118,21 +118,154 @@ def counts_probability_vector(raw_counts_json: str, width: int) -> np.ndarray:
     return probabilities
 
 
+def _solve_linear_system(matrix: list[list[float]], vector: list[float]) -> list[float] | None:
+    """Solve a small dense system with deterministic partial pivoting."""
+
+    size = len(vector)
+    augmented = [matrix[row].copy() + [vector[row]] for row in range(size)]
+    for column in range(size):
+        pivot = max(range(column, size), key=lambda row: (abs(augmented[row][column]), -row))
+        pivot_value = augmented[pivot][column]
+        if abs(pivot_value) <= 1e-18:
+            return None
+        augmented[column], augmented[pivot] = augmented[pivot], augmented[column]
+        for index in range(column, size + 1):
+            augmented[column][index] /= pivot_value
+        for row in range(size):
+            if row == column:
+                continue
+            factor = augmented[row][column]
+            if factor == 0.0:
+                continue
+            for index in range(column, size + 1):
+                augmented[row][index] -= factor * augmented[column][index]
+    return [augmented[row][-1] for row in range(size)]
+
+
+def _inverse_and_condition_inf(matrix: np.ndarray) -> tuple[list[list[float]] | None, float]:
+    """Invert a matrix and compute its infinity-norm condition number deterministically."""
+
+    size = matrix.shape[0]
+    augmented = [
+        [float(value) for value in matrix[row]]
+        + [1.0 if row == column else 0.0 for column in range(size)]
+        for row in range(size)
+    ]
+    for column in range(size):
+        pivot = max(range(column, size), key=lambda row: (abs(augmented[row][column]), -row))
+        pivot_value = augmented[pivot][column]
+        if abs(pivot_value) <= 1e-18:
+            return None, math.inf
+        augmented[column], augmented[pivot] = augmented[pivot], augmented[column]
+        for index in range(column, 2 * size):
+            augmented[column][index] /= pivot_value
+        for row in range(size):
+            if row == column:
+                continue
+            factor = augmented[row][column]
+            if factor == 0.0:
+                continue
+            for index in range(column, 2 * size):
+                augmented[row][index] -= factor * augmented[column][index]
+
+    inverse = [row[size:] for row in augmented]
+    matrix_norm = max(math.fsum(abs(float(value)) for value in row) for row in matrix)
+    inverse_norm = max(math.fsum(abs(value) for value in row) for row in inverse)
+    return inverse, matrix_norm * inverse_norm
+
+
+def _deterministic_nnls(
+    assignment_matrix: np.ndarray, observed_probabilities: np.ndarray
+) -> np.ndarray | None:
+    """Solve non-negative least squares with fixed-order Lawson-Hanson updates."""
+
+    size = assignment_matrix.shape[1]
+    gram = [
+        [
+            math.fsum(
+                float(assignment_matrix[row, left]) * float(assignment_matrix[row, right])
+                for row in range(assignment_matrix.shape[0])
+            )
+            for right in range(size)
+        ]
+        for left in range(size)
+    ]
+    cross = [
+        math.fsum(
+            float(assignment_matrix[row, column]) * float(observed_probabilities[row])
+            for row in range(assignment_matrix.shape[0])
+        )
+        for column in range(size)
+    ]
+    solution = [0.0] * size
+    passive: list[int] = []
+    tolerance = 1e-14
+
+    for _ in range(4 * size + 1):
+        gradient = [
+            cross[index]
+            - math.fsum(gram[index][column] * solution[column] for column in range(size))
+            for index in range(size)
+        ]
+        candidates = [
+            index for index in range(size) if index not in passive and gradient[index] > tolerance
+        ]
+        if not candidates:
+            break
+        passive.append(max(candidates, key=lambda index: (gradient[index], -index)))
+        passive.sort()
+
+        for _ in range(4 * size + 1):
+            submatrix = [[gram[row][column] for column in passive] for row in passive]
+            subvector = [cross[index] for index in passive]
+            passive_solution = _solve_linear_system(submatrix, subvector)
+            if passive_solution is None:
+                return None
+            trial = [0.0] * size
+            for index, value in zip(passive, passive_solution, strict=True):
+                trial[index] = value
+            nonpositive = [index for index in passive if trial[index] <= tolerance]
+            if not nonpositive:
+                solution = trial
+                break
+            steps = [
+                solution[index] / (solution[index] - trial[index])
+                for index in nonpositive
+                if solution[index] - trial[index] > 0.0
+            ]
+            if not steps:
+                return None
+            step = min(steps)
+            solution = [
+                solution[index] + step * (trial[index] - solution[index])
+                for index in range(size)
+            ]
+            passive = [index for index in passive if solution[index] > tolerance]
+        else:
+            return None
+    else:
+        return None
+
+    total = math.fsum(solution)
+    if total <= 0.0:
+        return None
+    return np.array([max(value / total, 0.0) for value in solution], dtype=float)
+
+
 def constrained_readout_correction(
     assignment_matrix: np.ndarray,
     observed_probabilities: np.ndarray,
     *,
     condition_threshold: float = 1e8,
 ) -> tuple[np.ndarray | None, float, str]:
-    """Solve A p = p_obs with non-negative probabilities and diagnostics."""
+    """Solve a fixed-order non-negative least-squares correction."""
 
-    condition_number = float(np.linalg.cond(assignment_matrix))
+    _, condition_number = _inverse_and_condition_inf(assignment_matrix)
     if not np.isfinite(condition_number) or condition_number > condition_threshold:
         return None, condition_number, "ill_conditioned"
-    solution = lsq_linear(assignment_matrix, observed_probabilities, bounds=(0.0, np.inf))
-    if not solution.success or solution.x.sum() <= 0:
+    corrected = _deterministic_nnls(assignment_matrix, observed_probabilities)
+    if corrected is None:
         return None, condition_number, "solver_failed"
-    corrected = solution.x / solution.x.sum()
     return corrected, condition_number, "ok"
 
 

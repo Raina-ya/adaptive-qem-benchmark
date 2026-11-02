@@ -1,5 +1,10 @@
 from pathlib import Path
 
+import matplotlib
+
+matplotlib.use("Agg")
+import matplotlib.pyplot as plt
+
 from src.verify_generated_artifacts import compare_artifact_trees
 
 
@@ -51,3 +56,27 @@ def test_missing_row_and_empty_png_fail(tmp_path: Path) -> None:
 
     assert "row count differs: 2 != 1" in details
     assert "PNG is empty" in details
+
+
+def test_runtime_pdf_is_compared_structurally(tmp_path: Path) -> None:
+    reference = tmp_path / "reference"
+    candidate = tmp_path / "candidate"
+    relative = "docs/day08_12_runtime_report.pdf"
+    for root, metadata in ((reference, "one"), (candidate, "two")):
+        path = root / relative
+        path.parent.mkdir(parents=True, exist_ok=True)
+        with plt.rc_context({"pdf.compression": 0}):
+            from matplotlib.backends.backend_pdf import PdfPages
+
+            with PdfPages(path, metadata={"Title": metadata}) as pdf:
+                for page_text in (
+                    "Day 8-12 Runtime and Performance Report\nWhere time went",
+                    "What this does not include",
+                ):
+                    figure = plt.figure()
+                    figure.text(0.1, 0.5, page_text)
+                    pdf.savefig(figure)
+                    plt.close(figure)
+
+    assert (reference / relative).read_bytes() != (candidate / relative).read_bytes()
+    assert compare_artifact_trees(reference, candidate) == []

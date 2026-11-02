@@ -68,7 +68,7 @@ def generate_day08() -> None:
     plt.close(figure)
 
 
-def generate_day09() -> None:
+def generate_day09(*, write_figure: bool = True) -> None:
     circuit = bell_circuit()
     spec = noise_spec("mixed", "medium")
     rows = []
@@ -112,6 +112,8 @@ def generate_day09() -> None:
             rows.append(base)
     frame = pd.DataFrame(rows)
     frame.to_csv(RESULTS / "day09_method_validation_budget-4096_repeats-20.csv", index=False)
+    if not write_figure:
+        return
     zne = frame[frame.method == "zne"].iloc[0]
     factors = np.array([1, 3, 5])
     estimates = np.array([zne.factor_1_estimate, zne.factor_3_estimate, zne.factor_5_estimate])
@@ -155,7 +157,7 @@ def _plot_rmse_heatmap(results: pd.DataFrame, path: Path) -> None:
     plt.close(figure)
 
 
-def generate_day11() -> None:
+def generate_day11(*, write_figure: bool = True) -> None:
     manifest = build_manifest(repeats=20)
     pilot = manifest[
         (manifest.depth == 1)
@@ -168,14 +170,17 @@ def generate_day11() -> None:
     audit = coverage_audit(results)
     audit["raw_file_bytes"] = results.to_csv(index=False).encode("utf-8").__len__()
     audit.to_csv(PROCESSED / "day11_pilot_audit.csv", index=False)
-    _plot_rmse_heatmap(results, FIGURES / "day11_pilot_rmse_heatmap.png")
+    if write_figure:
+        _plot_rmse_heatmap(results, FIGURES / "day11_pilot_rmse_heatmap.png")
 
 
-def generate_day12() -> None:
+def generate_day12(*, write_derived: bool = True) -> None:
     manifest = pd.read_csv(MANIFESTS / "volumetric_v1_manifest.csv")
     applicable = manifest[manifest.status != "not_applicable"].reset_index(drop=True)
     results = run_manifest(applicable)
     results.to_csv(RAW / "day12_ghz_volumetric_v1_repeats-50.csv", index=False)
+    if not write_derived:
+        return
     coverage = coverage_audit(results)
     coverage.to_csv(PROCESSED / "day12_ghz_coverage.csv", index=False)
     completed = results[results.status == "complete"].copy()

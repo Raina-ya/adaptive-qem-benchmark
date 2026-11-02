@@ -17,14 +17,12 @@ from pathlib import Path
 from typing import Any
 
 import pandas as pd
+from pypdf import PdfReader
 
 RTOL = 1e-9
 ATOL = 1e-12
 GENERATORS = (
-    "src.generate_artifacts",
-    "src.generate_days08_12",
-    "src.generate_paper_assets",
-    "src.generate_runtime_report",
+    "src.regenerate_readout_affected",
     "src.generate_audit_manifest",
 )
 ARTIFACT_ROOTS = (
@@ -36,6 +34,17 @@ ARTIFACT_ROOTS = (
 )
 SINGLE_ARTIFACTS = ("docs/day08_12_runtime_report.pdf",)
 AUDIT_MANIFEST = "results/processed/day08_12_audit_manifest.csv"
+PDF_REQUIREMENTS = {
+    "docs/day08_12_runtime_report.pdf": (
+        2,
+        3,
+        (
+            "Day 8-12 Runtime and Performance Report",
+            "Where time went",
+            "What this does not include",
+        ),
+    )
+}
 
 
 @dataclass(frozen=True)
@@ -143,6 +152,25 @@ def _compare_csv(reference: Path, candidate: Path, relative: str) -> list[str]:
     return failures
 
 
+def _validate_pdf(path: Path, relative: str) -> list[str]:
+    if not path.exists() or path.stat().st_size == 0:
+        return ["PDF is missing or empty"]
+    minimum, maximum, required_strings = PDF_REQUIREMENTS[relative]
+    try:
+        reader = PdfReader(path)
+        page_count = len(reader.pages)
+        text = "\n".join(page.extract_text() or "" for page in reader.pages)
+    except Exception as error:  # pypdf exposes multiple parse exception types
+        return [f"PDF cannot be parsed: {error}"]
+    failures = []
+    if not minimum <= page_count <= maximum:
+        failures.append(f"PDF page count {page_count} is outside [{minimum}, {maximum}]")
+    missing = [value for value in required_strings if value not in text]
+    if missing:
+        failures.append(f"PDF is missing required strings: {missing}")
+    return failures
+
+
 def compare_artifact_trees(reference_root: Path, candidate_root: Path) -> list[ComparisonFailure]:
     """Return semantic differences between committed and regenerated artifacts."""
 
@@ -168,6 +196,15 @@ def compare_artifact_trees(reference_root: Path, candidate_root: Path) -> list[C
             failures.extend(
                 ComparisonFailure(relative, detail)
                 for detail in _compare_csv(reference, candidate, relative)
+            )
+        elif suffix == ".pdf" and relative in PDF_REQUIREMENTS:
+            failures.extend(
+                ComparisonFailure(relative, f"committed {detail}")
+                for detail in _validate_pdf(reference, relative)
+            )
+            failures.extend(
+                ComparisonFailure(relative, f"regenerated {detail}")
+                for detail in _validate_pdf(candidate, relative)
             )
         elif reference.read_bytes() != candidate.read_bytes():
             failures.append(ComparisonFailure(relative, "binary or text content differs"))

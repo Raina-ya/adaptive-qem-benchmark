@@ -24,6 +24,17 @@ The root seed is `20261102`. Every stochastic operation receives a deterministic
 
 Unmitigated estimation spends the entire budget on the target circuit. Readout mitigation spends 20% on calibration and 80% on the target circuit. Calibration shots are divided deterministically across all computational-basis calibration states.
 
+## Readout-correction algorithm
+
+Readout mitigation solves the non-negative least-squares problem
+`min ||A p - p_observed||_2` with `p >= 0`, then normalizes `p` to unit sum. The
+implementation uses fixed-order Lawson-Hanson active-set updates, `math.fsum`
+inner products, and deterministic partial-pivot Gaussian elimination. It does
+not call a BLAS/LAPACK optimizer. Ill-conditioning is classified with a
+fixed-order infinity-norm condition number computed from deterministic
+Gauss-Jordan inversion; matrices above `1e8` return `ill_conditioned` without a
+corrected estimate.
+
 ## Data policy
 
 Raw counts, raw estimates, corrected estimates, resource use, seed, circuit metadata, and method status are retained. Aggregation creates new files and never overwrites raw observations.
