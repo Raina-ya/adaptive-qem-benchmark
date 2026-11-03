@@ -35,8 +35,30 @@ def prepare() -> None:
         directory.mkdir(parents=True, exist_ok=True)
 
 
+def _canonicalize_json_floats(value: object) -> object:
+    if isinstance(value, float):
+        return float(format(value, ".12g"))
+    if isinstance(value, dict):
+        return {key: _canonicalize_json_floats(item) for key, item in value.items()}
+    if isinstance(value, list):
+        return [_canonicalize_json_floats(item) for item in value]
+    return value
+
+
 def _write_canonical_csv(frame: pd.DataFrame, path: Path) -> int:
-    frame.to_csv(path, index=False, lineterminator="\n")
+    output = frame.copy()
+    for column in output.columns:
+        if column.endswith("_json"):
+            output[column] = output[column].map(
+                lambda value: json.dumps(
+                    _canonicalize_json_floats(json.loads(value)),
+                    separators=(",", ":"),
+                    sort_keys=True,
+                )
+                if isinstance(value, str)
+                else value
+            )
+    output.to_csv(path, index=False, lineterminator="\n", float_format="%.12g")
     return path.stat().st_size
 
 
