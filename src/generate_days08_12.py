@@ -35,6 +35,11 @@ def prepare() -> None:
         directory.mkdir(parents=True, exist_ok=True)
 
 
+def _write_canonical_csv(frame: pd.DataFrame, path: Path) -> int:
+    frame.to_csv(path, index=False, lineterminator="\n")
+    return path.stat().st_size
+
+
 def generate_day08() -> None:
     targets = (
         ("bell", bell_circuit()),
@@ -166,9 +171,9 @@ def generate_day11(*, write_figure: bool = True) -> None:
         & (manifest.shots == 1024)
     ].reset_index(drop=True)
     results = run_manifest(pilot)
-    results.to_csv(RAW / "day11_pilot_repeats-20.csv", index=False)
+    raw_file_bytes = _write_canonical_csv(results, RAW / "day11_pilot_repeats-20.csv")
     audit = coverage_audit(results)
-    audit["raw_file_bytes"] = results.to_csv(index=False).encode("utf-8").__len__()
+    audit["raw_file_bytes"] = raw_file_bytes
     audit.to_csv(PROCESSED / "day11_pilot_audit.csv", index=False)
     if write_figure:
         _plot_rmse_heatmap(results, FIGURES / "day11_pilot_rmse_heatmap.png")
