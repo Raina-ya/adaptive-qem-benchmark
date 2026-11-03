@@ -1,0 +1,32 @@
+{
+  "run_id": "9bfbe074-6279-4a0d-b81d-e981128943c3",
+  "script": "src.generate_nontrivial_benchmark",
+  "started_at_utc": "2026-11-03T06:46:06.618502Z",
+  "finished_at_utc": "2026-11-03T07:28:36.261729Z",
+  "wall_seconds": 2549.811336,
+  "python_version": "3.12.14",
+  "package_versions": {
+    "qiskit": "2.2.3",
+    "qiskit-aer": "0.17.2",
+    "numpy": "2.3.4",
+    "pandas": "2.3.3",
+    "matplotlib": "3.10.7",
+    "scipy": "1.16.3"
+  },
+  "git_commit_before": "f821d4221e20adb025f1f9ff28a20bbdb92f1a4a",
+  "git_dirty_before": true,
+  "git_commit_after": "f821d4221e20adb025f1f9ff28a20bbdb92f1a4a",
+  "git_dirty_after": true,
+  "host": "TP-1302774-NB",
+  "args": [],
+  "seed_root": 20261102,
+  "output_hashes": {
+    "results/processed/hardware_efficient_v1_coverage.csv": "ab4fe665e59cef28e964b53528f78e1b7cf075f5e68d10840a447864edc4a105",
+    "results/processed/noise_shift_holdout_v1_coverage.csv": "d808b5d99812e56a0c50baffbdcae3b47865fa3708242256293066540f550015",
+    "results/raw/hardware_efficient_v1_repeats-50.csv": "d195ae637d4489fe74f9a0d829aaa8ff167a370d7b372ccbab5ee664c5de1afa",
+    "results/raw/noise_shift_holdout_v1_repeats-50.csv": "66ad70be2bd3a5d1544899f8a80bfdf70a4ec7444f2c7951d404747d7c1bb428",
+    "figures/hardware_efficient_error_vs_depth.png": "5128ab167e06b96bdd93a13ca27b707c53082781eaba863e18f2f592d321c443"
+  },
+  "status": "ok",
+  "error": null
+}

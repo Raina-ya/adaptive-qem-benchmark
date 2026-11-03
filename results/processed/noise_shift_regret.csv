@@ -1,0 +1,37 @@
+family,circuit_id,width,depth,noise,shots,split,oracle_label,oracle_method,selected_method,rule_trace,strict_label_match,decision_compatible,selected_rmse,oracle_rmse,rmse_regret,inconclusive_or_abstain
+hardware_efficient,he_w2_d1,2,1,asymmetric_readout,4096,rule_design,practical_tie,readout,readout,stable calibration and material readout component,False,True,0.026283666359,0.026283666359,0,False
+hardware_efficient,he_w2_d1,2,1,coherent_shift,4096,rule_design,practical_tie,raw,raw,no mitigation rule has sufficient evidence,False,True,0.0153032829912,0.0153032829912,0,False
+hardware_efficient,he_w2_d1,2,1,correlated_shift,4096,rule_design,practical_tie,raw,raw,no mitigation rule has sufficient evidence,False,True,0.0151628417557,0.0151628417557,0,False
+hardware_efficient,he_w2_d1,2,1,intermediate_mixed,4096,rule_design,practical_tie,raw,raw,no mitigation rule has sufficient evidence,False,True,0.0138539971548,0.0138539971548,0,False
+hardware_efficient,he_w2_d3,2,3,asymmetric_readout,4096,holdout,practical_tie,raw,readout,stable calibration and material readout component,False,False,0.0280049431212,0.0307720271974,-0.00276708407621,False
+hardware_efficient,he_w2_d3,2,3,coherent_shift,4096,rule_design,practical_tie,raw,zne,deep gate-noise regime with an acceptable ZNE fit,False,False,0.0315111610676,0.0178813689656,0.0136297921019,False
+hardware_efficient,he_w2_d3,2,3,correlated_shift,4096,rule_design,practical_tie,raw,zne,deep gate-noise regime with an acceptable ZNE fit,False,False,0.0393106445622,0.0199444906551,0.0193661539071,False
+hardware_efficient,he_w2_d3,2,3,intermediate_mixed,4096,rule_design,practical_tie,raw,raw,no mitigation rule has sufficient evidence,False,True,0.0169514884908,0.0169514884908,0,False
+hardware_efficient,he_w2_d6,2,6,asymmetric_readout,4096,holdout,practical_tie,raw,readout,stable calibration and material readout component,False,False,0.0220223951411,0.0173878260498,0.00463456909132,False
+hardware_efficient,he_w2_d6,2,6,coherent_shift,4096,rule_design,practical_tie,raw,zne,deep gate-noise regime with an acceptable ZNE fit,False,False,0.0372938040953,0.0301356860424,0.00715811805288,False
+hardware_efficient,he_w2_d6,2,6,correlated_shift,4096,holdout,practical_tie,raw,zne,deep gate-noise regime with an acceptable ZNE fit,False,False,0.0329407988658,0.0234195904076,0.00952120845821,False
+hardware_efficient,he_w2_d6,2,6,intermediate_mixed,4096,rule_design,practical_tie,raw,raw,no mitigation rule has sufficient evidence,False,True,0.0280214852185,0.0280214852185,0,False
+hardware_efficient,he_w4_d1,4,1,asymmetric_readout,4096,holdout,practical_tie,raw,readout,stable calibration and material readout component,False,False,0.0474076385937,0.0148390437325,0.0325685948612,False
+hardware_efficient,he_w4_d1,4,1,coherent_shift,4096,holdout,practical_tie,raw,raw,no mitigation rule has sufficient evidence,False,True,0.0165186658686,0.0165186658686,0,False
+hardware_efficient,he_w4_d1,4,1,correlated_shift,4096,rule_design,practical_tie,raw,raw,no mitigation rule has sufficient evidence,False,True,0.015224073287,0.015224073287,0,False
+hardware_efficient,he_w4_d1,4,1,intermediate_mixed,4096,rule_design,practical_tie,raw,raw,no mitigation rule has sufficient evidence,False,True,0.0175003504279,0.0175003504279,0,False
+hardware_efficient,he_w4_d3,4,3,asymmetric_readout,4096,holdout,practical_tie,raw,readout,stable calibration and material readout component,False,False,0.0344476448949,0.0281653994504,0.00628224544458,False
+hardware_efficient,he_w4_d3,4,3,coherent_shift,4096,rule_design,practical_tie,raw,zne,deep gate-noise regime with an acceptable ZNE fit,False,False,0.0338393548521,0.0169065174404,0.0169328374116,False
+hardware_efficient,he_w4_d3,4,3,correlated_shift,4096,rule_design,zne,zne,zne,deep gate-noise regime with an acceptable ZNE fit,True,True,0.0634883409546,0.0634883409546,0,False
+hardware_efficient,he_w4_d3,4,3,intermediate_mixed,4096,rule_design,zne,zne,raw,no mitigation rule has sufficient evidence,False,False,0.112111270013,0.0802185894251,0.0318926805876,False
+hardware_efficient,he_w4_d6,4,6,asymmetric_readout,4096,rule_design,readout,readout,readout,stable calibration and material readout component,True,True,0.0431847147217,0.0431847147217,0,False
+hardware_efficient,he_w4_d6,4,6,coherent_shift,4096,rule_design,practical_tie,raw,zne,deep gate-noise regime with an acceptable ZNE fit,False,False,0.0388797965203,0.0263687334228,0.0125110630975,False
+hardware_efficient,he_w4_d6,4,6,correlated_shift,4096,rule_design,zne,zne,zne,deep gate-noise regime with an acceptable ZNE fit,True,True,0.139318087152,0.139318087152,0,False
+hardware_efficient,he_w4_d6,4,6,intermediate_mixed,4096,rule_design,zne,zne,raw,no mitigation rule has sufficient evidence,False,False,0.199063726301,0.165221852265,0.0338418740361,False
+hardware_efficient,he_w6_d1,6,1,asymmetric_readout,4096,rule_design,practical_tie,raw,raw,no mitigation rule has sufficient evidence,False,True,0.0162168466934,0.0162168466934,0,False
+hardware_efficient,he_w6_d1,6,1,coherent_shift,4096,rule_design,practical_tie,raw,raw,no mitigation rule has sufficient evidence,False,True,0.0130295106961,0.0130295106961,0,False
+hardware_efficient,he_w6_d1,6,1,correlated_shift,4096,rule_design,practical_tie,raw,raw,no mitigation rule has sufficient evidence,False,True,0.016608311233,0.016608311233,0,False
+hardware_efficient,he_w6_d1,6,1,intermediate_mixed,4096,rule_design,practical_tie,raw,raw,no mitigation rule has sufficient evidence,False,True,0.0148423470246,0.0148423470246,0,False
+hardware_efficient,he_w6_d3,6,3,asymmetric_readout,4096,rule_design,practical_tie,raw,readout,stable calibration and material readout component,False,False,0.0436422502899,0.0191531261664,0.0244891241235,False
+hardware_efficient,he_w6_d3,6,3,coherent_shift,4096,rule_design,practical_tie,raw,zne,deep gate-noise regime with an acceptable ZNE fit,False,False,0.0324044579314,0.0186496307251,0.0137548272062,False
+hardware_efficient,he_w6_d3,6,3,correlated_shift,4096,rule_design,practical_tie,raw,zne,deep gate-noise regime with an acceptable ZNE fit,False,False,0.0349933325664,0.0238053936488,0.0111879389176,False
+hardware_efficient,he_w6_d3,6,3,intermediate_mixed,4096,holdout,practical_tie,raw,raw,no mitigation rule has sufficient evidence,False,True,0.0226103004776,0.0226103004776,0,False
+hardware_efficient,he_w6_d6,6,6,asymmetric_readout,4096,rule_design,practical_tie,raw,readout,stable calibration and material readout component,False,False,0.054087026222,0.0339966777053,0.0200903485167,False
+hardware_efficient,he_w6_d6,6,6,coherent_shift,4096,rule_design,practical_tie,raw,zne,deep gate-noise regime with an acceptable ZNE fit,False,False,0.0337076651674,0.0189893473925,0.0147183177749,False
+hardware_efficient,he_w6_d6,6,6,correlated_shift,4096,holdout,practical_tie,raw,zne,deep gate-noise regime with an acceptable ZNE fit,False,False,0.0393128426037,0.031652833631,0.00766000897266,False
+hardware_efficient,he_w6_d6,6,6,intermediate_mixed,4096,rule_design,practical_tie,raw,raw,no mitigation rule has sufficient evidence,False,True,0.0371703462317,0.0371703462317,0,False

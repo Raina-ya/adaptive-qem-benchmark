@@ -1,0 +1,145 @@
+family,circuit_id,width,depth,noise,shots,split,oracle_label,oracle_method,equivalent_methods_json,winner_rmse,winner_execution_overhead,utility_gap,label_reason,practical_rmse_threshold,overhead_penalty
+ghz,ghz_w2,2,1,high,1024,rule_design,readout,readout,"[""readout""]",0.119207835122,5,0.0891352512513,lowest cost-aware utility with conclusive practical gain,0.005,0.01
+ghz,ghz_w2,2,1,high,4096,rule_design,readout,readout,"[""readout""]",0.115755692323,5,0.0839099395025,lowest cost-aware utility with conclusive practical gain,0.005,0.01
+ghz,ghz_w2,2,1,high,16384,rule_design,readout,readout,"[""readout""]",0.109265069969,5,0.0930835701954,lowest cost-aware utility with conclusive practical gain,0.005,0.01
+ghz,ghz_w2,2,1,low,1024,holdout,practical_tie,raw,"[""raw"",""zne""]",0.0302046850347,1,0.00464280438382,best two cost-aware utilities are practically equivalent,0.005,0.01
+ghz,ghz_w2,2,1,low,4096,holdout,practical_tie,readout,"[""readout"",""zne""]",0.0170081864596,5,0.000643198265509,best two cost-aware utilities are practically equivalent,0.005,0.01
+ghz,ghz_w2,2,1,low,16384,rule_design,practical_tie,readout,"[""readout"",""zne""]",0.0147361583611,5,0.00168156202089,best two cost-aware utilities are practically equivalent,0.005,0.01
+ghz,ghz_w2,2,1,medium,1024,rule_design,readout,readout,"[""readout""]",0.0596316608909,5,0.0295196268043,lowest cost-aware utility with conclusive practical gain,0.005,0.01
+ghz,ghz_w2,2,1,medium,4096,rule_design,readout,readout,"[""readout""]",0.0450378290325,5,0.0357337374466,lowest cost-aware utility with conclusive practical gain,0.005,0.01
+ghz,ghz_w2,2,1,medium,16384,holdout,readout,readout,"[""readout""]",0.0447878487305,5,0.0364871735232,lowest cost-aware utility with conclusive practical gain,0.005,0.01
+ghz,ghz_w2,2,1,zero,1024,rule_design,practical_tie,raw,"[""raw"",""zne""]",0,1,0.004,best two cost-aware utilities are practically equivalent,0.005,0.01
+ghz,ghz_w2,2,1,zero,4096,rule_design,practical_tie,raw,"[""raw"",""zne""]",0,1,0.004,best two cost-aware utilities are practically equivalent,0.005,0.01
+ghz,ghz_w2,2,1,zero,16384,rule_design,practical_tie,raw,"[""raw"",""zne""]",0,1,0.004,best two cost-aware utilities are practically equivalent,0.005,0.01
+ghz,ghz_w4,4,1,high,1024,rule_design,readout,readout,"[""readout""]",0.287112629172,17,0.139766787431,lowest cost-aware utility with conclusive practical gain,0.005,0.01
+ghz,ghz_w4,4,1,high,4096,rule_design,readout,readout,"[""readout""]",0.257117468179,17,0.168193402199,lowest cost-aware utility with conclusive practical gain,0.005,0.01
+ghz,ghz_w4,4,1,high,16384,holdout,readout,readout,"[""readout""]",0.2577307811,17,0.160580417039,lowest cost-aware utility with conclusive practical gain,0.005,0.01
+ghz,ghz_w4,4,1,low,1024,holdout,zne,zne,"[""zne""]",0.0493357298277,3,0.0171415467397,lowest cost-aware utility with conclusive practical gain,0.005,0.01
+ghz,ghz_w4,4,1,low,4096,rule_design,zne,zne,"[""zne""]",0.0399379274567,3,0.0091333619096,lowest cost-aware utility with conclusive practical gain,0.005,0.01
+ghz,ghz_w4,4,1,low,16384,rule_design,practical_tie,readout,"[""readout"",""zne""]",0.0341927773813,17,0.000382782438732,best two cost-aware utilities are practically equivalent,0.005,0.01
+ghz,ghz_w4,4,1,medium,1024,rule_design,readout,readout,"[""readout""]",0.13527326183,17,0.0407155246193,lowest cost-aware utility with conclusive practical gain,0.005,0.01
+ghz,ghz_w4,4,1,medium,4096,rule_design,readout,readout,"[""readout""]",0.115453842235,17,0.0484597553916,lowest cost-aware utility with conclusive practical gain,0.005,0.01
+ghz,ghz_w4,4,1,medium,16384,rule_design,readout,readout,"[""readout""]",0.109160427457,17,0.0550750985122,lowest cost-aware utility with conclusive practical gain,0.005,0.01
+ghz,ghz_w4,4,1,zero,1024,rule_design,practical_tie,raw,"[""raw"",""zne""]",0,1,0.00117647058824,best two cost-aware utilities are practically equivalent,0.005,0.01
+ghz,ghz_w4,4,1,zero,4096,rule_design,practical_tie,raw,"[""raw"",""zne""]",0,1,0.00117647058824,best two cost-aware utilities are practically equivalent,0.005,0.01
+ghz,ghz_w4,4,1,zero,16384,rule_design,practical_tie,raw,"[""raw"",""zne""]",0,1,0.00117647058824,best two cost-aware utilities are practically equivalent,0.005,0.01
+ghz,ghz_w6,6,1,high,1024,rule_design,inconclusive,,[],,,,one or more methods lack 50 complete repeats,,
+ghz,ghz_w6,6,1,high,4096,holdout,readout,readout,"[""readout""]",0.393232374799,65,0.196652675881,lowest cost-aware utility with conclusive practical gain,0.005,0.01
+ghz,ghz_w6,6,1,high,16384,rule_design,readout,readout,"[""readout""]",0.384146387427,65,0.202984665691,lowest cost-aware utility with conclusive practical gain,0.005,0.01
+ghz,ghz_w6,6,1,low,1024,rule_design,zne,zne,"[""zne""]",0.0650248735729,3,0.0464653737107,lowest cost-aware utility with conclusive practical gain,0.005,0.01
+ghz,ghz_w6,6,1,low,4096,rule_design,zne,zne,"[""zne""]",0.064510292988,3,0.0222535339648,lowest cost-aware utility with conclusive practical gain,0.005,0.01
+ghz,ghz_w6,6,1,low,16384,rule_design,practical_tie,zne,"[""readout"",""zne""]",0.0650052126006,3,0.0027580932481,best two cost-aware utilities are practically equivalent,0.005,0.01
+ghz,ghz_w6,6,1,medium,1024,rule_design,inconclusive,,[],,,,one or more methods lack 50 complete repeats,,
+ghz,ghz_w6,6,1,medium,4096,rule_design,readout,readout,"[""readout""]",0.193260638106,65,0.0640797261818,lowest cost-aware utility with conclusive practical gain,0.005,0.01
+ghz,ghz_w6,6,1,medium,16384,rule_design,readout,readout,"[""readout""]",0.171950240573,65,0.0817838179185,lowest cost-aware utility with conclusive practical gain,0.005,0.01
+ghz,ghz_w6,6,1,zero,1024,rule_design,practical_tie,raw,"[""raw"",""zne""]",0,1,0.000307692307693,best two cost-aware utilities are practically equivalent,0.005,0.01
+ghz,ghz_w6,6,1,zero,4096,rule_design,practical_tie,raw,"[""raw"",""zne""]",0,1,0.000307692307693,best two cost-aware utilities are practically equivalent,0.005,0.01
+ghz,ghz_w6,6,1,zero,16384,rule_design,practical_tie,raw,"[""raw"",""zne""]",0,1,0.000307692307693,best two cost-aware utilities are practically equivalent,0.005,0.01
+hardware_efficient,he_w2_d1,2,1,high,1024,holdout,practical_tie,raw,"[""raw""]",0.0290112887491,1,0.0413380126977,accuracy gain over raw is below the preregistered threshold,0.005,0.01
+hardware_efficient,he_w2_d1,2,1,high,4096,holdout,practical_tie,raw,"[""raw""]",0.016599069784,1,0.0186265813971,accuracy gain over raw is below the preregistered threshold,0.005,0.01
+hardware_efficient,he_w2_d1,2,1,high,16384,rule_design,practical_tie,raw,"[""raw""]",0.0108831491786,1,0.0103072220444,accuracy gain over raw is below the preregistered threshold,0.005,0.01
+hardware_efficient,he_w2_d1,2,1,low,1024,rule_design,practical_tie,raw,"[""raw""]",0.0347317570338,1,0.00990203729649,accuracy gain over raw is below the preregistered threshold,0.005,0.01
+hardware_efficient,he_w2_d1,2,1,low,4096,rule_design,practical_tie,raw,"[""raw""]",0.0151710892817,1,0.0115459242566,accuracy gain over raw is below the preregistered threshold,0.005,0.01
+hardware_efficient,he_w2_d1,2,1,low,16384,holdout,practical_tie,raw,"[""raw""]",0.00843049984431,1,0.00847893460347,accuracy gain over raw is below the preregistered threshold,0.005,0.01
+hardware_efficient,he_w2_d1,2,1,medium,1024,rule_design,practical_tie,raw,"[""raw""]",0.0268566453053,1,0.0282912514752,accuracy gain over raw is below the preregistered threshold,0.005,0.01
+hardware_efficient,he_w2_d1,2,1,medium,4096,holdout,practical_tie,raw,"[""raw""]",0.0163669955015,1,0.0119005873868,accuracy gain over raw is below the preregistered threshold,0.005,0.01
+hardware_efficient,he_w2_d1,2,1,medium,16384,rule_design,practical_tie,raw,"[""raw""]",0.00845460348589,1,0.0133248128967,accuracy gain over raw is below the preregistered threshold,0.005,0.01
+hardware_efficient,he_w2_d1,2,1,zero,1024,rule_design,practical_tie,raw,"[""raw""]",0.0280459005152,1,0.0108028113634,accuracy gain over raw is below the preregistered threshold,0.005,0.01
+hardware_efficient,he_w2_d1,2,1,zero,4096,holdout,practical_tie,raw,"[""raw""]",0.016662406151,1,0.0121235549464,accuracy gain over raw is below the preregistered threshold,0.005,0.01
+hardware_efficient,he_w2_d1,2,1,zero,16384,rule_design,practical_tie,raw,"[""raw""]",0.00850756837922,1,0.0084857974866,accuracy gain over raw is below the preregistered threshold,0.005,0.01
+hardware_efficient,he_w2_d3,2,3,high,1024,rule_design,practical_tie,raw,"[""raw""]",0.0306867914873,1,0.0367195833673,accuracy gain over raw is below the preregistered threshold,0.005,0.01
+hardware_efficient,he_w2_d3,2,3,high,4096,holdout,practical_tie,raw,"[""raw""]",0.0262327635357,1,0.0091412317006,accuracy gain over raw is below the preregistered threshold,0.005,0.01
+hardware_efficient,he_w2_d3,2,3,high,16384,holdout,practical_tie,raw,"[""raw"",""readout""]",0.0220889677178,1,0.00372139277585,best two cost-aware utilities are practically equivalent,0.005,0.01
+hardware_efficient,he_w2_d3,2,3,low,1024,rule_design,practical_tie,raw,"[""raw""]",0.0282959622599,1,0.0159411607089,accuracy gain over raw is below the preregistered threshold,0.005,0.01
+hardware_efficient,he_w2_d3,2,3,low,4096,rule_design,practical_tie,raw,"[""raw""]",0.0176628255206,1,0.0104949670161,accuracy gain over raw is below the preregistered threshold,0.005,0.01
+hardware_efficient,he_w2_d3,2,3,low,16384,holdout,practical_tie,raw,"[""raw""]",0.0102494332313,1,0.00876778138303,accuracy gain over raw is below the preregistered threshold,0.005,0.01
+hardware_efficient,he_w2_d3,2,3,medium,1024,holdout,practical_tie,raw,"[""raw""]",0.0344074543473,1,0.0328185953535,accuracy gain over raw is below the preregistered threshold,0.005,0.01
+hardware_efficient,he_w2_d3,2,3,medium,4096,holdout,practical_tie,raw,"[""raw""]",0.02114217204,1,0.0123874724139,accuracy gain over raw is below the preregistered threshold,0.005,0.01
+hardware_efficient,he_w2_d3,2,3,medium,16384,rule_design,practical_tie,raw,"[""raw""]",0.0149220962499,1,0.00683528008476,accuracy gain over raw is below the preregistered threshold,0.005,0.01
+hardware_efficient,he_w2_d3,2,3,zero,1024,rule_design,practical_tie,raw,"[""raw""]",0.0288199941509,1,0.0157613499493,accuracy gain over raw is below the preregistered threshold,0.005,0.01
+hardware_efficient,he_w2_d3,2,3,zero,4096,rule_design,practical_tie,raw,"[""raw""]",0.0175572053558,1,0.00899550094998,accuracy gain over raw is below the preregistered threshold,0.005,0.01
+hardware_efficient,he_w2_d3,2,3,zero,16384,rule_design,practical_tie,raw,"[""raw""]",0.00794797806414,1,0.00844898781089,accuracy gain over raw is below the preregistered threshold,0.005,0.01
+hardware_efficient,he_w2_d6,2,6,high,1024,rule_design,practical_tie,raw,"[""raw""]",0.0830145843304,1,0.00589254272097,accuracy gain over raw is below the preregistered threshold,0.005,0.01
+hardware_efficient,he_w2_d6,2,6,high,4096,rule_design,practical_tie,raw,"[""raw"",""readout"",""zne""]",0.0826179432805,1,0.00146400574484,best two cost-aware utilities are practically equivalent,0.005,0.01
+hardware_efficient,he_w2_d6,2,6,high,16384,holdout,practical_tie,zne,"[""raw"",""zne""]",0.0728606379671,3,0.00374283642348,best two cost-aware utilities are practically equivalent,0.005,0.01
+hardware_efficient,he_w2_d6,2,6,low,1024,rule_design,practical_tie,raw,"[""raw""]",0.0259897141388,1,0.0190971111793,accuracy gain over raw is below the preregistered threshold,0.005,0.01
+hardware_efficient,he_w2_d6,2,6,low,4096,rule_design,practical_tie,raw,"[""raw""]",0.0197483154611,1,0.00961756359101,accuracy gain over raw is below the preregistered threshold,0.005,0.01
+hardware_efficient,he_w2_d6,2,6,low,16384,holdout,practical_tie,raw,"[""raw""]",0.0146850697688,1,0.00696678208008,accuracy gain over raw is below the preregistered threshold,0.005,0.01
+hardware_efficient,he_w2_d6,2,6,medium,1024,holdout,practical_tie,raw,"[""raw""]",0.0533862914905,1,0.0109569885099,accuracy gain over raw is below the preregistered threshold,0.005,0.01
+hardware_efficient,he_w2_d6,2,6,medium,4096,rule_design,practical_tie,zne,"[""raw"",""zne""]",0.0401538978875,3,0.00110259471139,best two cost-aware utilities are practically equivalent,0.005,0.01
+hardware_efficient,he_w2_d6,2,6,medium,16384,rule_design,practical_tie,zne,"[""raw"",""zne""]",0.0306757865991,3,0.00440100618508,best two cost-aware utilities are practically equivalent,0.005,0.01
+hardware_efficient,he_w2_d6,2,6,zero,1024,rule_design,practical_tie,raw,"[""raw""]",0.0364755479781,1,0.00867575940646,accuracy gain over raw is below the preregistered threshold,0.005,0.01
+hardware_efficient,he_w2_d6,2,6,zero,4096,holdout,practical_tie,raw,"[""raw""]",0.0132937957488,1,0.0103302932767,accuracy gain over raw is below the preregistered threshold,0.005,0.01
+hardware_efficient,he_w2_d6,2,6,zero,16384,rule_design,practical_tie,raw,"[""raw""]",0.00791505026552,1,0.00976967808437,accuracy gain over raw is below the preregistered threshold,0.005,0.01
+hardware_efficient,he_w4_d1,4,1,high,1024,rule_design,practical_tie,raw,"[""raw""]",0.0397606495674,1,0.0298441078903,accuracy gain over raw is below the preregistered threshold,0.005,0.01
+hardware_efficient,he_w4_d1,4,1,high,4096,rule_design,practical_tie,raw,"[""raw""]",0.0229263506509,1,0.0121326382559,accuracy gain over raw is below the preregistered threshold,0.005,0.01
+hardware_efficient,he_w4_d1,4,1,high,16384,holdout,practical_tie,raw,"[""raw""]",0.0122603541539,1,0.00637950075606,accuracy gain over raw is below the preregistered threshold,0.005,0.01
+hardware_efficient,he_w4_d1,4,1,low,1024,rule_design,practical_tie,raw,"[""raw""]",0.0321617687232,1,0.0198551137753,accuracy gain over raw is below the preregistered threshold,0.005,0.01
+hardware_efficient,he_w4_d1,4,1,low,4096,holdout,practical_tie,raw,"[""raw""]",0.0137953309738,1,0.0139822013552,accuracy gain over raw is below the preregistered threshold,0.005,0.01
+hardware_efficient,he_w4_d1,4,1,low,16384,holdout,practical_tie,raw,"[""raw""]",0.00789648391323,1,0.00863807020352,accuracy gain over raw is below the preregistered threshold,0.005,0.01
+hardware_efficient,he_w4_d1,4,1,medium,1024,rule_design,practical_tie,raw,"[""raw""]",0.028547292556,1,0.0405749861283,accuracy gain over raw is below the preregistered threshold,0.005,0.01
+hardware_efficient,he_w4_d1,4,1,medium,4096,rule_design,practical_tie,raw,"[""raw""]",0.0165467899703,1,0.0227493454074,accuracy gain over raw is below the preregistered threshold,0.005,0.01
+hardware_efficient,he_w4_d1,4,1,medium,16384,rule_design,practical_tie,raw,"[""raw""]",0.0109936652771,1,0.0067024601369,accuracy gain over raw is below the preregistered threshold,0.005,0.01
+hardware_efficient,he_w4_d1,4,1,zero,1024,rule_design,practical_tie,raw,"[""raw""]",0.0327232196148,1,0.0099147019907,accuracy gain over raw is below the preregistered threshold,0.005,0.01
+hardware_efficient,he_w4_d1,4,1,zero,4096,rule_design,practical_tie,raw,"[""raw""]",0.0183498038702,1,0.00915986148975,accuracy gain over raw is below the preregistered threshold,0.005,0.01
+hardware_efficient,he_w4_d1,4,1,zero,16384,rule_design,practical_tie,raw,"[""raw""]",0.00760102195935,1,0.0111069055116,accuracy gain over raw is below the preregistered threshold,0.005,0.01
+hardware_efficient,he_w4_d3,4,3,high,1024,rule_design,inconclusive,readout,"[""readout""]",0.268672481786,17,0.00914813193306,paired RMSE-gain interval includes zero,0.005,0.01
+hardware_efficient,he_w4_d3,4,3,high,4096,rule_design,readout,readout,"[""readout""]",0.250918377557,17,0.0296492680927,lowest cost-aware utility with conclusive practical gain,0.005,0.01
+hardware_efficient,he_w4_d3,4,3,high,16384,rule_design,readout,readout,"[""readout""]",0.253961551729,17,0.0241340721521,lowest cost-aware utility with conclusive practical gain,0.005,0.01
+hardware_efficient,he_w4_d3,4,3,low,1024,rule_design,practical_tie,zne,"[""raw"",""zne""]",0.0635678024298,3,0.00024732832099,best two cost-aware utilities are practically equivalent,0.005,0.01
+hardware_efficient,he_w4_d3,4,3,low,4096,rule_design,zne,zne,"[""zne""]",0.0377509135345,3,0.0188624786043,lowest cost-aware utility with conclusive practical gain,0.005,0.01
+hardware_efficient,he_w4_d3,4,3,low,16384,rule_design,zne,zne,"[""zne""]",0.029300372631,3,0.025320924353,lowest cost-aware utility with conclusive practical gain,0.005,0.01
+hardware_efficient,he_w4_d3,4,3,medium,1024,holdout,zne,zne,"[""zne""]",0.144128887764,3,0.00530022379496,lowest cost-aware utility with conclusive practical gain,0.005,0.01
+hardware_efficient,he_w4_d3,4,3,medium,4096,rule_design,zne,zne,"[""zne""]",0.135386250952,3,0.0127489471482,lowest cost-aware utility with conclusive practical gain,0.005,0.01
+hardware_efficient,he_w4_d3,4,3,medium,16384,rule_design,zne,zne,"[""zne""]",0.13355851048,3,0.0104493782541,lowest cost-aware utility with conclusive practical gain,0.005,0.01
+hardware_efficient,he_w4_d3,4,3,zero,1024,holdout,practical_tie,raw,"[""raw""]",0.0301818379634,1,0.0114174798324,accuracy gain over raw is below the preregistered threshold,0.005,0.01
+hardware_efficient,he_w4_d3,4,3,zero,4096,rule_design,practical_tie,raw,"[""raw""]",0.0140263559537,1,0.0123438364084,accuracy gain over raw is below the preregistered threshold,0.005,0.01
+hardware_efficient,he_w4_d3,4,3,zero,16384,rule_design,practical_tie,raw,"[""raw""]",0.00621761137594,1,0.0101218002553,accuracy gain over raw is below the preregistered threshold,0.005,0.01
+hardware_efficient,he_w4_d6,4,6,high,1024,rule_design,practical_tie,raw,"[""raw"",""zne""]",0.389948416872,1,0.000177129834277,best two cost-aware utilities are practically equivalent,0.005,0.01
+hardware_efficient,he_w4_d6,4,6,high,4096,rule_design,practical_tie,readout,"[""raw"",""readout"",""zne""]",0.368953544334,17,0.000409213170559,best two cost-aware utilities are practically equivalent,0.005,0.01
+hardware_efficient,he_w4_d6,4,6,high,16384,rule_design,practical_tie,readout,"[""raw"",""readout""]",0.365967859411,17,0.00449813646643,best two cost-aware utilities are practically equivalent,0.005,0.01
+hardware_efficient,he_w4_d6,4,6,low,1024,rule_design,zne,zne,"[""zne""]",0.0784712408969,3,0.0248738225701,lowest cost-aware utility with conclusive practical gain,0.005,0.01
+hardware_efficient,he_w4_d6,4,6,low,4096,rule_design,zne,zne,"[""zne""]",0.0670535918315,3,0.0348229204199,lowest cost-aware utility with conclusive practical gain,0.005,0.01
+hardware_efficient,he_w4_d6,4,6,low,16384,rule_design,zne,zne,"[""zne""]",0.0677572050732,3,0.0319226749141,lowest cost-aware utility with conclusive practical gain,0.005,0.01
+hardware_efficient,he_w4_d6,4,6,medium,1024,rule_design,practical_tie,zne,"[""readout"",""zne""]",0.251107336394,3,0.00188163498047,best two cost-aware utilities are practically equivalent,0.005,0.01
+hardware_efficient,he_w4_d6,4,6,medium,4096,rule_design,zne,zne,"[""zne""]",0.236842160693,3,0.00753504099088,lowest cost-aware utility with conclusive practical gain,0.005,0.01
+hardware_efficient,he_w4_d6,4,6,medium,16384,rule_design,zne,zne,"[""zne""]",0.240112855867,3,0.00802276000528,lowest cost-aware utility with conclusive practical gain,0.005,0.01
+hardware_efficient,he_w4_d6,4,6,zero,1024,holdout,practical_tie,raw,"[""raw""]",0.0274097160101,1,0.0137426247939,accuracy gain over raw is below the preregistered threshold,0.005,0.01
+hardware_efficient,he_w4_d6,4,6,zero,4096,rule_design,practical_tie,raw,"[""raw""]",0.0146602818259,1,0.0105174523177,accuracy gain over raw is below the preregistered threshold,0.005,0.01
+hardware_efficient,he_w4_d6,4,6,zero,16384,rule_design,practical_tie,raw,"[""raw""]",0.00656279267681,1,0.00846796814493,accuracy gain over raw is below the preregistered threshold,0.005,0.01
+hardware_efficient,he_w6_d1,6,1,high,1024,rule_design,inconclusive,,[],,,,one or more methods lack 50 complete repeats,,
+hardware_efficient,he_w6_d1,6,1,high,4096,rule_design,practical_tie,raw,"[""raw""]",0.0167548837392,1,0.0161051459942,accuracy gain over raw is below the preregistered threshold,0.005,0.01
+hardware_efficient,he_w6_d1,6,1,high,16384,rule_design,practical_tie,raw,"[""raw""]",0.00853653712426,1,0.00804394036604,accuracy gain over raw is below the preregistered threshold,0.005,0.01
+hardware_efficient,he_w6_d1,6,1,low,1024,holdout,practical_tie,raw,"[""raw""]",0.0296046865562,1,0.0299932175449,accuracy gain over raw is below the preregistered threshold,0.005,0.01
+hardware_efficient,he_w6_d1,6,1,low,4096,rule_design,practical_tie,raw,"[""raw""]",0.0180403566222,1,0.0125445459466,accuracy gain over raw is below the preregistered threshold,0.005,0.01
+hardware_efficient,he_w6_d1,6,1,low,16384,rule_design,practical_tie,raw,"[""raw""]",0.00856142730626,1,0.00988623904709,accuracy gain over raw is below the preregistered threshold,0.005,0.01
+hardware_efficient,he_w6_d1,6,1,medium,1024,rule_design,inconclusive,,[],,,,one or more methods lack 50 complete repeats,,
+hardware_efficient,he_w6_d1,6,1,medium,4096,rule_design,practical_tie,raw,"[""raw""]",0.0140706806997,1,0.0168788298015,accuracy gain over raw is below the preregistered threshold,0.005,0.01
+hardware_efficient,he_w6_d1,6,1,medium,16384,rule_design,practical_tie,raw,"[""raw""]",0.00885368937483,1,0.00789264418845,accuracy gain over raw is below the preregistered threshold,0.005,0.01
+hardware_efficient,he_w6_d1,6,1,zero,1024,rule_design,practical_tie,raw,"[""raw""]",0.0281971755178,1,0.0135395982244,accuracy gain over raw is below the preregistered threshold,0.005,0.01
+hardware_efficient,he_w6_d1,6,1,zero,4096,rule_design,practical_tie,raw,"[""raw""]",0.0160657586708,1,0.00923109719948,accuracy gain over raw is below the preregistered threshold,0.005,0.01
+hardware_efficient,he_w6_d1,6,1,zero,16384,rule_design,practical_tie,raw,"[""raw""]",0.0075201957876,1,0.0101128108972,accuracy gain over raw is below the preregistered threshold,0.005,0.01
+hardware_efficient,he_w6_d3,6,3,high,1024,rule_design,inconclusive,,[],,,,one or more methods lack 50 complete repeats,,
+hardware_efficient,he_w6_d3,6,3,high,4096,rule_design,practical_tie,raw,"[""raw""]",0.0352605177355,1,0.00783911123178,accuracy gain over raw is below the preregistered threshold,0.005,0.01
+hardware_efficient,he_w6_d3,6,3,high,16384,rule_design,practical_tie,raw,"[""raw""]",0.034975055371,1,0.00625554913263,accuracy gain over raw is below the preregistered threshold,0.005,0.01
+hardware_efficient,he_w6_d3,6,3,low,1024,rule_design,practical_tie,raw,"[""raw""]",0.0337250669835,1,0.0232747674207,accuracy gain over raw is below the preregistered threshold,0.005,0.01
+hardware_efficient,he_w6_d3,6,3,low,4096,holdout,practical_tie,raw,"[""raw""]",0.0164818811849,1,0.0156436002941,accuracy gain over raw is below the preregistered threshold,0.005,0.01
+hardware_efficient,he_w6_d3,6,3,low,16384,rule_design,practical_tie,raw,"[""raw""]",0.0122761160694,1,0.00591050473386,accuracy gain over raw is below the preregistered threshold,0.005,0.01
+hardware_efficient,he_w6_d3,6,3,medium,1024,holdout,inconclusive,,[],,,,one or more methods lack 50 complete repeats,,
+hardware_efficient,he_w6_d3,6,3,medium,4096,rule_design,practical_tie,raw,"[""raw""]",0.0275631804988,1,0.00686222835144,accuracy gain over raw is below the preregistered threshold,0.005,0.01
+hardware_efficient,he_w6_d3,6,3,medium,16384,rule_design,practical_tie,raw,"[""raw"",""zne""]",0.0225186990802,1,0.00251603332522,best two cost-aware utilities are practically equivalent,0.005,0.01
+hardware_efficient,he_w6_d3,6,3,zero,1024,rule_design,practical_tie,raw,"[""raw""]",0.0274240394029,1,0.0216962705561,accuracy gain over raw is below the preregistered threshold,0.005,0.01
+hardware_efficient,he_w6_d3,6,3,zero,4096,rule_design,practical_tie,raw,"[""raw""]",0.0142777913363,1,0.0137533328121,accuracy gain over raw is below the preregistered threshold,0.005,0.01
+hardware_efficient,he_w6_d3,6,3,zero,16384,rule_design,practical_tie,raw,"[""raw""]",0.00851416449062,1,0.0103856068667,accuracy gain over raw is below the preregistered threshold,0.005,0.01
+hardware_efficient,he_w6_d6,6,6,high,1024,rule_design,inconclusive,,[],,,,one or more methods lack 50 complete repeats,,
+hardware_efficient,he_w6_d6,6,6,high,4096,rule_design,practical_tie,zne,"[""raw"",""zne""]",0.0528245977546,3,0.00173474996782,best two cost-aware utilities are practically equivalent,0.005,0.01
+hardware_efficient,he_w6_d6,6,6,high,16384,rule_design,practical_tie,raw,"[""raw""]",0.0523632891961,1,0.00600462117915,accuracy gain over raw is below the preregistered threshold,0.005,0.01
+hardware_efficient,he_w6_d6,6,6,low,1024,rule_design,practical_tie,raw,"[""raw""]",0.0316228422349,1,0.0239591250987,accuracy gain over raw is below the preregistered threshold,0.005,0.01
+hardware_efficient,he_w6_d6,6,6,low,4096,rule_design,practical_tie,raw,"[""raw""]",0.0244084113895,1,0.0136980726862,accuracy gain over raw is below the preregistered threshold,0.005,0.01
+hardware_efficient,he_w6_d6,6,6,low,16384,rule_design,practical_tie,raw,"[""raw""]",0.0181294844779,1,0.00597063562293,accuracy gain over raw is below the preregistered threshold,0.005,0.01
+hardware_efficient,he_w6_d6,6,6,medium,1024,rule_design,inconclusive,,[],,,,one or more methods lack 50 complete repeats,,
+hardware_efficient,he_w6_d6,6,6,medium,4096,rule_design,practical_tie,raw,"[""raw""]",0.0413951598476,1,0.00993322272651,accuracy gain over raw is below the preregistered threshold,0.005,0.01
+hardware_efficient,he_w6_d6,6,6,medium,16384,rule_design,practical_tie,raw,"[""raw""]",0.0397007015717,1,0.00585833084891,accuracy gain over raw is below the preregistered threshold,0.005,0.01
+hardware_efficient,he_w6_d6,6,6,zero,1024,rule_design,practical_tie,raw,"[""raw""]",0.0260210060219,1,0.0205937181293,accuracy gain over raw is below the preregistered threshold,0.005,0.01
+hardware_efficient,he_w6_d6,6,6,zero,4096,rule_design,practical_tie,raw,"[""raw""]",0.0157420421398,1,0.010381237017,accuracy gain over raw is below the preregistered threshold,0.005,0.01
+hardware_efficient,he_w6_d6,6,6,zero,16384,rule_design,practical_tie,raw,"[""raw""]",0.00759452348194,1,0.0101318029775,accuracy gain over raw is below the preregistered threshold,0.005,0.01

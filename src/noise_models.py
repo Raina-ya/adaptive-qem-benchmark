@@ -2,10 +2,18 @@
 
 from __future__ import annotations
 
+import math
 from dataclasses import dataclass
 
+import numpy as np
 from qiskit_aer import AerSimulator
-from qiskit_aer.noise import NoiseModel, ReadoutError, depolarizing_error
+from qiskit_aer.noise import (
+    NoiseModel,
+    ReadoutError,
+    coherent_unitary_error,
+    depolarizing_error,
+    pauli_error,
+)
 
 
 @dataclass(frozen=True)
@@ -17,6 +25,8 @@ class NoiseSpec:
     readout_p10: float = 0.0
     one_qubit_depolarizing: float = 0.0
     two_qubit_depolarizing: float = 0.0
+    coherent_overrotation: float = 0.0
+    correlated_zz: float = 0.0
 
 
 _STRENGTHS = {
@@ -52,6 +62,8 @@ def build_noise_model(spec: NoiseSpec) -> NoiseModel:
         spec.readout_p10,
         spec.one_qubit_depolarizing,
         spec.two_qubit_depolarizing,
+        spec.coherent_overrotation,
+        spec.correlated_zz,
     )
     if any(value < 0 for value in probabilities):
         raise ValueError("Noise probabilities must be non-negative")
@@ -64,13 +76,42 @@ def build_noise_model(spec: NoiseSpec) -> NoiseModel:
         model.add_all_qubit_readout_error(ReadoutError(assignment))
     if spec.one_qubit_depolarizing:
         one_qubit_error = depolarizing_error(spec.one_qubit_depolarizing, 1)
-        model.add_all_qubit_quantum_error(
-            one_qubit_error, ["x", "sx", "h", "rx", "ry", "rz"]
+    else:
+        one_qubit_error = None
+    if spec.coherent_overrotation:
+        half_angle = spec.coherent_overrotation / 2.0
+        unitary = np.array(
+            [
+                [math.cos(half_angle), -1j * math.sin(half_angle)],
+                [-1j * math.sin(half_angle), math.cos(half_angle)],
+            ],
+            dtype=complex,
         )
-    if spec.two_qubit_depolarizing:
-        model.add_all_qubit_quantum_error(
-            depolarizing_error(spec.two_qubit_depolarizing, 2), ["cx"]
+        coherent_error = coherent_unitary_error(unitary)
+        one_qubit_error = (
+            coherent_error
+            if one_qubit_error is None
+            else one_qubit_error.compose(coherent_error)
         )
+    if one_qubit_error is not None:
+        model.add_all_qubit_quantum_error(one_qubit_error, ["x", "sx", "h", "rx", "ry", "rz"])
+
+    two_qubit_error = (
+        depolarizing_error(spec.two_qubit_depolarizing, 2)
+        if spec.two_qubit_depolarizing
+        else None
+    )
+    if spec.correlated_zz:
+        correlated_error = pauli_error(
+            [("ZZ", spec.correlated_zz), ("II", 1.0 - spec.correlated_zz)]
+        )
+        two_qubit_error = (
+            correlated_error
+            if two_qubit_error is None
+            else two_qubit_error.compose(correlated_error)
+        )
+    if two_qubit_error is not None:
+        model.add_all_qubit_quantum_error(two_qubit_error, ["cx"])
     return model
 
 

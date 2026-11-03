@@ -1,0 +1,43 @@
+{
+  "run_id": "d377bbcd-7b3a-42f8-a4be-4682d4ec8c36",
+  "script": "src.generate_adaptive_analysis",
+  "started_at_utc": "2026-11-03T07:29:58.007219Z",
+  "finished_at_utc": "2026-11-03T07:30:10.707777Z",
+  "wall_seconds": 12.853432,
+  "python_version": "3.12.14",
+  "package_versions": {
+    "qiskit": "2.2.3",
+    "qiskit-aer": "0.17.2",
+    "numpy": "2.3.4",
+    "pandas": "2.3.3",
+    "matplotlib": "3.10.7",
+    "scipy": "1.16.3"
+  },
+  "git_commit_before": "f821d4221e20adb025f1f9ff28a20bbdb92f1a4a",
+  "git_dirty_before": true,
+  "git_commit_after": "f821d4221e20adb025f1f9ff28a20bbdb92f1a4a",
+  "git_dirty_after": true,
+  "host": "TP-1302774-NB",
+  "args": [],
+  "seed_root": 20261102,
+  "output_hashes": {
+    "results/processed/benchmark_summary_v1.csv": "02157517de858def7ac12c9a71b6c1e7acc3e206667ffd56405a4980c2444878",
+    "results/processed/core_v1_summary.csv": "c36c3b2423e4227a2021b793f449cd45b53a32c8a479312876681de8b3855776",
+    "results/processed/decision_error_summary.csv": "07e028be0ed206af2458c5b98f1ac6276b606285fcb8f9932bf32bbf2cba9aa4",
+    "results/processed/noise_shift_regret.csv": "8f01443f14377ce5486baa1b84a26d6098eec455968ae44b4b7f82b056d0cc54",
+    "results/processed/regime_labels_v1.csv": "b71c8fa18646595069369df0d11564a098c99c910d25308175ad95a4d6890367",
+    "results/processed/selector_holdout_evaluation.csv": "6e9b39b57156206a5db524fe5e012cc86c890b11a8d41fbb073b0e67576e7eb7",
+    "results/processed/selector_rule_design_predictions.csv": "a0f4500f95ed955c4e084dfc19d1eb83756b90ca48d2a8d273d3d9f1088e7a24",
+    "figures/bias_variance_tradeoff.png": "56649feb849684e06c7e9be3c54cbb425aadaae422d976628a5d3e11794f7084",
+    "figures/core_v1_regime_map.png": "35ff3fe6782599ef004c4a6ec8982a7e6a77762e12f19cf8dc904ff70833dab9",
+    "figures/decision_error_probability.png": "a83b6cd364f4e735721302492ff558b59378a4e1ec98f5d4e85575062c699705",
+    "figures/operating_regime_map_v1.png": "35ff3fe6782599ef004c4a6ec8982a7e6a77762e12f19cf8dc904ff70833dab9",
+    "figures/overhead_vs_rmse_gain.png": "34f4ac12c4d4f4ab5df28f0c130d792b219bd8780f06a679972302c286c39b4c",
+    "figures/regret_under_noise_shift.png": "44646d58d96509b2a22556bf9bbb5474f7f2fb1baecb0d2cd2544fb496777639",
+    "figures/rmse_heatmap.png": "07041db6e41245c16174ee7ec4cc84eb6efecf7d08677deac79f0685580c2a82",
+    "figures/selector_confusion_matrix.png": "4ee6d5686fa3ab4b15fdb0e6d108b76415ad9494c7f45d8a00e2e55078c4caaf",
+    "figures/selector_rmse_regret.png": "ad891002979ba8856787d716a66ca4a91843d144c52b70b8e613482a216b90c0"
+  },
+  "status": "ok",
+  "error": null
+}

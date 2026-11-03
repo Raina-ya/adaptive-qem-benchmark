@@ -1,0 +1,30 @@
+family,circuit_id,width,depth,noise,shots,split,oracle_label,oracle_method,selected_method,rule_trace,strict_label_match,decision_compatible,selected_rmse,oracle_rmse,rmse_regret,inconclusive_or_abstain
+ghz,ghz_w2,2,1,low,1024,holdout,practical_tie,raw,readout,stable calibration and material readout component,False,False,0.028012740738,0.0302046850347,-0.00219194429675,False
+ghz,ghz_w2,2,1,low,4096,holdout,practical_tie,readout,readout,stable calibration and material readout component,False,True,0.0170081864596,0.0170081864596,0,False
+ghz,ghz_w2,2,1,medium,16384,holdout,readout,readout,readout,stable calibration and material readout component,True,True,0.0447878487305,0.0447878487305,0,False
+ghz,ghz_w4,4,1,high,16384,holdout,readout,readout,raw,no mitigation rule has sufficient evidence,False,False,0.492379185422,0.2577307811,0.234648404322,False
+ghz,ghz_w4,4,1,low,1024,holdout,zne,zne,readout,stable calibration and material readout component,False,False,0.0582419824498,0.0493357298277,0.00890625262206,False
+ghz,ghz_w6,6,1,high,4096,holdout,readout,readout,raw,no mitigation rule has sufficient evidence,False,False,0.648701074185,0.393232374799,0.255468699386,False
+hardware_efficient,he_w2_d1,2,1,high,1024,holdout,practical_tie,raw,raw,no mitigation rule has sufficient evidence,False,True,0.0290112887491,0.0290112887491,0,False
+hardware_efficient,he_w2_d1,2,1,high,4096,holdout,practical_tie,raw,raw,no mitigation rule has sufficient evidence,False,True,0.016599069784,0.016599069784,0,False
+hardware_efficient,he_w2_d1,2,1,low,16384,holdout,practical_tie,raw,readout,stable calibration and material readout component,False,False,0.00890943444779,0.00843049984431,0.000478934603474,False
+hardware_efficient,he_w2_d1,2,1,medium,4096,holdout,practical_tie,raw,readout,stable calibration and material readout component,False,False,0.0202675828883,0.0163669955015,0.00390058738677,False
+hardware_efficient,he_w2_d1,2,1,zero,4096,holdout,practical_tie,raw,raw,declared zero-noise condition needs no mitigation,False,True,0.016662406151,0.016662406151,0,False
+hardware_efficient,he_w2_d3,2,3,high,4096,holdout,practical_tie,raw,zne,deep gate-noise regime with an acceptable ZNE fit,False,False,0.0405208764155,0.0262327635357,0.0142881128798,False
+hardware_efficient,he_w2_d3,2,3,high,16384,holdout,practical_tie,raw,zne,deep gate-noise regime with an acceptable ZNE fit,False,False,0.0276135761415,0.0220889677178,0.00552460842376,False
+hardware_efficient,he_w2_d3,2,3,low,16384,holdout,practical_tie,raw,readout,stable calibration and material readout component,False,False,0.0110172146144,0.0102494332313,0.000767781383028,False
+hardware_efficient,he_w2_d3,2,3,medium,1024,holdout,practical_tie,raw,readout,stable calibration and material readout component,False,False,0.066366649082,0.0344074543473,0.0319591947347,False
+hardware_efficient,he_w2_d3,2,3,medium,4096,holdout,practical_tie,raw,readout,stable calibration and material readout component,False,False,0.0261153219499,0.02114217204,0.00497314990989,False
+hardware_efficient,he_w2_d6,2,6,high,16384,holdout,practical_tie,zne,zne,deep gate-noise regime with an acceptable ZNE fit,False,True,0.0728606379671,0.0728606379671,0,False
+hardware_efficient,he_w2_d6,2,6,low,16384,holdout,practical_tie,raw,readout,stable calibration and material readout component,False,False,0.0150002856037,0.0146850697688,0.000315215834913,False
+hardware_efficient,he_w2_d6,2,6,medium,1024,holdout,practical_tie,raw,readout,stable calibration and material readout component,False,False,0.0563432800005,0.0533862914905,0.00295698850992,False
+hardware_efficient,he_w2_d6,2,6,zero,4096,holdout,practical_tie,raw,raw,declared zero-noise condition needs no mitigation,False,True,0.0132937957488,0.0132937957488,0,False
+hardware_efficient,he_w4_d1,4,1,high,16384,holdout,practical_tie,raw,raw,no mitigation rule has sufficient evidence,False,True,0.0122603541539,0.0122603541539,0,False
+hardware_efficient,he_w4_d1,4,1,low,4096,holdout,practical_tie,raw,readout,stable calibration and material readout component,False,False,0.0197983673614,0.0137953309738,0.00600303638762,False
+hardware_efficient,he_w4_d1,4,1,low,16384,holdout,practical_tie,raw,readout,stable calibration and material readout component,False,False,0.00975832519536,0.00789648391323,0.00186184128213,False
+hardware_efficient,he_w4_d3,4,3,medium,1024,holdout,zne,zne,readout,stable calibration and material readout component,False,False,0.141193817442,0.144128887764,-0.00293507032268,False
+hardware_efficient,he_w4_d3,4,3,zero,1024,holdout,practical_tie,raw,raw,declared zero-noise condition needs no mitigation,False,True,0.0301818379634,0.0301818379634,0,False
+hardware_efficient,he_w4_d6,4,6,zero,1024,holdout,practical_tie,raw,raw,declared zero-noise condition needs no mitigation,False,True,0.0274097160101,0.0274097160101,0,False
+hardware_efficient,he_w6_d1,6,1,low,1024,holdout,practical_tie,raw,raw,calibration overhead dominates the small wide-circuit budget,False,True,0.0296046865562,0.0296046865562,0,False
+hardware_efficient,he_w6_d3,6,3,low,4096,holdout,practical_tie,raw,readout,stable calibration and material readout component,False,False,0.028136952246,0.0164818811849,0.0116550710611,False
+hardware_efficient,he_w6_d3,6,3,medium,1024,holdout,inconclusive,,abstain,calibration condition number exceeds 8,False,True,,,,True

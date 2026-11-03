@@ -1,0 +1,14 @@
+version: holdout_v1
+rule_design_fraction: 0.80
+in_distribution_holdout_fraction: 0.20
+noise_shift_shot_budget: 4096
+noise_shift_repeats: 50
+noise_shift_conditions:
+  - intermediate_mixed
+  - asymmetric_readout
+  - coherent_shift
+  - correlated_shift
+methods: [raw, readout, zne]
+selector_uses_machine_learning: false
+selector_may_abstain: true
+decision_threshold: 0.0

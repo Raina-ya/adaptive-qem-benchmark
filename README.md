@@ -4,16 +4,24 @@ A reproducible simulator study of when quantum error mitigation helps, wastes a 
 shot budget, or fails explicitly.
 
 The benchmark compares raw estimation, full-assignment-matrix readout mitigation, and
-linear zero-noise extrapolation (ZNE) for the GHZ observable `X^w`. It crosses widths
-2, 4, and 6; four mixed-noise levels; total budgets of 1,024, 4,096, and 16,384 shots;
-and 50 deterministic repeats.
+linear zero-noise extrapolation (ZNE) for GHZ and fixed-seed hardware-efficient
+circuits. It crosses widths 2, 4, and 6; depths 1, 3, and 6 where applicable; multiple
+noise regimes; total budgets of 1,024, 4,096, and 16,384 shots; and 50 deterministic
+repeats.
 
 ## Verified result
 
-Among 34 operating cells where all three methods completed 50 repeats, readout
-mitigation had the lowest RMSE in 21 cells, raw estimation in 9, and linear ZNE in 4.
-Readout mitigation also produced 28 explicit `ill_conditioned` failures at width 6
-and a 1,024-shot budget. No method is uniformly reliable across the declared grid.
+Across 144 GHZ and hardware-efficient operating cells, the cost-aware oracle found
+103 practical ties, 18 readout winners, 14 ZNE winners, and 9 inconclusive cells.
+The frozen rule selector achieved 41.4% decision compatibility on a deterministic
+29-cell holdout, with mean RMSE regret 0.0207 and median regret 0.000397. Under four
+unseen noise shifts, decision compatibility was 50.0%, mean regret was 0.00771, and
+median regret was zero. These are diagnostic baseline results, not evidence of a
+generally reliable adaptive policy.
+
+The hardware-efficient run retained 99 explicit readout failures, concentrated in
+width-6, low-shot, medium/high-noise cells. Negative mitigation gains are also kept:
+179 of 432 method summaries had worse RMSE than the raw estimator.
 
 ![Operating-regime map showing raw, readout, ZNE, and failed cells](paper/figures/operating_regime_map.png)
 
@@ -41,8 +49,8 @@ other physical device.
 
 ## Reproduce
 
-Python 3.11 or 3.12 is required. The full Day 8-12 benchmark takes several minutes on
-a typical desktop.
+Python 3.11 or 3.12 is required. The expanded nontrivial-circuit generation took about
+43 minutes on the development desktop; runtime is machine-dependent.
 
 ```powershell
 python -m venv .venv
@@ -56,6 +64,8 @@ $env:MPLCONFIGDIR = ".matplotlib-cache"
 .\.venv\Scripts\python.exe -m src.run_with_log src.generate_paper_assets
 .\.venv\Scripts\python.exe -m src.run_with_log src.generate_runtime_report
 .\.venv\Scripts\python.exe -m src.run_with_log src.generate_audit_manifest
+.\.venv\Scripts\python.exe -m src.run_with_log src.generate_nontrivial_benchmark
+.\.venv\Scripts\python.exe -m src.run_with_log src.generate_adaptive_analysis
 tectonic paper/main.tex --outdir paper
 ```
 
@@ -81,12 +91,14 @@ ls results/runs/
 
 ## Limitations
 
-This is a small, simulator-only GHZ benchmark. It does not model device drift,
-crosstalk, leakage, relaxation, correlated readout, or calibration uncertainty. The
-declared GHZ depth values 3 and 6 are retained as `not_applicable`; only depth 1 is
-executed. Full-matrix calibration scales exponentially with width. Aggregate metrics
-are conditional on completed rows, while operating-cell winners require all methods
-to complete all 50 repeats.
+This is a simulator-only benchmark. It does not model device drift, leakage,
+relaxation, calibrated hardware noise, or calibration uncertainty. The structured
+noise-shift study adds asymmetric readout, coherent over-rotation, and correlated-ZZ
+controls, but these remain synthetic models. Declared GHZ depths 3 and 6 remain
+`not_applicable`; hardware-efficient circuits supply the nontrivial depth grid.
+Full-matrix calibration scales exponentially with width. Aggregate metrics are
+conditional on completed rows, while operating-cell labels require all methods to
+complete all 50 repeats.
 
 ## Repository structure
 

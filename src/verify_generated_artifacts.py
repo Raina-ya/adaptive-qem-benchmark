@@ -24,6 +24,8 @@ ATOL = 1e-12
 GENERATORS = (
     "src.generate_artifacts",
     "src.regenerate_readout_affected",
+    "src.generate_nontrivial_benchmark",
+    "src.generate_adaptive_analysis",
     "src.generate_audit_manifest",
 )
 ARTIFACT_ROOTS = (

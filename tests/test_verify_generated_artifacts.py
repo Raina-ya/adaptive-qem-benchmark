@@ -21,6 +21,11 @@ def test_comparator_regenerates_phase_0_through_day_7() -> None:
     assert "src.generate_artifacts" in GENERATORS
 
 
+def test_comparator_regenerates_adaptive_extension() -> None:
+    assert "src.generate_nontrivial_benchmark" in GENERATORS
+    assert "src.generate_adaptive_analysis" in GENERATORS
+
+
 def test_float_and_json_noise_within_tolerance_passes(tmp_path: Path) -> None:
     reference = tmp_path / "reference"
     candidate = tmp_path / "candidate"

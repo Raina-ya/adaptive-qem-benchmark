@@ -1,0 +1,9 @@
+metric,value
+operating_cells,144
+holdout_cells,29
+holdout_selector_accuracy,0.413793103448
+holdout_strict_label_match,0.0344827586207
+holdout_inconclusive_or_abstain_rate,0.0344827586207
+noise_shift_selector_accuracy,0.5
+noise_shift_strict_label_match,0.0833333333333
+noise_shift_inconclusive_or_abstain_rate,0
