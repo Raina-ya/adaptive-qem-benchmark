@@ -32,3 +32,10 @@ def test_paired_gap_statistics_include_covariance() -> None:
 def test_exact_tie_is_rejected() -> None:
     with pytest.raises(ValueError, match="unique winner"):
         evaluate_decision(1.0, 0.0, 0.5, 0.5)
+
+
+def test_candidate_order_is_not_encoded_in_decision_metric() -> None:
+    forward = evaluate_decision(0.2, -0.1, 0.1, -0.1)
+    reverse = evaluate_decision(-0.1, 0.2, -0.1, 0.1)
+    assert forward.decision_error == reverse.decision_error
+    assert forward.regret == reverse.regret

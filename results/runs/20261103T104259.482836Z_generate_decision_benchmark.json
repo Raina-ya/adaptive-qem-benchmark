@@ -1,0 +1,34 @@
+{
+  "run_id": "edd0d5c3-b645-4942-a817-f4401010c041",
+  "script": "src.generate_decision_benchmark",
+  "started_at_utc": "2026-11-03T10:26:55.191783Z",
+  "finished_at_utc": "2026-11-03T10:42:59.482836Z",
+  "wall_seconds": 964.564383,
+  "python_version": "3.12.14",
+  "package_versions": {
+    "qiskit": "2.2.3",
+    "qiskit-aer": "0.17.2",
+    "numpy": "2.3.4",
+    "pandas": "2.3.3",
+    "matplotlib": "3.10.7",
+    "scipy": "1.16.3"
+  },
+  "git_commit_before": "3c2f2cf1f8b0d5f430483ad32eedbf379e47708b",
+  "git_dirty_before": true,
+  "git_commit_after": "3c2f2cf1f8b0d5f430483ad32eedbf379e47708b",
+  "git_dirty_after": true,
+  "host": "TP-1302774-NB",
+  "args": [],
+  "seed_root": 20261102,
+  "output_hashes": {
+    "results/processed/decision_margin_summary_v1.csv": "30afd4223fd02b87fc5d9a3ab8093ae038c6a12d3db8ff0c4605c399eca74f8b",
+    "results/processed/decision_unresolved_cells_v1.csv": "227d470ffafae356322cb1b3a5be11f9261894586c4d83a3a8bc2812d2a6d0e3",
+    "results/raw/decision_margin_benchmark_v1.csv": "f2616d940b6917a9f774d5a1f94cb7c8f54baf5cad8af02d734b01b539fd0f17",
+    "figures/decision_margin_vs_error.png": "a9d9a3ac59c3c828e9f82babb4aea7bc032ea6f7e83ca77be6bc3f85d020ab1a",
+    "figures/gap_variance_vs_margin.png": "fbde003a8e8f97164855e622ea5f6702c14af14c2b4c099d542b21fd9d10ca11",
+    "figures/rmse_vs_decision_error.png": "eeb0ac68ccf432f2e9fb0f58808d7ffb075f2c2c6b3d83f78863d301ac5d97fb",
+    "figures/shared_vs_independent_decisions.png": "de2e2aada61a7e75e6dc0eef7eabdd7e2624124f6da13bb4bb42d65a19490d23"
+  },
+  "status": "ok",
+  "error": null
+}

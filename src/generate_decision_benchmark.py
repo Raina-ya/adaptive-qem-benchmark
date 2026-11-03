@@ -102,7 +102,9 @@ def _estimate(candidate, method: str, shots: int, seed: int, noise):
             result.corrected_estimate,
             result.raw_counts_json,
             {
-                "executions": result.total_circuit_executions,
+                "executions": (
+                    result.target_circuit_executions + result.calibration_circuit_executions
+                ),
                 "condition_number": result.condition_number,
                 "calibration_counts": result.calibration_counts_json,
             },
@@ -133,16 +135,24 @@ def execute_manifest(manifest: pd.DataFrame) -> pd.DataFrame:
 
     rows: list[dict[str, object]] = []
     identity_columns = [column for column in manifest.columns if column != "status"]
+    completed: dict[tuple[object, ...], dict[str, object]] = {}
     if RAW_PATH.exists():
         checkpoint = pd.read_csv(RAW_PATH)
-        prefix = manifest.iloc[: len(checkpoint)].reset_index(drop=True)
-        observed = checkpoint[identity_columns].reset_index(drop=True)
-        prefix = prefix[identity_columns]
-        if len(checkpoint) > len(manifest) or not prefix.equals(observed):
-            raise RuntimeError("Existing decision checkpoint does not match the manifest prefix")
-        rows = checkpoint.to_dict("records")
-    for index, item in manifest.iloc[len(rows) :].iterrows():
+        manifest_keys = {
+            tuple(row) for row in manifest[identity_columns].itertuples(index=False, name=None)
+        }
+        for record in checkpoint.to_dict("records"):
+            key = tuple(record[column] for column in identity_columns)
+            if key not in manifest_keys:
+                raise RuntimeError("Existing decision checkpoint contains an unknown cell")
+            if record["status"] == "complete":
+                completed[key] = record
+    for index, item in manifest.iterrows():
         row = item.to_dict()
+        key = tuple(row[column] for column in identity_columns)
+        if key in completed:
+            rows.append(completed[key])
+            continue
         instance = controlled_decision_instance(float(item.margin), depth=int(item.depth))
         candidate_budget = split_shots(int(item.shots), 2)
         spec = noise_spec("mixed", str(item.noise))
@@ -253,7 +263,19 @@ def summarize(raw: pd.DataFrame) -> pd.DataFrame:
             total_shots_mean=float(group.total_shots_used.mean()),
         )
         rows.append(row)
-    return pd.DataFrame(rows)
+    summary = pd.DataFrame(rows)
+    reliable: dict[tuple[str, int], float] = {}
+    for (method, shots), method_group in summary.groupby(["method", "shots"]):
+        resolved_margins = [
+            float(margin)
+            for margin, margin_group in method_group.groupby("margin")
+            if margin_group.status.eq("complete").all()
+        ]
+        reliable[(str(method), int(shots))] = min(resolved_margins) if resolved_margins else np.nan
+    summary["minimum_reliably_resolved_margin"] = [
+        reliable[(str(row.method), int(row.shots))] for row in summary.itertuples(index=False)
+    ]
+    return summary
 
 
 def _plot(summary: pd.DataFrame) -> None:
@@ -266,10 +288,15 @@ def _plot(summary: pd.DataFrame) -> None:
             axis.errorbar(
                 group.margin,
                 group.decision_error_probability,
-                yerr=[
-                    group.decision_error_probability - group.decision_error_wilson_low,
-                    group.decision_error_wilson_high - group.decision_error_probability,
-                ],
+                yerr=np.maximum(
+                    0.0,
+                    np.vstack(
+                        [
+                            group.decision_error_probability - group.decision_error_wilson_low,
+                            group.decision_error_wilson_high - group.decision_error_probability,
+                        ]
+                    ),
+                ),
                 marker="o",
                 label=method,
                 color=palette[method],
@@ -343,6 +370,7 @@ def main(argv: list[str] | None = None) -> None:
     MANIFEST_PATH.parent.mkdir(parents=True, exist_ok=True)
     manifest.to_csv(MANIFEST_PATH, index=False)
     raw = execute_manifest(manifest)
+    raw = raw.drop(columns=["minimum_reliably_resolved_margin"], errors="ignore")
     RAW_PATH.parent.mkdir(parents=True, exist_ok=True)
     raw.to_csv(RAW_PATH, index=False)
     summary = summarize(raw)
