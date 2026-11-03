@@ -1,288 +1,244 @@
 \documentclass[10pt,twocolumn]{article}
 \usepackage[margin=0.72in,columnsep=0.24in]{geometry}
-\usepackage{amsmath,amssymb,booktabs,graphicx,microtype,siunitx,xcolor,hyperref,enumitem,balance}
+\usepackage{amsmath,amssymb,booktabs,graphicx,microtype,xcolor,hyperref,enumitem}
 \hypersetup{colorlinks=true,linkcolor=blue!55!black,citecolor=blue!55!black,urlcolor=blue!55!black}
 \setlist{nosep,leftmargin=*}
-\sisetup{detect-all}
 \graphicspath{{figures/}}
-\input{generated/metrics.tex}
-\title{Adaptive Quantum Error Mitigation Under Fixed Shot Budgets:\\
-A Reproducible Simulator Benchmark}
+\input{generated/adaptive_metrics.tex}
+\title{Adaptive Quantum Error Mitigation Under Fixed Shot Budgets:\
+Operating Regimes, Abstention, and Noise-Model Shift}
 \author{Zhen-Jun Liu}
-\date{November 2, 2026}
+\date{November 3, 2026}
+
 \begin{document}
 \maketitle
+
 \begin{abstract}
-Quantum error mitigation (QEM) can reduce bias without encoding a logical qubit, but
-its auxiliary executions and statistical amplification consume finite sampling
-resources. This study asks when unmitigated estimation, full-assignment-matrix
-readout mitigation, and linear zero-noise extrapolation (ZNE) are useful under the
-same total shot budget. We evaluate $X^{\otimes w}$ on simulated GHZ circuits with
-widths $w\in\{2,4,6\}$, four idealized mixed-noise levels, three shot budgets, and 50
-deterministic repeats per applicable operating cell. Among 34 cells for which all
-three methods completed 50 repeats, readout mitigation attained the lowest
-root-mean-square error (RMSE) in \ReadoutWins{} cells, raw estimation in \RawWins{},
-and linear ZNE in \ZNEWins{}. Across completed rows, the respective RMSE values were
-\ReadoutRMSE{}, \RawRMSE{}, and \ZNERMSE{} for readout, raw, and ZNE. Readout
-mitigation also failed explicitly in \FailedRows{} width-6, 1,024-shot rows because
-the sampled calibration matrix was ill-conditioned. The evidence is entirely
-analytic or simulated; it does not establish performance on quantum hardware or
-under calibrated device noise.
+Quantum error mitigation (QEM) trades bias reduction against auxiliary executions and
+sampling variance, so a method that helps one circuit may waste resources or become
+unstable elsewhere. We compare unmitigated estimation, full-assignment-matrix
+readout mitigation, and linear zero-noise extrapolation (ZNE) under identical total
+shot budgets. The simulator benchmark combines GHZ and fixed-seed
+hardware-efficient circuits with widths 2, 4, and 6, depths 1, 3, and 6 where
+applicable, four main noise levels, three shot budgets, and 50 deterministic repeats.
+A cost-aware oracle labels \OperatingCells{} operating cells as \PracticalTies{}
+practical ties, \ReadoutWinners{} readout winners, \ZNEWinners{} ZNE winners, and
+\InconclusiveCells{} inconclusive. A frozen, non-ML rule selector reaches only
+\HoldoutCompatibility{} decision compatibility on a \HoldoutCells{}-cell
+deterministic holdout and \ShiftCompatibility{} under four unseen synthetic noise
+shifts. The benchmark retains \HardwareFailures{} explicit readout failures and
+\NegativeGains{} of \SummaryRows{} method summaries with negative RMSE gain.
+These simulated results support selective mitigation and abstention as research
+questions, but do not validate a general selector or establish hardware performance.
 \end{abstract}
+
 \section{Introduction}
-Near-term quantum computations often estimate expectation values from noisy,
-finite-shot measurements. QEM methods seek to reduce the resulting error without
-the qubit overhead of full error correction, but they introduce sampling and
-classical-processing overhead and can amplify variance
-\cite{temme2017,li2017,cai2023}. Consequently, applying mitigation is not a
-method-independent prescription: effectiveness depends on the circuit, observable,
-noise channel, and resource budget.
+QEM can reduce expectation-value bias without logical encoding, but its additional
+circuits and statistical amplification consume finite resources
+\cite{temme2017,li2017,cai2023}. Comparing methods at unequal execution cost can
+therefore manufacture an apparent advantage. Even under a fixed budget, the best
+method can change with circuit structure, observable, noise, and sampling regime.
 
-The research question is: \emph{under a fixed total shot budget, which of raw
-estimation, readout mitigation, and linear ZNE minimizes estimation error, and where
-does mitigation fail or waste resources?} The repository implements a simulator-only
-benchmark with deterministic seeds, repeat-level raw data, explicit resource
-accounting, and failure statuses. The contribution is an auditable operating-regime
-comparison, not a claim of new QEM theory or hardware advantage.
+This work asks three questions: when does mitigation improve RMSE at fixed total
+shots, when are methods practically indistinguishable, and can a simple selector
+choose safely without access to the exact reference? The contribution is a
+reproducible simulator benchmark with repeat-level data, explicit execution ledgers,
+cost-aware labels, abstention rules, and evaluation under noise-model mismatch. It is
+not a proposal for new QEM theory or a claim of quantum-hardware advantage.
+
 \section{Methodology}
-\subsection{Reference state and observable}
-For width $w$, the benchmark prepares
+\subsection{Circuit families and observables}
+The GHZ family prepares
 \begin{equation}
-  \lvert \mathrm{GHZ}_w\rangle =
-  \frac{\lvert 0\rangle^{\otimes w}+\lvert 1\rangle^{\otimes w}}{\sqrt{2}},
-  \label{eq:ghz}
+|\mathrm{GHZ}_w\rangle=(|0\rangle^{\otimes w}+|1\rangle^{\otimes w})/\sqrt{2},
 \end{equation}
-using one Hadamard gate followed by $w-1$ controlled-NOT gates. The primary
-observable is $P_w=X^{\otimes w}$, for which the analytic prediction and noiseless
-statevector result are
-\begin{equation}
-  \mu_{\mathrm{ref}}=\langle \mathrm{GHZ}_w\rvert P_w
-  \lvert \mathrm{GHZ}_w\rangle=1.
-  \label{eq:reference}
-\end{equation}
-Tests cross-check this relation to absolute tolerance $10^{-12}$ for
-$w\in\{2,4,6\}$.
+with analytic observables $X^{\otimes w}=1$ and neighboring $ZZ=1$. The
+hardware-efficient family alternates fixed-seed single-qubit rotations and
+nearest-neighbor entanglers at depths 1, 3, and 6. Its Pauli observables and
+statevector references are fixed before noisy sampling; some references are
+deliberately away from $\pm1$ to avoid a stabilizer-only benchmark.
 
-For $N$ shots with parity eigenvalues $y_s\in\{-1,+1\}$, the raw estimator and
-plug-in shot-noise standard error are
-\begin{align}
-  \widehat{\mu} &= \frac{1}{N}\sum_{s=1}^{N}y_s,\label{eq:estimator}\\
-  \widehat{\sigma}_{\widehat{\mu}} &=
-  \sqrt{\frac{1-\widehat{\mu}^{\,2}}{N}}.\label{eq:se}
-\end{align}
-\subsection{Noise model}
-Qiskit Aer supplies the noisy target-circuit simulation \cite{qiskitaer}. The
-diagnostic mixed-noise model combines independent assignment error, one-qubit
-depolarizing error, and two-qubit depolarizing error. Table~\ref{tab:noise} records
-the exact simulator parameters. These values are controlled study factors, not
-device calibrations.
-\begin{table}[t]
+\begin{figure}[t]
 \centering
-\caption{The four simulated noise levels increase readout and depolarizing error
-together; none is assigned to a physical device.}
-\label{tab:noise}
-\begin{tabular}{lrrrr}
-\toprule
-Level & $p_{01}$ & $p_{10}$ & $p_{1q}$ & $p_{2q}$\\
-\midrule
-Zero & 0 & 0 & 0 & 0\\
-Low & .005 & .004 & .001 & .010\\
-Medium & .020 & .016 & .005 & .030\\
-High & .050 & .040 & .010 & .080\\
-\bottomrule
-\end{tabular}
-\end{table}
-\subsection{Readout mitigation}
-For width $w$, all $2^w$ computational basis states are calibrated. If
-$A_{ij}=\Pr(\mathrm{observe}\ i\mid\mathrm{prepare}\ j)$ and
-$\widehat{\boldsymbol p}_{\mathrm{obs}}$ is the observed probability vector, the
-corrected distribution solves
+\includegraphics[width=\columnwidth]{circuit_families.png}
+\caption{The benchmark combines an analytically controlled GHZ family with a
+nontrivial hardware-efficient depth grid; both diagrams are conceptual and all
+executed circuits are generated deterministically in code.}
+\label{fig:circuits}
+\end{figure}
+
+For repeat $r$, $e_r=\widehat\mu_r-\mu_{\rm ref}$. We report bias, sample variance,
+and
 \begin{equation}
-  \widehat{\boldsymbol p}=\underset{\boldsymbol p\geq 0}{\arg\min}
-  \lVert A\boldsymbol p-\widehat{\boldsymbol p}_{\mathrm{obs}}\rVert_2,
-  \quad \mathbf{1}^{\mathsf T}\widehat{\boldsymbol p}=1.
-  \label{eq:readout}
+\mathrm{RMSE}=\sqrt{R^{-1}\sum_{r=1}^{R}e_r^2}.
 \end{equation}
-This constrained correction follows the assignment-matrix approach
-\cite{bravyi2021}. A condition number above $10^8$ or a non-finite value produces an
-explicit \texttt{ill\_conditioned} status. The total budget is split
-deterministically: 20\% for calibration and 80\% for the target. Calibration
-observations are sampled directly from the declared independent assignment channel
-with seeded multinomial draws; no hardware calibration data are used.
-\subsection{Linear zero-noise extrapolation}
-Global unitary folding constructs
+Paired RMSE-gain intervals use deterministic bias-corrected and accelerated
+bootstrap resampling. Decision-error probability is the fraction of repeats whose
+estimated sign disagrees with the reference decision; Wilson intervals quantify its
+binomial uncertainty.
+
+\subsection{Mitigation and fixed budgets}
+Raw estimation spends the full budget on the target. Readout mitigation allocates
+20\% to all $2^w$ calibration states and 80\% to the target. It solves a constrained
+assignment-matrix correction and reports ill-conditioning explicitly rather than
+silently inverting an unstable matrix \cite{bravyi2021}. Linear ZNE splits the same
+budget over global folds $\lambda\in\{1,3,5\}$ and uses the preregistered fit
 \begin{equation}
-  U_{\lambda}=U(U^{\dagger}U)^{(\lambda-1)/2},
-  \quad \lambda\in\{1,3,5\},
-  \label{eq:folding}
+\widehat\mu(\lambda)=\beta_0+\beta_1\lambda,
+\qquad \widehat\mu_{\rm ZNE}=\beta_0,
 \end{equation}
-which is ideally equivalent to $U$ while increasing noisy gate exposure. This is a
-standard digital noise-scaling mechanism \cite{giurgica2020}. The fixed total shot
-budget is divided across the three factors. Before the full benchmark, the analysis
-model was fixed as ordinary least squares,
-\begin{equation}
-  \widehat{\mu}(\lambda)=\beta_0+\beta_1\lambda,
-  \qquad \widehat{\mu}_{\mathrm{ZNE}}=\beta_0.
-  \label{eq:zne}
-\end{equation}
-Extrapolates are retained without clipping and flagged when outside $[-1,1]$.
-\subsection{Metrics}
-For completed repeats $r=1,\ldots,R$, let
-$e_r=\widehat{\mu}_r-\mu_{\mathrm{ref}}$. The reported metrics are
-\begin{align}
-  \mathrm{bias} &= R^{-1}\sum_r e_r,\\
-  \mathrm{variance} &= (R-1)^{-1}\sum_r
-  (\widehat{\mu}_r-\overline{\mu})^2,\\
-  \mathrm{RMSE} &= \sqrt{R^{-1}\sum_r e_r^2}.
-  \label{eq:metrics}
-\end{align}
-Method-level summaries are repeat-weighted and conditional on completion. The
-operating-regime winner is defined only where all three methods have 50 completed
-repeats, avoiding comparison against a partially failed method.
+without clipping out-of-range extrapolates \cite{giurgica2020}.
+
+\subsection{Cost-aware labels and frozen selector}
+For each fully completed cell, the oracle combines RMSE with an execution-overhead
+penalty. Differences below the preregistered RMSE threshold 0.005 are labeled
+\texttt{practical\_tie}; incomplete three-method comparisons are
+\texttt{inconclusive}. A deterministic hash split reserves at least 20\% of cells.
+The selector is then frozen before holdout outcomes are inspected. It uses only
+width, depth, declared noise regime, shots, calibration conditioning, and ZNE fit
+residuals. It can select raw, readout, or ZNE, or abstain; it never receives the
+statevector reference or oracle label.
+
 \section{Experiment Setup}
-The frozen manifest crosses widths $2,4,6$; declared depths $1,3,6$; four noise
-levels; shot budgets $1{,}024$, $4{,}096$, and $16{,}384$; three methods; and 50
-repeat seeds. GHZ preparation is defined only at depth parameter 1, so depths 3 and
-6 remain in the manifest as \texttt{not\_applicable}. The applicable benchmark
-contains \TotalRows{} repeat-level rows across 36 operating cells and three methods.
+The main grid crosses widths $2,4,6$, hardware-efficient depths $1,3,6$, noise levels
+zero/low/medium/high, shot budgets 1,024/4,096/16,384, three methods, and 50 repeats.
+GHZ depths 3 and 6 remain explicit \texttt{not\_applicable} cells. All seeds derive
+from root seed 20261102. Qiskit Aer supplies ideal statevectors and finite-shot noisy
+simulation \cite{qiskitaer}. The main model combines independent assignment error
+with one- and two-qubit depolarizing channels.
 
-All stochastic seeds derive from root seed 20261102 through SHA-256 namespacing.
-Raw estimation spends all shots on the target. Readout mitigation charges every
-calibration shot to the same total budget. ZNE charges all three folded-circuit
-executions to that budget. The environment is Python 3.12 with Qiskit 2.2.3, Qiskit
-Aer 0.17.2, NumPy 2.3.4, SciPy 1.16.3, and pandas 2.3.3.
+A separate 4,096-shot shift set tests intermediate mixed noise, asymmetric readout,
+coherent over-rotation, and correlated $ZZ$ error. These are controlled synthetic
+stress tests, not calibrated device models. Every manifest row has a raw row with
+status \texttt{complete}, \texttt{failed}, or \texttt{not\_applicable}; no failed
+cell is silently dropped.
 
-Figure~\ref{fig:folding} verifies that folding increases transpiled depth while tests
-establish ideal-unitary equivalence to $10^{-12}$.
-\begin{figure}[t]
-\centering
-\includegraphics[width=\columnwidth]{day08_depth_vs_noise_factor.png}
-\caption{Global folding increases transpiled depth for the tested Bell, GHZ, and
-hardware-efficient circuits while preserving the ideal unitary in tests.}
-\label{fig:folding}
-\end{figure}
 \section{Results}
-\subsection{Aggregate error and operating regimes}
-Figure~\ref{fig:rmse} shows completed-row RMSE by simulated noise. Zero-noise results
-agree with the analytic reference up to floating-point precision. Beyond zero noise,
-readout mitigation has the lowest aggregate RMSE: \ReadoutRMSE{} overall, compared
-with \ZNERMSE{} for linear ZNE and \RawRMSE{} for raw estimation. These aggregates
-do not mean that readout wins every condition.
-\begin{figure}[t]
-\centering
-\includegraphics[width=\columnwidth]{rmse_by_noise.png}
-\caption{Across completed simulated rows, readout mitigation has lower RMSE than raw
-estimation and linear ZNE at low, medium, and high mixed-noise levels.}
-\label{fig:rmse}
-\end{figure}
-\begin{table*}[t]
-\centering
-\caption{Completed-row bias and RMSE depend on method and simulated noise. Readout
-has fewer completed rows at medium and high noise because failed rows have no numeric
-estimate.}
-\label{tab:noise-results}
-\begin{tabular}{llrrr}
-\toprule
-Noise & Method & Completed & Bias & RMSE\\
-\midrule
-\input{generated/noise_method_rows.tex}
-\end{tabular}
-\end{table*}
-
-Figure~\ref{fig:regimes} resolves the aggregate into 36 width--noise--budget
-conditions. Of the \CompleteOperatingCells{} fully completed cells, readout has the
-lowest RMSE in \ReadoutWins{}, raw estimation in \RawWins{}, and linear ZNE in
-\ZNEWins{}. No method dominates the complete operating grid.
-\begin{figure*}[t]
-\centering
-\includegraphics[width=0.93\textwidth]{operating_regime_map.png}
-\caption{The minimum-RMSE method changes with width, noise, and total shots.
-Failed conditions are excluded because readout did not complete all 50 repeats.}
-\label{fig:regimes}
-\end{figure*}
-\subsection{Explicit readout failures}
-The run retains \CompleteRows{} completed and \FailedRows{} failed rows. All failures
-occur for width 6, total budget 1,024, and readout mitigation
-(Table~\ref{tab:failures}). They represent \ReadoutFailureRate{} of the 1,800
-readout rows. With 20\% calibration allocation, 204 shots are divided among 64 basis
-states, leaving three or four samples per calibration column; the sampled assignment
-matrix can be singular or exceed the condition-number threshold. This is a supported
-numerical diagnosis; its hardware relevance remains untested.
+\subsection{Operating regimes}
 \begin{table}[t]
 \centering
-\caption{All failed simulated rows are explicit conditioning failures at the
-smallest budget and largest width.}
-\label{tab:failures}
-\resizebox{\columnwidth}{!}{%
-\begin{tabular}{rrrrrl}
+\caption{Most simulated operating cells are practical ties; a single universal
+mitigation winner is not supported.}
+\label{tab:regimes}
+\begin{tabular}{lr}
 \toprule
-$w$ & Noise & Shots & Method & Count & Status\\
+Cost-aware label & Cells\\
 \midrule
-\input{generated/failure_rows.tex}
-\end{tabular}}
+\input{generated/adaptive_regime_rows.tex}
+\end{tabular}
 \end{table}
-\subsection{ZNE behavior}
-The preregistered three-factor linear fit improves aggregate RMSE over raw estimation
-but wins only \ZNEWins{} complete cells. Only \ZNEOutOfRange{} nontrivial
-extrapolates exceed the Pauli range by more than $10^{-12}$; they remain unclipped.
-Figure~\ref{fig:zne} shows factor estimates and the fit for the first Day 9 validation
-repeat. It illustrates the estimator, not the full performance distribution.
+
+Table~\ref{tab:regimes} shows that practical equivalence dominates the grid.
+Readout and ZNE win distinct subsets, while nine cells are inconclusive because the
+50-repeat completeness contract is not met. Figure~\ref{fig:regimes} shows how
+these labels vary with simulated noise. The map prevents small numerical RMSE
+differences from being presented as scientific method changes.
+
 \begin{figure}[t]
 \centering
-\includegraphics[width=\columnwidth]{day09_zne_extrapolation_lambda-1-3-5.png}
-\caption{The validation artifact preserves all three noisy estimates and the
-preregistered extrapolate instead of reporting only a corrected value.}
-\label{fig:zne}
+\includegraphics[width=\columnwidth]{operating_regime_map_v1.png}
+\caption{Cost-aware labels retain practical ties and incomplete comparisons instead
+of forcing every simulated cell to declare a winner.}
+\label{fig:regimes}
 \end{figure}
+
+Mitigation can also worsen estimation: \NegativeGains{} of \SummaryRows{} method
+summaries have negative RMSE gain relative to raw estimation. Readout produces
+\HardwareFailures{} explicit hardware-efficient failures, concentrated at width 6,
+1,024 shots, and medium/high noise. These failures are part of method performance,
+not missing data.
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=\columnwidth]{overhead_vs_rmse_gain.png}
+\caption{Higher simulated execution overhead does not guarantee positive RMSE gain;
+negative gains remain visible rather than being clipped or filtered.}
+\label{fig:gain}
+\end{figure}
+
+\subsection{Selector holdout and noise shift}
+On \HoldoutCells{} held-out cells, the frozen selector achieves
+\HoldoutCompatibility{} decision compatibility. Mean RMSE regret is
+\HoldoutMeanRegret{} and median regret is \HoldoutMedianRegret{}. Strict label
+agreement is lower because a practical tie can contain several acceptable methods;
+compatibility is therefore the primary decision metric.
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=\columnwidth]{selector_rmse_regret.png}
+\caption{The frozen selector often has small regret but retains substantial positive
+outliers, so the holdout does not validate a generally reliable policy.}
+\label{fig:holdout}
+\end{figure}
+
+Under the four unseen noise shifts, compatibility is \ShiftCompatibility{}, mean
+regret is \ShiftMeanRegret{}, and median regret is \ShiftMedianRegret{}. Negative
+regret can occur because the cost-aware oracle penalizes overhead while the plotted
+quantity is RMSE alone; it is not evidence that the selector beats the oracle's
+declared utility.
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=\columnwidth]{regret_under_noise_shift.png}
+\caption{Noise-model mismatch exposes method-dependent regret and outliers; median
+performance alone would hide these failures.}
+\label{fig:shift}
+\end{figure}
+
+\subsection{Decision reliability}
+Expectation RMSE and decision reliability are distinct. Figure~\ref{fig:decision}
+reports sign-decision error with Wilson uncertainty. A method may reduce continuous
+estimation error without reducing the probability of a wrong downstream decision.
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=\columnwidth]{decision_error_probability.png}
+\caption{Decision-error probability changes by method and synthetic noise shift,
+showing that expectation accuracy is not a sufficient proxy for decision reliability.}
+\label{fig:decision}
+\end{figure}
+
 \section{Conclusion}
-Under the declared simulator model and equal total shot budgets, QEM effectiveness is
-operating-regime dependent. Readout mitigation produced the lowest RMSE most often
-and the lowest aggregate RMSE, but failed when full-matrix calibration was
-undersampled. Linear ZNE improved aggregate RMSE relative to raw estimation yet was
-best in only a minority of complete cells. The evidence supports a selector based on
-width, noise, budget, and method status; it does not support unconditional mitigation.
+No QEM method is uniformly useful under the declared fixed-budget simulator grid.
+Most operating cells are practical ties, some favor readout or ZNE, and low-shot
+readout calibration can fail explicitly. The frozen rule selector is reproducible
+and explainable, but its modest holdout and shift compatibility make it a baseline
+for further study rather than a successful adaptive policy. The strongest supported
+conclusion is operational: mitigation should be compared with raw estimation under
+equal resource accounting, with ties, negative gains, and abstention preserved.
+
 \section{Discussion}
-\subsection{Evidence-supported findings}
-The comparison demonstrates that mitigation overhead must be charged explicitly,
-aggregate performance hides regime changes, and failure status is part of method
-performance. Raw estimation remains preferable in \RawWins{} fully completed cells.
-Omitting the 28 ill-conditioned rows would overstate readout reliability.
-\subsection{Interpretation and hypotheses}
-Readout mitigation likely performs well because its calibration uses the same
-independent assignment channel applied to target measurements. This is an
-interpretation, not evidence that it remains best under correlated readout, drift, or
-device calibration error. Linear ZNE may underperform because a first-order model is
-restrictive and the fixed budget leaves about one third of the shots at each factor.
-The benchmark does not isolate these possible causes.
-\subsection{Limitations}
-All noisy results are Qiskit Aer simulations with idealized, stationary, Markovian
-channels. The study contains no hardware-derived or physical experimental data and
-models no crosstalk, leakage, relaxation, drift, compilation variability, or coherent
-calibration error. The GHZ benchmark uses only $X^{\otimes w}$ and widths up to six;
-the declared depth sweep is not applicable. Full-matrix calibration scales as
-$2^w$. Method-level RMSE is conditional on completion, and the operating map
-contains only 34 complete comparisons. The fixed seed set is not a confidence
-statement about real devices. No learned or optimized selector is evaluated.
+\subsection{Supported findings}
+The data directly support regime dependence, nontrivial execution overhead, explicit
+readout instability, negative mitigation gains, and a gap between estimation RMSE
+and decision reliability. The deterministic holdout also shows that intuitive rules
+do not generalize reliably across the present circuit and noise grid.
+
+\subsection{Hypotheses and limitations}
+Possible causes of selector error include insufficient features, first-order ZNE,
+and the mismatch between synthetic training and shift channels; the experiment does
+not isolate these causes. All noisy values are simulator-derived. There is no IBM or
+other hardware execution, device drift, calibrated crosstalk, leakage, relaxation,
+or non-Markovian noise. Width is limited to six, the hardware-efficient ansatz and
+observables are fixed, and full assignment calibration scales exponentially. The
+same seed family and simulator implementation bound generalization. No ML selector
+is trained, and no post-holdout rule tuning is performed.
+
 \appendix
-\section{Reproducibility and Data Contract}
+\section{Reproducibility}
 \begin{verbatim}
 python -m pytest
-python -m src.generate_artifacts
-python -m src.generate_days08_12
+python -m src.generate_nontrivial_benchmark
+python -m src.generate_adaptive_analysis
 python -m src.generate_paper_assets
 tectonic paper/main.tex --outdir paper
 \end{verbatim}
-Repeat-level observations remain under \texttt{results/raw/}; processed coverage is
-separate. Seeds, statuses, count payloads, and method diagnostics are retained.
-Wall-clock measurements are excluded from scientific raw rows because they are
-nondeterministic and are reported separately.
-\section{Analytic and Test Controls}
-Tests check q0-first bit ordering, seed derivation, Bell and GHZ analytic expectations,
-statevector agreement, folding equivalence, exact shot accounting, calibration
-identity, explicit ill-conditioning, ZNE factors, manifest completeness, and
-deterministic row execution. These validate implementation invariants, not physical
-fidelity of the noise model.
-\balance
+Repeat-level rows remain under \texttt{results/raw}; processed summaries, manifests,
+run metadata, seeds, diagnostics, and execution counts remain separate and auditable.
+Tests check analytic references, statevector agreement, folding equivalence, shot
+accounting, deterministic seeds, manifest coverage, metric recomputation, and the
+holdout boundary.
+
 \bibliographystyle{abbrv}
 \bibliography{references}
 \end{document}
