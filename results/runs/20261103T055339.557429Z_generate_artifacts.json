@@ -1,0 +1,37 @@
+{
+  "run_id": "c3c60ad6-ba3c-4dab-8019-7c1958986c0c",
+  "script": "src.generate_artifacts",
+  "started_at_utc": "2026-11-03T05:53:27.116912Z",
+  "finished_at_utc": "2026-11-03T05:53:39.557429Z",
+  "wall_seconds": 12.487985,
+  "python_version": "3.12.14",
+  "package_versions": {
+    "qiskit": "2.2.3",
+    "qiskit-aer": "0.17.2",
+    "numpy": "2.3.4",
+    "pandas": "2.3.3",
+    "matplotlib": "3.10.7",
+    "scipy": "1.16.3"
+  },
+  "git_commit_before": "2084e2621a087e1a2f6e2dcf04fba5b331c657d6",
+  "git_dirty_before": true,
+  "git_commit_after": "2084e2621a087e1a2f6e2dcf04fba5b331c657d6",
+  "git_dirty_after": true,
+  "host": "TP-1302774-NB",
+  "args": [],
+  "seed_root": 20261102,
+  "output_hashes": {
+    "results/day02_bell_xx_shots-1024_seed-20261102.csv": "39f63e1c09181042f9a06124149699996977a4b3ba5a5ecce10afa977431ae1a",
+    "results/day03_ghz_references_widths-2-4-6.csv": "5666e061c6b749fc83ee17d22f6e4589fa6b967624b8bdbba103ebcec33cae04",
+    "results/day04_he_references_w-2-4-6_d-1-3-6_seed-20261102.csv": "294a6208e5bfcdc47fc2503d241addd0a194eb3daa0feef4847c74a2fa8591c3",
+    "results/day05_noise_response_bell_xx_shots-4096.csv": "890d3b751f563ce92ea6a63801c3dbe8e8b38435af91ae029277410ef87a4648",
+    "results/day06_unmitigated_shots-1024-4096-16384_repeats-30.csv": "eb92d9318678d3a43fc93fd49d4f2b19bc1976dd7d980cf2be8e844f536bc9d6",
+    "results/day07_readout_calibration_budget-4096_repeats-30.csv": "d7379e8a7080ed380ce9a1b3355e0a8cd21f7546a9a14cbb56a2d47930bc4b1f",
+    "results/day07_readout_mitigation_budget-4096_repeats-30.csv": "269e14f3b909ca92ae925bf51513fd255b5dbae2ed604228eb9b87caf9878998",
+    "figures/day02_bell_xx_estimate_distribution.png": "4423163785334df4fb1b88691076d61dd4cbbd48047000eaf6ec76f37c13c91a",
+    "figures/day05_error_vs_noise_by_family.png": "118dab09d3879a09a8a4a4dce2d4d94626d595aa791fd184396bd968ff43ff04",
+    "figures/day07_readout_raw_vs_corrected.png": "d67dcc07b7050d78558067566b9867e2c23c42f5b55f6c7e204adc1feff83d94"
+  },
+  "status": "ok",
+  "error": null
+}

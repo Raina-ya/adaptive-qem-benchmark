@@ -5,7 +5,7 @@ import matplotlib
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 
-from src.verify_generated_artifacts import compare_artifact_trees
+from src.verify_generated_artifacts import GENERATORS, compare_artifact_trees
 
 
 def _write(root: Path, relative: str, content: str | bytes) -> None:
@@ -15,6 +15,10 @@ def _write(root: Path, relative: str, content: str | bytes) -> None:
         path.write_bytes(content)
     else:
         path.write_text(content, encoding="utf-8")
+
+
+def test_comparator_regenerates_phase_0_through_day_7() -> None:
+    assert "src.generate_artifacts" in GENERATORS
 
 
 def test_float_and_json_noise_within_tolerance_passes(tmp_path: Path) -> None:

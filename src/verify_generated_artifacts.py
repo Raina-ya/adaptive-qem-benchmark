@@ -22,6 +22,7 @@ from pypdf import PdfReader
 RTOL = 1e-9
 ATOL = 1e-12
 GENERATORS = (
+    "src.generate_artifacts",
     "src.regenerate_readout_affected",
     "src.generate_audit_manifest",
 )
