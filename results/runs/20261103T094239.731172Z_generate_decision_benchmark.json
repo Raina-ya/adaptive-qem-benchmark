@@ -1,0 +1,26 @@
+{
+  "run_id": "a1fdc947-8f42-4851-83b2-ba3ae27a71fb",
+  "script": "src.generate_decision_benchmark",
+  "started_at_utc": "2026-11-03T09:42:36.149896Z",
+  "finished_at_utc": "2026-11-03T09:42:39.731172Z",
+  "wall_seconds": 3.769018,
+  "python_version": "3.12.14",
+  "package_versions": {
+    "qiskit": "2.2.3",
+    "qiskit-aer": "0.17.2",
+    "numpy": "2.3.4",
+    "pandas": "2.3.3",
+    "matplotlib": "3.10.7",
+    "scipy": "1.16.3"
+  },
+  "git_commit_before": "57c692878cb927a773fe55d65914d3219b4065f9",
+  "git_dirty_before": true,
+  "git_commit_after": "57c692878cb927a773fe55d65914d3219b4065f9",
+  "git_dirty_after": true,
+  "host": "TP-1302774-NB",
+  "args": [],
+  "seed_root": 20261102,
+  "output_hashes": {},
+  "status": "failed",
+  "error": "Traceback (most recent call last):\n  File \"<frozen runpy>\", line 198, in _run_module_as_main\n  File \"<frozen runpy>\", line 88, in _run_code\n  File \"C:\\Users\\wits\\Documents\\Codex\\2026-10-30\\adaptive-qem-benchmark\\src\\generate_decision_benchmark.py\", line 355, in <module>\n    main()\n  File \"C:\\Users\\wits\\Documents\\Codex\\2026-10-30\\adaptive-qem-benchmark\\src\\generate_decision_benchmark.py\", line 344, in main\n    raw = execute_manifest(manifest)\n          ^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"C:\\Users\\wits\\Documents\\Codex\\2026-10-30\\adaptive-qem-benchmark\\src\\generate_decision_benchmark.py\", line 141, in execute_manifest\n    raise RuntimeError(\"Existing decision checkpoint does not match the manifest prefix\")\nRuntimeError: Existing decision checkpoint does not match the manifest prefix"
+}

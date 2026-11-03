@@ -1,0 +1,15 @@
+version: decision_benchmark_v1
+evidence_label: noisy_simulated
+margins: [0.02, 0.05, 0.10, 0.20]
+shot_budgets: [1024, 4096, 16384]
+methods: [raw, readout, zne]
+record_modes: [independent_records, shared_records]
+noise_levels: [zero, low, medium, high]
+width: 2
+depth: 3
+repeats: 100
+practical_tie_fraction_of_exact_margin: 0.5
+maximum_acceptable_decision_error: 0.20
+unresolved_rule: empirical_gap_interval_crosses_zero_or_wilson_upper_exceeds_tolerance
+shared_records_definition: common random-number seeds and identical calibration seeds across candidates
+budget_definition: declared shots cover both candidates and all method-specific overhead
