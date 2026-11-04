@@ -1,0 +1,25 @@
+version: combined_qem_v1
+evidence_label: noisy_simulated
+root_seed: 20261102
+repeats: 50
+total_shot_budgets: [4096, 16384]
+methods: [raw, readout, zne, combined]
+zne_factors: [1, 3, 5]
+readout_calibration_fraction: 0.20
+allocation_policies:
+  balanced: [0.3333333333333333, 0.3333333333333333, 0.3333333333333333]
+  base_heavy: [0.50, 0.30, 0.20]
+combined_order: factor_counts_then_readout_correction_then_expectation_then_linear_zne
+interaction_definition: combined_error_minus_readout_error_minus_zne_error_plus_raw_error
+cells:
+  - {cell_id: readout_dominated, kind: expectation, circuit_id: ghz_w2, noise: high, preregistration_evidence: readout_winner_at_4096}
+  - {cell_id: gate_noise_dominated, kind: expectation, circuit_id: he_w4_d3, noise: medium, preregistration_evidence: zne_winner_at_4096}
+  - {cell_id: practical_tie, kind: expectation, circuit_id: ghz_w2, noise: low, preregistration_evidence: practical_tie_at_4096}
+  - {cell_id: zne_invalid, kind: expectation, circuit_id: he_w2_d3, noise: medium, preregistration_evidence: rejected_by_zne_validity_v1}
+  - {cell_id: decision_near_tie, kind: decision, circuit_id: controlled_margin_002, noise: medium, margin: 0.02, preregistration_evidence: unresolved_at_4096}
+  - {cell_id: decision_larger_margin, kind: decision, circuit_id: controlled_margin_020, noise: medium, margin: 0.20, preregistration_evidence: resolved_at_4096}
+budget_definition: declared shots include every candidate, calibration state, and folded circuit
+control_policy: matched-cost garbage folding is validation-only and excluded from four-method ranking
+validity_policy: combined ZNE cannot be called credible without the frozen C5 gate
+outcome_tuning_forbidden: true
+hardware_execution_authorized: false
