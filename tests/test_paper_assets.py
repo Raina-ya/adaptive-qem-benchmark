@@ -32,3 +32,8 @@ def test_generated_paper_macros_contain_current_selector_results() -> None:
     assert r"\newcommand{\HoldoutCompatibility}{41.4\%}" in text
     assert r"\newcommand{\ShiftCompatibility}{50.0\%}" in text
     assert r"\newcommand{\HardwareFailures}{99}" in text
+    assert r"\newcommand{\ZNEValidityCells}{16}" in text
+    assert r"\newcommand{\ZNECredibleCells}{5}" in text
+    assert r"\newcommand{\ZNERejectedCells}{11}" in text
+    assert r"\newcommand{\ZNEProbabilityRepeats}{800}" in text
+    assert r"\newcommand{\ZNEHardwareCredibleCells}{0}" in text

@@ -35,6 +35,11 @@ def write_metrics() -> None:
     hardware = pd.read_csv(
         ROOT / "results/raw/hardware_efficient_v1_repeats-50.csv"
     )
+    zne_diagnostics = pd.read_csv(
+        ROOT / "results/processed/zne_probability_diagnostics_v1.csv"
+    )
+    zne_validity = pd.read_csv(ROOT / "results/processed/zne_validity_v1.csv")
+    hardware_validity = zne_validity["circuit_id"].str.startswith("hardware_efficient")
     labels = regimes["oracle_label"].value_counts()
     macros = {
         "OperatingCells": int(metrics["operating_cells"]),
@@ -56,6 +61,20 @@ def write_metrics() -> None:
         "HardwareFailures": int((hardware["status"] == "failed").sum()),
         "NegativeGains": int((summaries["rmse_gain_vs_raw"] < 0).sum()),
         "SummaryRows": len(summaries),
+        "ZNEValidityCells": len(zne_validity),
+        "ZNECredibleCells": int((zne_validity["validity_status"] == "credible").sum()),
+        "ZNERejectedCells": int((zne_validity["validity_status"] == "rejected").sum()),
+        "ZNEProbabilityRepeats": len(zne_diagnostics),
+        "ZNEUnstableRepeats": int(
+            (zne_diagnostics["validity_classification"] == "extrapolation_unstable").sum()
+        ),
+        "ZNEDestroyedRepeats": int(
+            (zne_diagnostics["validity_classification"] == "signal_destroyed").sum()
+        ),
+        "ZNEHardwareCells": int(hardware_validity.sum()),
+        "ZNEHardwareCredibleCells": int(
+            (hardware_validity & (zne_validity["validity_status"] == "credible")).sum()
+        ),
     }
     text = "\n".join(
         f"\\newcommand{{\\{name}}}{{{value}}}" for name, value in macros.items()
@@ -132,6 +151,8 @@ def copy_repository_figures() -> None:
         "selector_rmse_regret.png",
         "regret_under_noise_shift.png",
         "decision_error_probability.png",
+        "zne_genuine_vs_garbage_folding.png",
+        "zne_signal_retention_map.png",
     ):
         shutil.copyfile(ROOT / "figures" / name, FIGURES / name)
 

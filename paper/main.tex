@@ -8,7 +8,7 @@
 \title{Adaptive Quantum Error Mitigation Under Fixed Shot Budgets:\
 Operating Regimes, Abstention, and Noise-Model Shift}
 \author{Zhen-Jun Liu}
-\date{November 3, 2026}
+\date{November 4, 2026}
 
 \begin{document}
 \maketitle
@@ -28,6 +28,9 @@ practical ties, \ReadoutWinners{} readout winners, \ZNEWinners{} ZNE winners, an
 deterministic holdout and \ShiftCompatibility{} under four unseen synthetic noise
 shifts. The benchmark retains \HardwareFailures{} explicit readout failures and
 \NegativeGains{} of \SummaryRows{} method summaries with negative RMSE gain.
+An additional preregistered ZNE validity gate accepts only \ZNECredibleCells{} of
+\ZNEValidityCells{} simulated circuit--noise--budget cells; none of the
+\ZNEHardwareCells{} tested hardware-efficient cells passes every check.
 These simulated results support selective mitigation and abstention as research
 questions, but do not validate a general selector or establish hardware performance.
 \end{abstract}
@@ -39,9 +42,10 @@ circuits and statistical amplification consume finite resources
 therefore manufacture an apparent advantage. Even under a fixed budget, the best
 method can change with circuit structure, observable, noise, and sampling regime.
 
-This work asks three questions: when does mitigation improve RMSE at fixed total
+This work asks four questions: when does mitigation improve RMSE at fixed total
 shots, when are methods practically indistinguishable, and can a simple selector
-choose safely without access to the exact reference? The contribution is a
+choose safely without access to the exact reference, and when is an apparent ZNE
+improvement credible rather than an extrapolation artifact? The contribution is a
 reproducible simulator benchmark with repeat-level data, explicit execution ledgers,
 cost-aware labels, abstention rules, and evaluation under noise-model mismatch. It is
 not a proposal for new QEM theory or a claim of quantum-hardware advantage.
@@ -88,6 +92,16 @@ budget over global folds $\lambda\in\{1,3,5\}$ and uses the preregistered fit
 \qquad \widehat\mu_{\rm ZNE}=\beta_0,
 \end{equation}
 without clipping out-of-range extrapolates \cite{giurgica2020}.
+
+\subsection{ZNE validity and falsification}
+An extrapolate is not treated as credible merely because it moves toward the exact
+reference. A preregistered gate additionally requires retained signal at the largest
+fold, physical expectation and signed-probability diagnostics, positive paired gain
+with uncertainty, a positive advantage over matched-cost garbage folding, and no
+excess of destroyed or unstable repeats. Garbage folding increases execution cost
+without implementing the intended unitary-equivalent noise scaling and therefore
+serves only as a negative control. The gate uses 50 deterministic repeats per cell;
+rejected cells retain every failed criterion and are never converted into ZNE wins.
 
 \subsection{Cost-aware labels and frozen selector}
 For each fully completed cell, the oracle combines RMSE with an execution-overhead
@@ -156,6 +170,35 @@ negative gains remain visible rather than being clipped or filtered.}
 \label{fig:gain}
 \end{figure}
 
+\subsection{ZNE validity under negative controls}
+The probability-level diagnostic contains \ZNEProbabilityRepeats{} simulated
+repeat records across \ZNEValidityCells{} preregistered cells. Of these,
+\ZNEUnstableRepeats{} repeats are classified as extrapolation-unstable and
+\ZNEDestroyedRepeats{} as signal-destroyed. The cell-level validity gate accepts
+\ZNECredibleCells{} cells and rejects \ZNERejectedCells{}. All
+\ZNEHardwareCells{} hardware-efficient cells are rejected; their apparent
+corrections do not survive the combined gain-uncertainty and trend requirements.
+The five accepted cells are Bell-state conditions, so this result narrows rather
+than broadens the evidence for linear ZNE.
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=\columnwidth]{zne_genuine_vs_garbage_folding.png}
+\caption{Matched-cost garbage folding separates an apparent correction from a
+unitary-equivalent ZNE effect; only cells passing the full preregistered gate are
+reported as credible.}
+\label{fig:zne-control}
+\end{figure}
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=\columnwidth]{zne_signal_retention_map.png}
+\caption{Signal retention and extrapolation stability vary by simulated circuit,
+noise, and budget; the hardware-efficient cells fail the combined validity gate
+despite some favorable individual diagnostics.}
+\label{fig:zne-retention}
+\end{figure}
+
 \subsection{Selector holdout and noise shift}
 On \HoldoutCells{} held-out cells, the frozen selector achieves
 \HoldoutCompatibility{} decision compatibility. Mean RMSE regret is
@@ -205,21 +248,28 @@ readout calibration can fail explicitly. The frozen rule selector is reproducibl
 and explainable, but its modest holdout and shift compatibility make it a baseline
 for further study rather than a successful adaptive policy. The strongest supported
 conclusion is operational: mitigation should be compared with raw estimation under
-equal resource accounting, with ties, negative gains, and abstention preserved.
+equal resource accounting, with ties, negative gains, abstention, and failed ZNE
+validity checks preserved. In this benchmark, apparent extrapolation gains are more
+common than gains that survive the full falsification gate.
 
 \section{Discussion}
 \subsection{Supported findings}
 The data directly support regime dependence, nontrivial execution overhead, explicit
 readout instability, negative mitigation gains, and a gap between estimation RMSE
 and decision reliability. The deterministic holdout also shows that intuitive rules
-do not generalize reliably across the present circuit and noise grid.
+do not generalize reliably across the present circuit and noise grid. The ZNE
+negative control further shows that improvement toward a reference is insufficient
+evidence unless signal retention, physicality, uncertainty, and a matched-cost
+control agree.
 
 \subsection{Hypotheses and limitations}
 Possible causes of selector error include insufficient features, first-order ZNE,
 and the mismatch between synthetic training and shift channels; the experiment does
-not isolate these causes. All noisy values are simulator-derived. There is no IBM or
-other hardware execution, device drift, calibrated crosstalk, leakage, relaxation,
-or non-Markovian noise. Width is limited to six, the hardware-efficient ansatz and
+not isolate these causes. The validity gate is conditional on its frozen thresholds,
+linear fit, chosen folds, and maximally mixed observable-floor model; it does not
+establish a general theorem about ZNE. All noisy values are simulator-derived. There
+is no IBM or other hardware execution, device drift, calibrated crosstalk, leakage,
+relaxation, or non-Markovian noise. Width is limited to six, the hardware-efficient ansatz and
 observables are fixed, and full assignment calibration scales exponentially. The
 same seed family and simulator implementation bound generalization. No ML selector
 is trained, and no post-holdout rule tuning is performed.
@@ -228,8 +278,7 @@ is trained, and no post-holdout rule tuning is performed.
 \section{Reproducibility}
 \begin{verbatim}
 python -m pytest
-python -m src.generate_nontrivial_benchmark
-python -m src.generate_adaptive_analysis
+python -m src.verify_generated_artifacts
 python -m src.generate_paper_assets
 tectonic paper/main.tex --outdir paper
 \end{verbatim}
