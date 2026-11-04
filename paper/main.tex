@@ -31,6 +31,11 @@ shifts. The benchmark retains \HardwareFailures{} explicit readout failures and
 An additional preregistered ZNE validity gate accepts only \ZNECredibleCells{} of
 \ZNEValidityCells{} simulated circuit--noise--budget cells; none of the
 \ZNEHardwareCells{} tested hardware-efficient cells passes every check.
+In a separate factorial study, combined readout mitigation and ZNE has the lowest
+expectation RMSE in \CombinedExpectationWins{} of \CombinedExpectationCells{}
+preregistered conditions, yet all \CombinedValidityCells{} combined-ZNE conditions
+fail at least one frozen validity criterion. Its near-tie decision-error probability
+remains between \CombinedNearTieMinimum{} and \CombinedNearTieMaximum{}.
 These simulated results support selective mitigation and abstention as research
 questions, but do not validate a general selector or establish hardware performance.
 \end{abstract}
@@ -42,10 +47,10 @@ circuits and statistical amplification consume finite resources
 therefore manufacture an apparent advantage. Even under a fixed budget, the best
 method can change with circuit structure, observable, noise, and sampling regime.
 
-This work asks four questions: when does mitigation improve RMSE at fixed total
-shots, when are methods practically indistinguishable, and can a simple selector
-choose safely without access to the exact reference, and when is an apparent ZNE
-improvement credible rather than an extrapolation artifact? The contribution is a
+This work asks when mitigation improves RMSE at fixed total shots, when methods are
+practically indistinguishable, whether a simple selector can choose safely without
+the exact reference, when apparent ZNE improvement is credible, and whether readout
+correction and ZNE cooperate under one resource ledger. The contribution is a
 reproducible simulator benchmark with repeat-level data, explicit execution ledgers,
 cost-aware labels, abstention rules, and evaluation under noise-model mismatch. It is
 not a proposal for new QEM theory or a claim of quantum-hardware advantage.
@@ -93,6 +98,21 @@ budget over global folds $\lambda\in\{1,3,5\}$ and uses the preregistered fit
 \end{equation}
 without clipping out-of-range extrapolates \cite{giurgica2020}.
 
+\subsection{Combined mitigation and factorial interaction}
+The combined estimator calibrates one full assignment matrix per repeat, corrects
+the probability distribution at each fold, converts each corrected distribution to
+an expectation, and then applies the same linear extrapolation. It reserves 20\% of
+the total budget for calibration. The remaining shots are either divided equally
+across folds (balanced) or allocated 50\%/30\%/20\% to $\lambda=1,3,5$
+(base-heavy). Intermediate counts, corrected estimates, extrapolates, and every
+calibration and folded execution remain in the repeat-level ledger. For paired
+absolute errors $E$, the factorial interaction is
+\begin{equation}
+I=E_{\rm combined}-E_{\rm readout}-E_{\rm ZNE}+E_{\rm raw}.
+\end{equation}
+Negative $I$ indicates that the joint error is below the additive single-method
+contrast; it does not by itself establish a credible extrapolation mechanism.
+
 \subsection{ZNE validity and falsification}
 An extrapolate is not treated as credible merely because it moves toward the exact
 reference. A preregistered gate additionally requires retained signal at the largest
@@ -126,6 +146,13 @@ coherent over-rotation, and correlated $ZZ$ error. These are controlled syntheti
 stress tests, not calibrated device models. Every manifest row has a raw row with
 status \texttt{complete}, \texttt{failed}, or \texttt{not\_applicable}; no failed
 cell is silently dropped.
+
+The combined study preregisters six diagnostic cells: readout-dominated,
+gate-noise-dominated, practical-tie, ZNE-invalid, 0.02-margin decision, and
+0.20-margin decision conditions. It crosses budgets 4,096 and 16,384, both frozen
+allocation policies, four factorial methods, and 50 paired repeats. Matched-cost
+garbage folding is used only by the validity gate and is excluded from method
+ranking.
 
 \section{Results}
 \subsection{Operating regimes}
@@ -199,6 +226,40 @@ despite some favorable individual diagnostics.}
 \label{fig:zne-retention}
 \end{figure}
 
+\subsection{Combined QEM under one budget}
+Combined mitigation has the lowest expectation RMSE in
+\CombinedExpectationWins{} of \CombinedExpectationCells{} preregistered
+circuit--budget--allocation conditions. This descriptive win count is insufficient
+for a mechanism claim: combined RMSE gain versus raw ranges from negative to
+positive, and additional execution burden does not guarantee improvement
+(Fig.~\ref{fig:combined-gain}).
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=\columnwidth]{combined_overhead_vs_gain.png}
+\caption{Combined readout correction and ZNE often lowers simulated expectation
+RMSE, but some conditions remain worse than raw despite greater execution overhead.}
+\label{fig:combined-gain}
+\end{figure}
+
+Exactly \CombinedNegativeInteractions{} of \CombinedInteractionCells{} paired
+factorial contrasts are negative; the remainder are positive. Their uncertainty
+intervals frequently overlap zero (Fig.~\ref{fig:combined-interaction}), so the data
+do not support a uniform cooperative or antagonistic interaction. More decisively,
+all \CombinedValidityRejected{} of \CombinedValidityCells{} combined-ZNE conditions
+are rejected by at least one frozen signal, physicality, uncertainty, trend, or
+garbage-control requirement. The RMSE improvements therefore remain simulated
+estimator outcomes rather than validated ZNE effects.
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=\columnwidth]{combined_interaction_effect.png}
+\caption{Paired factorial interactions change sign across preregistered cells,
+budgets, and allocations; many intervals cross zero, rejecting a universal synergy
+claim.}
+\label{fig:combined-interaction}
+\end{figure}
+
 \subsection{Selector holdout and noise shift}
 On \HoldoutCells{} held-out cells, the frozen selector achieves
 \HoldoutCompatibility{} decision compatibility. Mean RMSE regret is
@@ -241,6 +302,21 @@ showing that expectation accuracy is not a sufficient proxy for decision reliabi
 \label{fig:decision}
 \end{figure}
 
+The controlled combined-QEM decision study sharpens this separation. At margin
+0.02, combined decision-error probability ranges from
+\CombinedNearTieMinimum{} to \CombinedNearTieMaximum{} across budgets and
+allocations and does not consistently beat readout alone. At margin 0.20, nearly all
+methods resolve the decision. Combined mitigation can therefore improve an
+expectation estimate while leaving a resource-constrained near-tie unresolved.
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=\columnwidth]{combined_decision_error.png}
+\caption{The larger decision margin is resolved, whereas the 0.02 near-tie retains
+substantial Wilson-bounded error and no consistent combined-QEM advantage.}
+\label{fig:combined-decision}
+\end{figure}
+
 \section{Conclusion}
 No QEM method is uniformly useful under the declared fixed-budget simulator grid.
 Most operating cells are practical ties, some favor readout or ZNE, and low-shot
@@ -250,7 +326,10 @@ for further study rather than a successful adaptive policy. The strongest suppor
 conclusion is operational: mitigation should be compared with raw estimation under
 equal resource accounting, with ties, negative gains, abstention, and failed ZNE
 validity checks preserved. In this benchmark, apparent extrapolation gains are more
-common than gains that survive the full falsification gate.
+common than gains that survive the full falsification gate. Combining readout
+correction with ZNE improves RMSE in selected simulated conditions, but neither its
+factorial interaction nor its downstream decision error supports a universal synergy
+claim, and no combined condition passes the frozen validity gate.
 
 \section{Discussion}
 \subsection{Supported findings}
@@ -260,7 +339,9 @@ and decision reliability. The deterministic holdout also shows that intuitive ru
 do not generalize reliably across the present circuit and noise grid. The ZNE
 negative control further shows that improvement toward a reference is insufficient
 evidence unless signal retention, physicality, uncertainty, and a matched-cost
-control agree.
+control agree. The combined experiment further supports a separation between
+estimator performance and mechanism validity: lower RMSE can coexist with rejected
+ZNE diagnostics and unresolved near-tie decisions.
 
 \subsection{Hypotheses and limitations}
 Possible causes of selector error include insufficient features, first-order ZNE,
@@ -272,7 +353,10 @@ is no IBM or other hardware execution, device drift, calibrated crosstalk, leaka
 relaxation, or non-Markovian noise. Width is limited to six, the hardware-efficient ansatz and
 observables are fixed, and full assignment calibration scales exponentially. The
 same seed family and simulator implementation bound generalization. No ML selector
-is trained, and no post-holdout rule tuning is performed.
+is trained, and no post-holdout rule tuning is performed. The combined study covers
+only six preregistered cells, two budgets, and two allocation policies; it does not
+compare extrapolate-then-correct ordering or establish that readout and gate errors
+are separable on hardware.
 
 \appendix
 \section{Reproducibility}

@@ -37,3 +37,9 @@ def test_generated_paper_macros_contain_current_selector_results() -> None:
     assert r"\newcommand{\ZNERejectedCells}{11}" in text
     assert r"\newcommand{\ZNEProbabilityRepeats}{800}" in text
     assert r"\newcommand{\ZNEHardwareCredibleCells}{0}" in text
+    assert r"\newcommand{\CombinedExpectationCells}{16}" in text
+    assert r"\newcommand{\CombinedExpectationWins}{12}" in text
+    assert r"\newcommand{\CombinedValidityRejected}{16}" in text
+    assert r"\newcommand{\CombinedNegativeInteractions}{12}" in text
+    assert r"\newcommand{\CombinedNearTieMinimum}{0.26}" in text
+    assert r"\newcommand{\CombinedNearTieMaximum}{0.48}" in text

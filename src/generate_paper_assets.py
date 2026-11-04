@@ -39,6 +39,31 @@ def write_metrics() -> None:
         ROOT / "results/processed/zne_probability_diagnostics_v1.csv"
     )
     zne_validity = pd.read_csv(ROOT / "results/processed/zne_validity_v1.csv")
+    combined_summary = pd.read_csv(
+        ROOT / "results/processed/combined_qem_summary_v1.csv"
+    )
+    combined_interactions = pd.read_csv(
+        ROOT / "results/processed/combined_qem_interactions_v1.csv"
+    )
+    combined_validity = pd.read_csv(
+        ROOT / "results/processed/combined_qem_validity_v1.csv"
+    )
+    combined_expectation = combined_summary.loc[
+        combined_summary["kind"] == "expectation"
+    ]
+    combined_winners = combined_expectation.loc[
+        combined_expectation.groupby(
+            ["cell_id", "total_shot_budget", "allocation_policy"]
+        )["rmse"].idxmin()
+    ]
+    combined_decisions = combined_summary.loc[
+        (combined_summary["kind"] == "decision")
+        & (combined_summary["method"] == "combined")
+    ]
+    combined_near_tie = combined_decisions.loc[
+        combined_decisions["cell_id"] == "decision_near_tie",
+        "decision_error_probability",
+    ]
     hardware_validity = zne_validity["circuit_id"].str.startswith("hardware_efficient")
     labels = regimes["oracle_label"].value_counts()
     macros = {
@@ -75,6 +100,18 @@ def write_metrics() -> None:
         "ZNEHardwareCredibleCells": int(
             (hardware_validity & (zne_validity["validity_status"] == "credible")).sum()
         ),
+        "CombinedExpectationCells": len(combined_winners),
+        "CombinedExpectationWins": int((combined_winners["method"] == "combined").sum()),
+        "CombinedValidityCells": len(combined_validity),
+        "CombinedValidityRejected": int(
+            (combined_validity["validity_status"] == "rejected").sum()
+        ),
+        "CombinedNegativeInteractions": int(
+            (combined_interactions["interaction_mean"] < 0).sum()
+        ),
+        "CombinedInteractionCells": len(combined_interactions),
+        "CombinedNearTieMinimum": f"{combined_near_tie.min():.2f}",
+        "CombinedNearTieMaximum": f"{combined_near_tie.max():.2f}",
     }
     text = "\n".join(
         f"\\newcommand{{\\{name}}}{{{value}}}" for name, value in macros.items()
@@ -153,6 +190,9 @@ def copy_repository_figures() -> None:
         "decision_error_probability.png",
         "zne_genuine_vs_garbage_folding.png",
         "zne_signal_retention_map.png",
+        "combined_overhead_vs_gain.png",
+        "combined_interaction_effect.png",
+        "combined_decision_error.png",
     ):
         shutil.copyfile(ROOT / "figures" / name, FIGURES / name)
 
