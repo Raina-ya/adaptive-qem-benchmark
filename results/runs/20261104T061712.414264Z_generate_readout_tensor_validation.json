@@ -1,0 +1,30 @@
+{
+  "run_id": "92ddadbd-9546-4218-a577-9c9c78c90c59",
+  "script": "src.generate_readout_tensor_validation",
+  "started_at_utc": "2026-11-04T06:15:45.711746Z",
+  "finished_at_utc": "2026-11-04T06:17:12.414264Z",
+  "wall_seconds": 87.098404,
+  "python_version": "3.12.14",
+  "package_versions": {
+    "qiskit": "2.2.3",
+    "qiskit-aer": "0.17.2",
+    "numpy": "2.3.4",
+    "pandas": "2.3.3",
+    "matplotlib": "3.10.7",
+    "scipy": "1.16.3"
+  },
+  "git_commit_before": "116dd4f3dd2715f54940c7985bdd91e5bb6d4408",
+  "git_dirty_before": true,
+  "git_commit_after": "116dd4f3dd2715f54940c7985bdd91e5bb6d4408",
+  "git_dirty_after": true,
+  "host": "TP-1302774-NB",
+  "args": [],
+  "seed_root": 20261102,
+  "output_hashes": {
+    "results/processed/readout_tensor_validation_summary_v1.csv": "a2eb496b412f2fe5013a13f80dde33619a9b028dce6033fc57ae5c05a70f2c9a",
+    "results/raw/readout_tensor_validation_v1.csv": "4690c0506237cc5c2fa1ba5376261cc95cb20f3f1d67bd82f749d6cf62509489",
+    "figures/readout_tensor_vs_full.png": "b5be62cb8765b654144b3766105347a0372240a1ff8d888df60fc53cf47f72cb"
+  },
+  "status": "ok",
+  "error": null
+}

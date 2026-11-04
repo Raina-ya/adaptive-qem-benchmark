@@ -82,6 +82,7 @@ $env:MPLCONFIGDIR = ".matplotlib-cache"
 .\.venv\Scripts\python.exe -m src.run_with_log src.generate_zne_validity_gate
 .\.venv\Scripts\python.exe -m src.run_with_log src.generate_combined_qem
 .\.venv\Scripts\python.exe -m src.run_with_log src.readout_scalability_metrics
+.\.venv\Scripts\python.exe -m src.run_with_log src.generate_readout_tensor_validation
 tectonic paper/main.tex --outdir paper
 ```
 
@@ -116,10 +117,13 @@ Full-matrix calibration scales exponentially with width. Aggregate metrics are
 conditional on completed rows, while operating-cell labels require all methods to
 complete all 50 repeats.
 
-The scalable-readout track currently contains only its frozen width-2--12 protocol,
-analytic resource estimates, and width-2/4 full-matrix feasibility references. It
-does not yet contain tensor-product, observed-subspace, matrix-free, or correlated
-mismatch benchmark outcomes.
+The scalable-readout track contains a frozen width-2--12 protocol, analytic resource
+estimates, width-2/4 full-matrix feasibility references, and a 20-repeat tensor-product
+validation at widths 2, 4, and 6. Under independent and asymmetric per-qubit readout
+models, tensor correction had lower RMSE in 19 of 24 fixed-budget cells while using
+`2*w` rather than `2**w` calibration circuits. This validates the implementation in
+its assumed model; it is not evidence of robustness to correlated readout. Observed-
+subspace, matrix-free, and correlated-mismatch outcomes are not yet available.
 
 ## Repository structure
 

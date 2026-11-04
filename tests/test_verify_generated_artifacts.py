@@ -28,6 +28,7 @@ def test_comparator_regenerates_adaptive_extension() -> None:
     assert "src.generate_zne_falsification" in GENERATORS
     assert "src.generate_zne_validity_gate" in GENERATORS
     assert "src.readout_scalability_metrics" in GENERATORS
+    assert "src.generate_readout_tensor_validation" in GENERATORS
 
 
 def test_float_and_json_noise_within_tolerance_passes(tmp_path: Path) -> None:
