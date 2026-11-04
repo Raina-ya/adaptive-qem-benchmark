@@ -1,0 +1,29 @@
+{
+  "run_id": "bac84a64-de4e-4dd7-84f2-c8ae8614e9f9",
+  "script": "src.generate_zne_validity_gate",
+  "started_at_utc": "2026-11-04T01:21:45.762092Z",
+  "finished_at_utc": "2026-11-04T01:21:47.569850Z",
+  "wall_seconds": 2.025566,
+  "python_version": "3.12.14",
+  "package_versions": {
+    "qiskit": "2.2.3",
+    "qiskit-aer": "0.17.2",
+    "numpy": "2.3.4",
+    "pandas": "2.3.3",
+    "matplotlib": "3.10.7",
+    "scipy": "1.16.3"
+  },
+  "git_commit_before": "b0fcb077011ceffe4bc4f38b260371aad0ead06f",
+  "git_dirty_before": true,
+  "git_commit_after": "b0fcb077011ceffe4bc4f38b260371aad0ead06f",
+  "git_dirty_after": true,
+  "host": "TP-1302774-NB",
+  "args": [],
+  "seed_root": 20261102,
+  "output_hashes": {
+    "results/processed/zne_validity_v1.csv": "9a622c868cad4597b439acce285652c6021ff554c2fb021da3cbe3770c3a4540",
+    "figures/zne_signal_retention_map.png": "3d7a3084555a33d4e0dd8ff36c4d80582a1fc51422729dd3add1e9548ab388e2"
+  },
+  "status": "ok",
+  "error": null
+}

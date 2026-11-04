@@ -1,0 +1,12 @@
+version: zne_falsification_v1
+evidence_label: noisy_simulated
+circuits: [bell_xx, hardware_efficient_w2_d3_xz]
+noise_levels: [zero, low, medium, high]
+shot_budgets: [4096, 16384]
+methods: [raw, genuine_folding, garbage_folding]
+noise_factors: [1, 3, 5]
+repeats: 50
+garbage_definition: original_U_followed_by_lambda_minus_one_inverse_U_copies
+matched_cost: equal_total_shots_equal_factor_split_equal_full_circuit_copy_count
+selection_policy: negative_control_only_never_a_mitigation_candidate
+probability_policy: preserve_signed_distribution_without_clipping_or_renormalization

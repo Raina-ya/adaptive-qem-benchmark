@@ -1,0 +1,29 @@
+{
+  "run_id": "f5b044a1-50e9-4b22-abe2-06c1c32701c4",
+  "script": "src.generate_zne_falsification",
+  "started_at_utc": "2026-11-04T01:11:38.459368Z",
+  "finished_at_utc": "2026-11-04T01:16:43.191957Z",
+  "wall_seconds": 305.057134,
+  "python_version": "3.12.14",
+  "package_versions": {
+    "qiskit": "2.2.3",
+    "qiskit-aer": "0.17.2",
+    "numpy": "2.3.4",
+    "pandas": "2.3.3",
+    "matplotlib": "3.10.7",
+    "scipy": "1.16.3"
+  },
+  "git_commit_before": "b0fcb077011ceffe4bc4f38b260371aad0ead06f",
+  "git_dirty_before": true,
+  "git_commit_after": "b0fcb077011ceffe4bc4f38b260371aad0ead06f",
+  "git_dirty_after": true,
+  "host": "TP-1302774-NB",
+  "args": [],
+  "seed_root": 20261102,
+  "output_hashes": {
+    "results/raw/zne_falsification_v1.csv": "0613df9f53fd8645cc8ddecf62de2e14f9e4e16c16461398088c664d92f1a2c2",
+    "figures/zne_genuine_vs_garbage_folding.png": "63cd245578c5a079e90f693070fcd41a8db27ec1d13357b02b854c763e993d38"
+  },
+  "status": "ok",
+  "error": null
+}
