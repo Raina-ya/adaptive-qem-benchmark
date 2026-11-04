@@ -29,6 +29,7 @@ GENERATORS = (
     "src.generate_zne_probability_diagnostics",
     "src.generate_zne_falsification",
     "src.generate_zne_validity_gate",
+    "src.readout_scalability_metrics",
     "src.generate_audit_manifest",
 )
 ARTIFACT_ROOTS = (

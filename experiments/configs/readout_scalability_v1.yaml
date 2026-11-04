@@ -1,0 +1,28 @@
+version: readout_scalability_v1
+evidence_label: noisy_simulated
+root_seed: 20261102
+widths: [2, 4, 6, 8, 10, 12]
+distributions: [sparse, broad]
+readout_models: [independent, asymmetric, pair_correlated, calibration_mismatch]
+methods: [full_matrix, tensor_product, observed_subspace, matrix_free_subspace]
+shot_budgets: [4096, 16384]
+repeats:
+  widths_2_4_6: 50
+  widths_8_10_12_pilot: 10
+small_width_exact_reference: [2, 4]
+resource_model:
+  assignment_dimension: 2**width
+  dense_entries: 4**width
+  dense_float_bytes: 8
+  full_calibration_circuits: 2**width
+  tensor_calibration_circuits: 2*width
+full_matrix_gates:
+  maximum_dense_bytes: 536870912
+  maximum_calibration_circuits: 1024
+  maximum_solve_dimension: 256
+statuses: [planned, not_applicable, resource_limited]
+support_selection_may_use_exact_reference: false
+memory_and_shot_cost_reported_separately: true
+approximation_and_sampling_error_reported_separately: true
+hardware_execution_authorized: false
+outcome_tuning_forbidden: true

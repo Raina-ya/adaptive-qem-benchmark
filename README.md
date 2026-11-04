@@ -81,6 +81,7 @@ $env:MPLCONFIGDIR = ".matplotlib-cache"
 .\.venv\Scripts\python.exe -m src.run_with_log src.generate_zne_falsification
 .\.venv\Scripts\python.exe -m src.run_with_log src.generate_zne_validity_gate
 .\.venv\Scripts\python.exe -m src.run_with_log src.generate_combined_qem
+.\.venv\Scripts\python.exe -m src.run_with_log src.readout_scalability_metrics
 tectonic paper/main.tex --outdir paper
 ```
 
@@ -114,6 +115,11 @@ controls, but these remain synthetic models. Declared GHZ depths 3 and 6 remain
 Full-matrix calibration scales exponentially with width. Aggregate metrics are
 conditional on completed rows, while operating-cell labels require all methods to
 complete all 50 repeats.
+
+The scalable-readout track currently contains only its frozen width-2--12 protocol,
+analytic resource estimates, and width-2/4 full-matrix feasibility references. It
+does not yet contain tensor-product, observed-subspace, matrix-free, or correlated
+mismatch benchmark outcomes.
 
 ## Repository structure
 

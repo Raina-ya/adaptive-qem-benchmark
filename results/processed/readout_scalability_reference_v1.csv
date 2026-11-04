@@ -1,0 +1,5 @@
+width,distribution,method,input_kind,condition_estimate,maximum_absolute_probability_error,status,result_label
+2,sparse,full_matrix,analytic_probability_vector,1.2292060491493384,5.5511151231257827e-17,ok,analytic
+2,broad,full_matrix,analytic_probability_vector,1.2292060491493384,5.5511151231257827e-17,ok,analytic
+4,sparse,full_matrix,analytic_probability_vector,1.5109475112653263,0,ok,analytic
+4,broad,full_matrix,analytic_probability_vector,1.5109475112653263,5.5511151231257827e-17,ok,analytic
