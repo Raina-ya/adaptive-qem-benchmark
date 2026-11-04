@@ -58,7 +58,8 @@ python -m venv .venv
 $env:MPLBACKEND = "Agg"
 $env:MPLCONFIGDIR = ".matplotlib-cache"
 
-.\.venv\Scripts\python.exe -m pytest
+.\.venv\Scripts\python.exe -m coverage run -m pytest
+.\.venv\Scripts\python.exe -m coverage report
 .\.venv\Scripts\python.exe -m src.run_with_log src.generate_artifacts
 .\.venv\Scripts\python.exe -m src.run_with_log src.regenerate_readout_affected
 .\.venv\Scripts\python.exe -m src.run_with_log src.generate_paper_assets
@@ -66,6 +67,9 @@ $env:MPLCONFIGDIR = ".matplotlib-cache"
 .\.venv\Scripts\python.exe -m src.run_with_log src.generate_audit_manifest
 .\.venv\Scripts\python.exe -m src.run_with_log src.generate_nontrivial_benchmark
 .\.venv\Scripts\python.exe -m src.run_with_log src.generate_adaptive_analysis
+.\.venv\Scripts\python.exe -m src.run_with_log src.generate_zne_probability_diagnostics
+.\.venv\Scripts\python.exe -m src.run_with_log src.generate_zne_falsification
+.\.venv\Scripts\python.exe -m src.run_with_log src.generate_zne_validity_gate
 tectonic paper/main.tex --outdir paper
 ```
 

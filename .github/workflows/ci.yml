@@ -26,8 +26,10 @@ jobs:
           pip install --only-binary=:all: -r requirements-ci.txt
       - name: Lint project sources
         run: python -m ruff check src tests
-      - name: Run tests
-        run: python -m pytest
+      - name: Run tests with branch coverage
+        run: |
+          python -m coverage run -m pytest
+          python -m coverage report
       - name: Regenerate and verify deterministic artifacts
         env:
           MPLBACKEND: Agg

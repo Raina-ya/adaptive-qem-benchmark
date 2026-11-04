@@ -24,6 +24,9 @@ def test_comparator_regenerates_phase_0_through_day_7() -> None:
 def test_comparator_regenerates_adaptive_extension() -> None:
     assert "src.generate_nontrivial_benchmark" in GENERATORS
     assert "src.generate_adaptive_analysis" in GENERATORS
+    assert "src.generate_zne_probability_diagnostics" in GENERATORS
+    assert "src.generate_zne_falsification" in GENERATORS
+    assert "src.generate_zne_validity_gate" in GENERATORS
 
 
 def test_float_and_json_noise_within_tolerance_passes(tmp_path: Path) -> None:

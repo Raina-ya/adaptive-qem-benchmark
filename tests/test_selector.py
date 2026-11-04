@@ -1,4 +1,5 @@
 import pandas as pd
+import pytest
 
 from src.regime_map import assign_holdout, build_regime_labels
 from src.selector import select_qem_method
@@ -22,6 +23,33 @@ def test_selector_signature_has_no_exact_reference() -> None:
     import inspect
 
     assert "reference" not in inspect.signature(select_qem_method).parameters
+
+
+@pytest.mark.parametrize(
+    ("overrides", "expected"),
+    [
+        ({"fit_residual": 0.04}, "abstain"),
+        ({"noise": "zero"}, "raw"),
+        ({"shots": 1024, "width": 6}, "raw"),
+        ({"noise": "medium", "condition_number": 2.0}, "readout"),
+        ({"noise": "high", "depth": 3, "fit_residual": 0.005}, "zne"),
+        ({"gate_count": 101, "shots": 2048}, "inconclusive"),
+        ({}, "raw"),
+    ],
+)
+def test_selector_frozen_rule_branches(overrides: dict[str, object], expected: str) -> None:
+    inputs: dict[str, object] = {
+        "noise": "unknown",
+        "shots": 4096,
+        "width": 4,
+        "depth": 1,
+        "gate_count": 40,
+        "condition_number": None,
+        "fit_residual": None,
+    }
+    inputs.update(overrides)
+
+    assert select_qem_method(**inputs).method == expected
 
 
 def test_holdout_and_labels_allow_nonwinner_outcomes() -> None:

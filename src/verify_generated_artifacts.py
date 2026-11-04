@@ -26,6 +26,9 @@ GENERATORS = (
     "src.regenerate_readout_affected",
     "src.generate_nontrivial_benchmark",
     "src.generate_adaptive_analysis",
+    "src.generate_zne_probability_diagnostics",
+    "src.generate_zne_falsification",
+    "src.generate_zne_validity_gate",
     "src.generate_audit_manifest",
 )
 ARTIFACT_ROOTS = (
