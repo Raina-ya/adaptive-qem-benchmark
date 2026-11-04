@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import json
 import math
 from dataclasses import dataclass
 
@@ -26,6 +27,7 @@ VALIDITY_CLASSIFICATIONS = frozenset(
         "inconclusive",
     }
 )
+UNPHYSICAL_MASS_THRESHOLD = 0.05
 
 
 @dataclass(frozen=True)
@@ -43,6 +45,19 @@ class ZNEValidityResult:
     fit_residual: float
     normalized_fit_residual: float
     validity_classification: str
+
+
+@dataclass(frozen=True)
+class ProbabilityExtrapolationDiagnostic:
+    """Unclipped signed-mass diagnostics for extrapolated probabilities."""
+
+    factors: tuple[int, ...]
+    extrapolation_weights: tuple[float, ...]
+    extrapolated_probabilities: tuple[float, ...]
+    negative_mass: float
+    above_one_mass: float
+    normalization_error: float
+    unphysical_mass_flag: bool
 
 
 def _validate_inputs(
@@ -135,4 +150,68 @@ def assess_zne_validity(
         fit_residual=fit_residual,
         normalized_fit_residual=normalized_residual,
         validity_classification=classification,
+    )
+
+
+def linear_intercept_weights(factors: tuple[int, ...]) -> tuple[float, ...]:
+    """Return ordinary-least-squares weights for the intercept at factor zero."""
+
+    if len(factors) < 2 or len(set(factors)) != len(factors):
+        raise ValueError("At least two distinct factors are required")
+    values = np.asarray(factors, dtype=float)
+    if np.any(~np.isfinite(values)):
+        raise ValueError("Factors must be finite")
+    centered = values - values.mean()
+    denominator = float(centered @ centered)
+    weights = 1.0 / len(values) - values.mean() * centered / denominator
+    return tuple(float(value) for value in weights)
+
+
+def probability_vector_from_counts(counts_json: str, width: int) -> np.ndarray:
+    """Convert preserved Qiskit counts to a computational-basis probability vector."""
+
+    if width < 1:
+        raise ValueError("Width must be positive")
+    counts = json.loads(counts_json)
+    if not isinstance(counts, dict) or not counts:
+        raise ValueError("Counts must be a non-empty JSON object")
+    shots = sum(int(value) for value in counts.values())
+    if shots <= 0:
+        raise ValueError("Counts must contain positive total shots")
+    probabilities = np.zeros(2**width, dtype=float)
+    for bitstring, count in counts.items():
+        clean = str(bitstring).replace(" ", "")
+        if len(clean) != width or any(bit not in "01" for bit in clean):
+            raise ValueError("Count keys must match the declared width")
+        probabilities[int(clean, 2)] += int(count) / shots
+    return probabilities
+
+
+def extrapolate_probability_distribution(
+    factors: tuple[int, ...], factor_probabilities: tuple[np.ndarray, ...]
+) -> ProbabilityExtrapolationDiagnostic:
+    """Extrapolate basis probabilities without clipping negative or excess mass."""
+
+    if len(factors) != len(factor_probabilities):
+        raise ValueError("Every factor must have one probability vector")
+    weights = linear_intercept_weights(factors)
+    matrix = np.asarray(factor_probabilities, dtype=float)
+    if matrix.ndim != 2 or matrix.shape[1] == 0:
+        raise ValueError("Factor probabilities must be equal-length vectors")
+    if np.any(~np.isfinite(matrix)) or np.any(matrix < 0.0):
+        raise ValueError("Factor probabilities must be finite and non-negative")
+    if not np.allclose(matrix.sum(axis=1), 1.0, rtol=0.0, atol=1e-12):
+        raise ValueError("Every factor probability vector must sum to one")
+    extrapolated = np.asarray(weights) @ matrix
+    negative_mass = float(np.maximum(-extrapolated, 0.0).sum())
+    above_one_mass = float(np.maximum(extrapolated - 1.0, 0.0).sum())
+    normalization_error = abs(float(extrapolated.sum()) - 1.0)
+    return ProbabilityExtrapolationDiagnostic(
+        factors=factors,
+        extrapolation_weights=weights,
+        extrapolated_probabilities=tuple(float(value) for value in extrapolated),
+        negative_mass=negative_mass,
+        above_one_mass=above_one_mass,
+        normalization_error=normalization_error,
+        unphysical_mass_flag=(negative_mass + above_one_mass > UNPHYSICAL_MASS_THRESHOLD),
     )
