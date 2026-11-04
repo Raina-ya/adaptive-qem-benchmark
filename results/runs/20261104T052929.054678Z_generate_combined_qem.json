@@ -1,0 +1,33 @@
+{
+  "run_id": "0c30f259-39bc-49c1-8ace-d02513be166f",
+  "script": "src.generate_combined_qem",
+  "started_at_utc": "2026-11-04T04:25:24.420863Z",
+  "finished_at_utc": "2026-11-04T05:29:29.054678Z",
+  "wall_seconds": 3844.935193,
+  "python_version": "3.12.14",
+  "package_versions": {
+    "qiskit": "2.2.3",
+    "qiskit-aer": "0.17.2",
+    "numpy": "2.3.4",
+    "pandas": "2.3.3",
+    "matplotlib": "3.10.7",
+    "scipy": "1.16.3"
+  },
+  "git_commit_before": "d899bd5624b5765b38f87a97a26f087620364ce2",
+  "git_dirty_before": true,
+  "git_commit_after": "d899bd5624b5765b38f87a97a26f087620364ce2",
+  "git_dirty_after": true,
+  "host": "TP-1302774-NB",
+  "args": [],
+  "seed_root": 20261102,
+  "output_hashes": {
+    "results/processed/combined_qem_interactions_v1.csv": "d2cc59c0317569eeeb5bce1b5bcf4a999222dacf98064a8191b0f1392d653035",
+    "results/processed/combined_qem_summary_v1.csv": "b17ea77ef7b49efa7788f7fc5ec46b460d01e7beceddda58003bb245cfcc5bf8",
+    "results/processed/combined_qem_validity_v1.csv": "4bdbebe33b43448bcaf9be50216345497ffdfd84034fb51c5217ee7bffacf19b",
+    "results/raw/combined_qem_v1.csv": "42aadbb7d79a25f6492a3d308520d4d0928e24ef394fe554b0e4e484a7dcb951",
+    "figures/combined_interaction_effect.png": "97e330009d4393e17481ae0489215b0b6e7eaba101137d18ec1811880b6ed3e1",
+    "figures/combined_overhead_vs_gain.png": "6d75584d6292feee332c5893378c9a370188a9bfa75d715cc789327f73fc2768"
+  },
+  "status": "failed",
+  "error": "Traceback (most recent call last):\n  File \"<frozen runpy>\", line 198, in _run_module_as_main\n  File \"<frozen runpy>\", line 88, in _run_code\n  File \"C:\\Users\\wits\\Documents\\Codex\\2026-10-30\\adaptive-qem-benchmark\\src\\generate_combined_qem.py\", line 634, in <module>\n    main()\n  File \"C:\\Users\\wits\\Documents\\Codex\\2026-10-30\\adaptive-qem-benchmark\\src\\generate_combined_qem.py\", line 630, in main\n    _plot(summary, interactions)\n  File \"C:\\Users\\wits\\Documents\\Codex\\2026-10-30\\adaptive-qem-benchmark\\src\\generate_combined_qem.py\", line 592, in _plot\n    axis.bar(x, values.decision_error_probability, width=width, label=cell_id)\n  File \"C:\\Users\\wits\\Documents\\Codex\\2026-10-30\\adaptive-qem-benchmark\\.venv\\Lib\\site-packages\\matplotlib\\__init__.py\", line 1524, in inner\n    return func(\n           ^^^^^\n  File \"C:\\Users\\wits\\Documents\\Codex\\2026-10-30\\adaptive-qem-benchmark\\.venv\\Lib\\site-packages\\matplotlib\\axes\\_axes.py\", line 2583, in bar\n    x, height, width, y, linewidth, hatch = np.broadcast_arrays(\n                                            ^^^^^^^^^^^^^^^^^^^^\n  File \"C:\\Users\\wits\\Documents\\Codex\\2026-10-30\\adaptive-qem-benchmark\\.venv\\Lib\\site-packages\\numpy\\lib\\_stride_tricks_impl.py\", line 544, in broadcast_arrays\n    shape = _broadcast_shape(*args)\n            ^^^^^^^^^^^^^^^^^^^^^^^\n  File \"C:\\Users\\wits\\Documents\\Codex\\2026-10-30\\adaptive-qem-benchmark\\.venv\\Lib\\site-packages\\numpy\\lib\\_stride_tricks_impl.py\", line 419, in _broadcast_shape\n    b = np.broadcast(*args[:32])\n        ^^^^^^^^^^^^^^^^^^^^^^^^\nValueError: shape mismatch: objects cannot be broadcast to a single shape.  Mismatch is between arg 0 with shape (4,) and arg 1 with shape (8,)."
+}

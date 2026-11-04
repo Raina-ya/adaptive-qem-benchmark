@@ -23,6 +23,14 @@ The hardware-efficient run retained 99 explicit readout failures, concentrated i
 width-6, low-shot, medium/high-noise cells. Negative mitigation gains are also kept:
 179 of 432 method summaries had worse RMSE than the raw estimator.
 
+A preregistered combined-QEM study compares raw, readout, ZNE, and readout-plus-ZNE
+under the same 4,096- and 16,384-shot budgets. Combined QEM had the lowest expectation
+RMSE in 12 of 16 circuit/budget/allocation cells, but all 16 combined-ZNE validity
+assessments were rejected by at least one frozen negative-control criterion. On the
+0.02-margin decision task, combined mitigation produced error rates from 0.26 to 0.48
+and did not consistently improve on readout mitigation. These simulated results show
+estimation gains, not credible universal ZNE behavior or improved decisions.
+
 ![Operating-regime map showing raw, readout, ZNE, and failed cells](paper/figures/operating_regime_map.png)
 
 Read the full paper: **[Adaptive Quantum Error Mitigation Under Fixed Shot Budgets](paper/main.pdf)**
@@ -44,6 +52,8 @@ other physical device.
 - Readout mitigation spends 20% on all `2^w` calibration states and 80% on the target.
 - Linear ZNE splits the same total budget across global folds 1, 3, and 5 and retains
   unclipped extrapolates.
+- Combined mitigation reserves 20% for assignment-matrix calibration, then allocates
+  the remainder across folds using frozen balanced or base-heavy policies.
 - Every stochastic seed derives from root seed `20261102`.
 - Failed, raw, corrected, and factor-level observations remain explicit.
 
@@ -70,6 +80,7 @@ $env:MPLCONFIGDIR = ".matplotlib-cache"
 .\.venv\Scripts\python.exe -m src.run_with_log src.generate_zne_probability_diagnostics
 .\.venv\Scripts\python.exe -m src.run_with_log src.generate_zne_falsification
 .\.venv\Scripts\python.exe -m src.run_with_log src.generate_zne_validity_gate
+.\.venv\Scripts\python.exe -m src.run_with_log src.generate_combined_qem
 tectonic paper/main.tex --outdir paper
 ```
 

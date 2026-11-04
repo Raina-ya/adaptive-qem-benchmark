@@ -26,5 +26,11 @@ Linear ZNE is limited to global folding factors 1, 3, and 5 with a preregistered
 ordinary-least-squares extrapolation. The fixed total shot budget is split across
 factors. No alternative noise scaling, fit order, or adaptive allocation is evaluated.
 
+The combined-QEM study applies assignment-matrix correction separately at each noise
+factor before linear extrapolation. It evaluates only two frozen allocations and six
+preregistered simulator cells. Every combined validity assessment failed at least one
+frozen negative-control criterion, so lower RMSE in selected cells is not treated as
+evidence that the extrapolation mechanism is credible or broadly transferable.
+
 The rule selector is a frozen, explainable baseline. Its modest holdout compatibility
 and nonzero regret do not support deployment or universal method-selection claims.

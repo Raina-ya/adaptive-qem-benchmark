@@ -5,7 +5,12 @@ from src.generate_combined_qem import (
     ALLOCATION_POLICIES,
     BUDGETS,
     CELLS,
+    FIGURE_DIR,
+    INTERACTIONS_PATH,
     METHODS,
+    RAW_PATH,
+    SUMMARY_PATH,
+    VALIDITY_PATH,
     build_manifest,
     summarize_interactions,
 )
@@ -65,3 +70,25 @@ def test_interaction_uses_the_frozen_factorial_contrast() -> None:
     assert len(result) == 1
     assert result.iloc[0].interaction_mean == pytest.approx(-0.01)
     assert result.iloc[0].matched_repeats == 3
+
+
+def test_committed_combined_artifacts_are_complete() -> None:
+    raw = pd.read_csv(RAW_PATH)
+    primary = raw.loc[raw.record_kind == "primary"]
+
+    assert len(raw) == 5600
+    assert len(primary) == 4800
+    assert set(raw.status) == {"complete"}
+    assert (raw.total_shots_used == raw.total_shot_budget).all()
+    assert primary.groupby(
+        ["cell_id", "total_shot_budget", "allocation_policy", "method"]
+    ).size().eq(50).all()
+    assert len(pd.read_csv(SUMMARY_PATH)) == 96
+    assert len(pd.read_csv(INTERACTIONS_PATH)) == 24
+    assert len(pd.read_csv(VALIDITY_PATH)) == 16
+    for filename in (
+        "combined_overhead_vs_gain.png",
+        "combined_interaction_effect.png",
+        "combined_decision_error.png",
+    ):
+        assert (FIGURE_DIR / filename).stat().st_size > 0

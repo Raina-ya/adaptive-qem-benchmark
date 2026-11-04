@@ -584,10 +584,15 @@ def _plot(summary: pd.DataFrame, interactions: pd.DataFrame) -> None:
     figure, axes = plt.subplots(1, 2, figsize=(11.0, 4.6), sharey=True)
     for axis, policy in zip(axes, ALLOCATION_POLICIES, strict=True):
         subset = decisions.loc[decisions.allocation_policy == policy]
-        positions = np.arange(len(METHODS))
+        categories = [
+            (method, budget)
+            for budget in BUDGETS
+            for method in METHODS
+        ]
+        positions = np.arange(len(categories))
         width = 0.35
         for offset, (cell_id, group) in enumerate(subset.groupby("cell_id", sort=True)):
-            values = group.set_index("method").loc[list(METHODS)]
+            values = group.set_index(["method", "total_shot_budget"]).loc[categories]
             x = positions + (offset - 0.5) * width
             axis.bar(x, values.decision_error_probability, width=width, label=cell_id)
             axis.errorbar(
@@ -595,15 +600,28 @@ def _plot(summary: pd.DataFrame, interactions: pd.DataFrame) -> None:
                 values.decision_error_probability,
                 yerr=np.vstack(
                     (
-                        values.decision_error_probability - values.decision_error_wilson_low,
-                        values.decision_error_wilson_high - values.decision_error_probability,
+                        np.maximum(
+                            0.0,
+                            values.decision_error_probability
+                            - values.decision_error_wilson_low,
+                        ),
+                        np.maximum(
+                            0.0,
+                            values.decision_error_wilson_high
+                            - values.decision_error_probability,
+                        ),
                     )
                 ),
                 fmt="none",
                 color="black",
                 capsize=2,
             )
-        axis.set_xticks(positions, METHODS)
+        axis.set_xticks(
+            positions,
+            [f"{method}\n{budget}" for method, budget in categories],
+            rotation=45,
+            ha="right",
+        )
         axis.set(title=policy, xlabel="Method")
     axes[0].set_ylabel("Decision-error probability with 95% Wilson interval")
     axes[-1].legend(fontsize=8)
