@@ -1,0 +1,33 @@
+{
+  "run_id": "faeeb094-ac3c-4abe-8e25-2f8c0827db70",
+  "script": "src.reliability_envelopes",
+  "started_at_utc": "2026-11-05T09:19:23.744831Z",
+  "finished_at_utc": "2026-11-05T09:19:30.196768Z",
+  "wall_seconds": 7.243157,
+  "python_version": "3.12.14",
+  "package_versions": {
+    "qiskit": "2.2.3",
+    "qiskit-aer": "0.17.2",
+    "numpy": "2.3.4",
+    "pandas": "2.3.3",
+    "matplotlib": "3.10.7",
+    "scipy": "1.16.3"
+  },
+  "git_commit_before": "2d07ba83e9852cd15378f22aaec1c754a8c677d5",
+  "git_dirty_before": true,
+  "git_commit_after": "2d07ba83e9852cd15378f22aaec1c754a8c677d5",
+  "git_dirty_after": true,
+  "host": "TP-1302774-NB",
+  "args": [],
+  "seed_root": 20261102,
+  "output_hashes": {
+    "results/processed/method_envelope_cells_v1.csv": "4def5c1bbb237d1e21ef3a6c8593224a6382788893777545c1ee3f57df0c5a49",
+    "results/processed/method_envelope_level_validation_v1.csv": "6c39b45b8550d93edb2de12c5edd84cc876639a54ccc8f873e1d2589c8b307a2",
+    "results/processed/method_envelope_validation_v1.csv": "79fce475eaf6bd0a5dd3750be40e643eacf8358d548a120b98299abb0590612a",
+    "results/processed/method_reliability_envelopes_v1.csv": "abff70f6cbc270d0843a6c4b22f5af8b18bcf52c03d7324c3eae0a900b2da272",
+    "results/processed/selector_gate_stability_v1.csv": "c1657fa36363406e77bfbeab1c4459dc64dbcbb2f83362aef7301445c125c481",
+    "figures/method_reliability_envelopes.png": "14d1be05fb77af943240699a5ebb04a6cc7ed141b020679d231d55f210873b40"
+  },
+  "status": "ok",
+  "error": null
+}

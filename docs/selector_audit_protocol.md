@@ -107,8 +107,7 @@ cells have a reference magnitude of at least 0.06. In those 84 cells, raw has 42
 outcomes, the selector 28, and always-readout 19, with no catastrophic cell. The 0.06 split
 is descriptive and was chosen after seeing the data.
 
-Reliability envelopes, bootstrap threshold stability, and charged learning costs are not
-evaluated here.
+Charged learning costs are not evaluated here.
 
 ### Limits
 
@@ -117,10 +116,81 @@ The relative catastrophic rule is strict when the reference is near zero, so
 `catastrophic_absolute` and `catastrophic_relative` are reported separately. Category counts
 use point estimates of RMSE and ignore their sampling uncertainty.
 
+## Reliability envelopes (I2)
+
+Definitions are in `experiments/configs/method_envelopes_v1.yaml` and were written before
+these results were computed, but after the I1 results had been seen. A cell is reliable for
+a method when all 50 repeats completed and its RMSE regret is at most 0.005. A level is
+supported when it has at least 10 rule-design cells, a reliable rate of at least 80%, and a
+Wilson lower bound of at least 50%.
+
+### Supported levels
+
+| Method | Level | Reliable rate | Supported in bootstrap |
+|---|---|---:|---:|
+| raw | zero noise | 32/32 | 100% |
+| raw | `|reference|` below 0.06 | 56/56 | 100% |
+| raw | decision margin 0.20 | 11/12 | 93% |
+| raw | width 6 | 36/44 | 55% (unstable) |
+| readout | decision margin 0.20 | 11/12 | 94% |
+| readout | zero noise | 29/32 | 89% (unstable) |
+| readout | `|reference|` at least 0.5 | 26/30 | 88% (unstable) |
+| zne | none | | |
+
+No method has a supported level on every feature; depth has none at all. The frozen joint
+envelope therefore contains no cells, so its inside-versus-outside validation has nothing
+to compare. A strict "inside on every feature" rule would always report no safe method on
+this grid.
+
+### Single levels on cells that did not define them
+
+| Method and level | Holdout | Noise shift |
+|---|---:|---:|
+| raw, `|reference|` below 0.06 | 16/16 | 23/24 |
+| raw, width 6 | 3/4 | 12/12 |
+| raw, zero noise | 4/4 | no cells |
+| readout, `|reference|` at least 0.5 | 5/6 | no cells |
+| readout, zero noise | 4/4 | no cells |
+
+The supported raw levels mostly reflect low signal: most width-6 cells have references near
+zero. They do not show that raw recovers a strong signal.
+
+### Do the diagnostics predict reliability?
+
+- **Condition number:** partly, as a warning. Readout was reliable in 75% of cells below 1.5,
+  50% from 1.5 to 3, 10% from 3 to 8, and 0 of 4 cells at 8 or above. Low values alone do not
+  reach the 80% support rate.
+- **ZNE fit residual:** no. Rates are 24-33% in every bin with at least 10 cells, so the
+  selector's residual limits add no evidence.
+- **Signal retention:** not clearly. Rates are 56%, 27%, and 46% across the three populated
+  identified bins, and 11% when the baseline is unidentifiable.
+
+### Review questions
+
+**Is the envelope based on enough cells?** Only for single features. Levels have 10-115 cells,
+but there is one circuit per width and depth, and interactions are not estimated. Decision
+margin has 12 cells per level from a separate width-2, depth-3 experiment.
+
+**Are thresholds stable under bootstrap?** Mixed. Of 7 supported levels, 3 are unstable.
+Resampling repeats also moves selector gates in cells near the limit: 3 cells are unstable at
+the condition-number gate of 8 (means 7.87, 8.10, and 8.16), and 7 cells are unstable at the
+limit of 3. The residual limits of 0.01 and 0.03 are never reached.
+
+**Does the selector generalize beyond its noise model?** This evidence cannot show that. Most
+supported levels have few or no noise-shift cells, and the raw near-zero result is expected
+because noise moves estimates toward zero whichever noise model acts.
+
+### Limits
+
+Ranges are marginal and describe only observed grid values, so they must not be interpolated
+or extrapolated. The 0.06 reference edge was chosen after seeing the data. Rates use the same
+evidence as earlier inspections, so holdout and noise-shift results are diagnostic.
+
 ## Reproduce
 
 ```powershell
 .\.venv\Scripts\python.exe -m src.run_with_log src.regime_labels_v2
 .\.venv\Scripts\python.exe -m src.run_with_log src.selector_audit
-.\.venv\Scripts\python.exe -m pytest tests/test_regime_labels_v2.py tests/test_selector_audit.py -q
+.\.venv\Scripts\python.exe -m src.run_with_log src.reliability_envelopes
+.\.venv\Scripts\python.exe -m pytest tests/test_regime_labels_v2.py tests/test_selector_audit.py tests/test_reliability_envelopes.py -q
 ```

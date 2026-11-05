@@ -1,0 +1,80 @@
+method,feature,level,source,cells,reliable_cells,reliable_rate,wilson_low,wilson_high,status,bootstrap_supported_frequency,stability
+raw,width,2,rule_design_cells,31,22,0.709677419355,0.534076706693,0.839041998437,unsupported,0.174,unstable
+raw,width,4,rule_design_cells,40,18,0.45,0.307053078109,0.601709082011,unsupported,0,stable_unsupported
+raw,width,6,rule_design_cells,44,36,0.818181818182,0.680394491128,0.904871942844,supported,0.546,unstable
+raw,depth,1,rule_design_cells,57,36,0.631578947368,0.501777982225,0.744764429656,unsupported,0.002,stable_unsupported
+raw,depth,3,rule_design_cells,27,20,0.740740740741,0.553214286854,0.868296254381,unsupported,0.203,unstable
+raw,depth,6,rule_design_cells,31,20,0.645161290323,0.469479540644,0.788833409061,unsupported,0.03,stable_unsupported
+raw,noise,zero,rule_design_cells,32,32,1,0.892820801745,1,supported,1,stable_supported
+raw,noise,low,rule_design_cells,26,15,0.576923076923,0.389486137466,0.744555566863,unsupported,0.011,stable_unsupported
+raw,noise,medium,rule_design_cells,29,14,0.48275862069,0.313860901527,0.65568978118,unsupported,0.001,stable_unsupported
+raw,noise,high,rule_design_cells,28,15,0.535714285714,0.358126892345,0.704684300172,unsupported,0.001,stable_unsupported
+raw,shots,1024,rule_design_cells,38,28,0.736842105263,0.579911538125,0.850283787452,unsupported,0.097,stable_unsupported
+raw,shots,4096,rule_design_cells,38,23,0.605263157895,0.44717867996,0.744019242518,unsupported,0.005,stable_unsupported
+raw,shots,16384,rule_design_cells,39,25,0.641025641026,0.484181485595,0.77257914541,unsupported,0.011,stable_unsupported
+raw,execution_overhead,1.0,rule_design_cells,115,76,0.660869565217,0.570396029913,0.740943130403,unsupported,0.001,stable_unsupported
+raw,absolute_reference,"[0, 0.06)",rule_design_cells,56,56,1,0.935806063281,1,supported,1,stable_supported
+raw,absolute_reference,"[0.06, 0.5)",rule_design_cells,29,11,0.379310344828,0.226880221008,0.55997455794,unsupported,0,stable_unsupported
+raw,absolute_reference,>= 0.5,rule_design_cells,30,9,0.3,0.166647482682,0.478757874587,unsupported,0,stable_unsupported
+raw,decision_margin,0.02,decision_benchmark_w2_d3,12,0,0,2.77555756156e-17,0.242494006655,unsupported,0,stable_unsupported
+raw,decision_margin,0.05,decision_benchmark_w2_d3,12,4,0.333333333333,0.138120091091,0.609377911127,unsupported,0,stable_unsupported
+raw,decision_margin,0.1,decision_benchmark_w2_d3,12,8,0.666666666667,0.390622088873,0.861879908909,unsupported,0.163,unstable
+raw,decision_margin,0.2,decision_benchmark_w2_d3,12,11,0.916666666667,0.646120088859,0.985134905595,supported,0.927,stable_supported
+readout,width,2,rule_design_cells,31,23,0.741935483871,0.567538641906,0.862982940936,unsupported,0.145,unstable
+readout,width,4,rule_design_cells,40,27,0.675,0.520177461899,0.799154977682,unsupported,0.03,stable_unsupported
+readout,width,6,rule_design_cells,44,20,0.454545454545,0.317052341422,0.59933816801,unsupported,0,stable_unsupported
+readout,depth,1,rule_design_cells,57,37,0.649122807018,0.519418953557,0.759995779908,unsupported,0.003,stable_unsupported
+readout,depth,3,rule_design_cells,27,15,0.555555555556,0.373130245132,0.72414141823,unsupported,0.004,stable_unsupported
+readout,depth,6,rule_design_cells,31,18,0.58064516129,0.407662624954,0.735844569327,unsupported,0,stable_unsupported
+readout,noise,zero,rule_design_cells,32,29,0.90625,0.757818452716,0.967598448702,supported,0.887,unstable
+readout,noise,low,rule_design_cells,26,12,0.461538461538,0.287558535304,0.645420612531,unsupported,0,stable_unsupported
+readout,noise,medium,rule_design_cells,29,17,0.586206896552,0.407378359879,0.744868226587,unsupported,0.002,stable_unsupported
+readout,noise,high,rule_design_cells,28,12,0.428571428571,0.265085471241,0.609292143725,unsupported,0,stable_unsupported
+readout,shots,1024,rule_design_cells,38,14,0.368421052632,0.233842192472,0.52716040443,unsupported,0,stable_unsupported
+readout,shots,4096,rule_design_cells,38,26,0.684210526316,0.525442401094,0.809153963244,unsupported,0.004,stable_unsupported
+readout,shots,16384,rule_design_cells,39,30,0.769230769231,0.616637427717,0.873541958749,unsupported,0.236,unstable
+readout,execution_overhead,5.0,rule_design_cells,31,23,0.741935483871,0.567538641906,0.862982940936,unsupported,0.129,unstable
+readout,execution_overhead,17.0,rule_design_cells,40,27,0.675,0.520177461899,0.799154977682,unsupported,0.033,stable_unsupported
+readout,execution_overhead,65.0,rule_design_cells,44,20,0.454545454545,0.317052341422,0.59933816801,unsupported,0,stable_unsupported
+readout,absolute_reference,"[0, 0.06)",rule_design_cells,56,24,0.428571428571,0.307689626839,0.558623792692,unsupported,0,stable_unsupported
+readout,absolute_reference,"[0.06, 0.5)",rule_design_cells,29,20,0.689655172414,0.507698657669,0.827243832555,unsupported,0.018,stable_unsupported
+readout,absolute_reference,>= 0.5,rule_design_cells,30,26,0.866666666667,0.70318673318,0.946903445159,supported,0.877,unstable
+readout,condition_number,"[1, 1.5)",rule_design_cells,75,56,0.746666666667,0.637896731344,0.831399506364,unsupported,0.041,stable_unsupported
+readout,condition_number,"[1.5, 3)",rule_design_cells,26,13,0.5,0.320605935258,0.679394064742,unsupported,0,stable_unsupported
+readout,condition_number,"[3, 8)",rule_design_cells,10,1,0.1,0.0178762130951,0.404150026795,unsupported,0,stable_unsupported
+readout,condition_number,>= 8,rule_design_cells,4,0,0,0,0.489890836455,insufficient_cells,0,stable_unsupported
+readout,decision_margin,0.02,decision_benchmark_w2_d3,12,0,0,2.77555756156e-17,0.242494006655,unsupported,0,stable_unsupported
+readout,decision_margin,0.05,decision_benchmark_w2_d3,12,3,0.25,0.0889416683941,0.532305334934,unsupported,0,stable_unsupported
+readout,decision_margin,0.1,decision_benchmark_w2_d3,12,6,0.5,0.253781597634,0.746218402366,unsupported,0.018,stable_unsupported
+readout,decision_margin,0.2,decision_benchmark_w2_d3,12,11,0.916666666667,0.646120088859,0.985134905595,supported,0.943,stable_supported
+zne,width,2,rule_design_cells,31,8,0.258064516129,0.137017059064,0.432461358094,unsupported,0,stable_unsupported
+zne,width,4,rule_design_cells,40,15,0.375,0.242229791672,0.529675608627,unsupported,0,stable_unsupported
+zne,width,6,rule_design_cells,44,9,0.204545454545,0.111532530701,0.345005780611,unsupported,0,stable_unsupported
+zne,depth,1,rule_design_cells,57,14,0.245614035088,0.152328374703,0.371022962328,unsupported,0,stable_unsupported
+zne,depth,3,rule_design_cells,27,7,0.259259259259,0.131703745619,0.446785713146,unsupported,0,stable_unsupported
+zne,depth,6,rule_design_cells,31,11,0.354838709677,0.211166590939,0.530520459356,unsupported,0,stable_unsupported
+zne,noise,zero,rule_design_cells,32,9,0.28125,0.155645804977,0.453745094259,unsupported,0,stable_unsupported
+zne,noise,low,rule_design_cells,26,9,0.346153846154,0.194122303229,0.537794288112,unsupported,0,stable_unsupported
+zne,noise,medium,rule_design_cells,29,9,0.310344827586,0.172756167445,0.492301342331,unsupported,0,stable_unsupported
+zne,noise,high,rule_design_cells,28,5,0.178571428571,0.078785019456,0.355914247893,unsupported,0,stable_unsupported
+zne,shots,1024,rule_design_cells,38,10,0.263157894737,0.149716212548,0.420088461875,unsupported,0,stable_unsupported
+zne,shots,4096,rule_design_cells,38,12,0.315789473684,0.190846036756,0.474557598906,unsupported,0,stable_unsupported
+zne,shots,16384,rule_design_cells,39,10,0.25641025641,0.14568780541,0.410816559217,unsupported,0,stable_unsupported
+zne,execution_overhead,3.0,rule_design_cells,115,32,0.278260869565,0.204538949,0.366317884077,unsupported,0,stable_unsupported
+zne,absolute_reference,"[0, 0.06)",rule_design_cells,56,3,0.0535714285714,0.0183857813821,0.146073090688,unsupported,0,stable_unsupported
+zne,absolute_reference,"[0.06, 0.5)",rule_design_cells,29,15,0.51724137931,0.34431021882,0.686139098473,unsupported,0,stable_unsupported
+zne,absolute_reference,>= 0.5,rule_design_cells,30,14,0.466666666667,0.302323889077,0.638577003801,unsupported,0,stable_unsupported
+zne,fit_residual,"[0, 0.0001)",rule_design_cells,36,12,0.333333333333,0.202146188243,0.496660021288,unsupported,0,stable_unsupported
+zne,fit_residual,"[0.0001, 0.0005)",rule_design_cells,34,8,0.235294117647,0.124369855326,0.399961379225,unsupported,0,stable_unsupported
+zne,fit_residual,"[0.0005, 0.001)",rule_design_cells,16,4,0.25,0.101820674912,0.494983165355,unsupported,0,stable_unsupported
+zne,fit_residual,"[0.001, 0.0025)",rule_design_cells,28,7,0.25,0.126764949193,0.43355670319,unsupported,0,stable_unsupported
+zne,fit_residual,>= 0.0025,rule_design_cells,1,1,1,0.206549314377,1,insufficient_cells,0,stable_unsupported
+zne,signal_retention,"[0, 0.1)",rule_design_cells,2,1,0.5,0.0945312057342,0.905468794266,insufficient_cells,0,stable_unsupported
+zne,signal_retention,"[0.1, 0.5)",rule_design_cells,16,9,0.5625,0.331785563988,0.769013475945,unsupported,0.062,stable_unsupported
+zne,signal_retention,"[0.5, 0.8)",rule_design_cells,15,4,0.266666666667,0.108974533257,0.51950434056,unsupported,0,stable_unsupported
+zne,signal_retention,>= 0.8,rule_design_cells,26,12,0.461538461538,0.287558535304,0.645420612531,unsupported,0.001,stable_unsupported
+zne,signal_retention,unidentifiable,rule_design_cells,56,6,0.107142857143,0.0500393557112,0.214684451711,unsupported,0,stable_unsupported
+zne,decision_margin,0.02,decision_benchmark_w2_d3,12,0,0,2.77555756156e-17,0.242494006655,unsupported,0,stable_unsupported
+zne,decision_margin,0.05,decision_benchmark_w2_d3,12,0,0,2.77555756156e-17,0.242494006655,unsupported,0,stable_unsupported
+zne,decision_margin,0.1,decision_benchmark_w2_d3,12,4,0.333333333333,0.138120091091,0.609377911127,unsupported,0,stable_unsupported
+zne,decision_margin,0.2,decision_benchmark_w2_d3,12,8,0.666666666667,0.390622088873,0.861879908909,unsupported,0.163,unstable

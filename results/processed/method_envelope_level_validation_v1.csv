@@ -1,0 +1,11 @@
+method,feature,level,stability,design_reliable_rate,evaluation_set,cells,reliable_cells,reliable_rate,wilson_low,wilson_high
+raw,width,6,unstable,0.818181818182,holdout,4,3,0.75,0.300641842582,0.95441273919
+raw,width,6,unstable,0.818181818182,noise_shift,12,12,1,0.757505993345,1
+raw,noise,zero,stable_supported,1,holdout,4,4,1,0.510109163545,1
+raw,noise,zero,stable_supported,1,noise_shift,0,0,,,
+raw,absolute_reference,"[0, 0.06)",stable_supported,1,holdout,16,16,1,0.806392319466,1
+raw,absolute_reference,"[0, 0.06)",stable_supported,1,noise_shift,24,23,0.958333333333,0.797581935213,0.992606543834
+readout,noise,zero,unstable,0.90625,holdout,4,4,1,0.510109163545,1
+readout,noise,zero,unstable,0.90625,noise_shift,0,0,,,
+readout,absolute_reference,>= 0.5,unstable,0.866666666667,holdout,6,5,0.833333333333,0.436497177814,0.969946630252
+readout,absolute_reference,>= 0.5,unstable,0.866666666667,noise_shift,0,0,,,

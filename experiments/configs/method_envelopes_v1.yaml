@@ -1,0 +1,37 @@
+{
+  "version": "method_envelopes_v1",
+  "evidence_label": "noisy_simulated",
+  "simulator_only": true,
+  "status": "post_hoc_analysis_after_inspecting_i1_results",
+  "reliable_cell": "the method completed all 50 repeats and its RMSE regret against the best method in the cell is at most the negligible limit",
+  "negligible_regret_max": 0.005,
+  "complete_repeats": 50,
+  "repeat_bootstrap_resamples": 200,
+  "cell_bootstrap_resamples": 1000,
+  "design_set": "rule_design",
+  "validation_sets": ["holdout", "noise_shift"],
+  "support_rule": {
+    "min_cells": 10,
+    "min_reliable_rate": 0.80,
+    "min_wilson_low": 0.50
+  },
+  "stability_rule": {
+    "stable_supported_frequency": 0.90,
+    "stable_unsupported_frequency": 0.10
+  },
+  "bins": {
+    "condition_number": [1.0, 1.5, 3.0, 8.0],
+    "fit_residual": [0.0, 0.0001, 0.0005, 0.001, 0.0025],
+    "signal_retention": [0.0, 0.1, 0.5, 0.8],
+    "absolute_reference": [0.0, 0.06, 0.5]
+  },
+  "absolute_reference_note": "the 0.06 edge was chosen after seeing I1 results and is descriptive",
+  "condition_number_cell_value": "median over all 50 repeats; a failed repeat counts as infinite, so failures are not hidden",
+  "signal_retention_cell_value": "median of |E(5)|/|E(1)| over repeats whose factor-one value exceeds twice its shot-noise standard error; unidentifiable if fewer than half qualify",
+  "fit_residual_cell_value": "median residual sum of squares over completed repeats",
+  "decision_margin_source": "decision_margin_summary_v1 with independent_records; reliable means status complete; width 2 and depth 3 only",
+  "selector_gates": {"condition_number": [3.0, 8.0], "fit_residual": [0.01, 0.03]},
+  "gate_bootstrap_resamples": 1000,
+  "gate_unstable_range": [0.05, 0.95],
+  "scope_boundary": "marginal ranges on a coarse simulator grid with one circuit per width and depth; no interpolation, extrapolation, or hardware claim"
+}
