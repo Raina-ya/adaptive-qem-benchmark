@@ -5,7 +5,11 @@ import matplotlib
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 
-from src.verify_generated_artifacts import GENERATORS, compare_artifact_trees
+from src.verify_generated_artifacts import (
+    EXPENSIVE_GENERATORS,
+    GENERATORS,
+    compare_artifact_trees,
+)
 
 
 def _write(root: Path, relative: str, content: str | bytes) -> None:
@@ -29,6 +33,10 @@ def test_comparator_regenerates_adaptive_extension() -> None:
     assert "src.generate_zne_validity_gate" in GENERATORS
     assert "src.readout_scalability_metrics" in GENERATORS
     assert "src.generate_readout_tensor_validation" in GENERATORS
+    assert "src.generate_readout_subspace_validation" in GENERATORS
+    assert "src.generate_readout_matrix_free_validation" in GENERATORS
+    assert "src.generate_readout_scalability_benchmark" in EXPENSIVE_GENERATORS
+    assert "src.generate_readout_mismatch_benchmark" in EXPENSIVE_GENERATORS
 
 
 def test_float_and_json_noise_within_tolerance_passes(tmp_path: Path) -> None:
@@ -56,6 +64,47 @@ def test_real_value_change_fails(tmp_path: Path) -> None:
 
     assert failures
     assert failures[0].path == "results/sample.csv"
+
+
+def test_artifact_filter_ignores_unselected_differences(tmp_path: Path) -> None:
+    reference = tmp_path / "reference"
+    candidate = tmp_path / "candidate"
+    selected = "results/selected.csv"
+    _write(reference, selected, "id,value\n1,0.5\n")
+    _write(candidate, selected, "id,value\n1,0.5\n")
+    _write(reference, "results/unselected.csv", "id,value\n1,0.5\n")
+    _write(candidate, "results/unselected.csv", "id,value\n1,0.9\n")
+
+    assert compare_artifact_trees(reference, candidate, {selected}) == []
+
+
+def test_artifact_filter_reports_unknown_path(tmp_path: Path) -> None:
+    reference = tmp_path / "reference"
+    candidate = tmp_path / "candidate"
+
+    failures = compare_artifact_trees(
+        reference, candidate, {"results/does_not_exist.csv"}
+    )
+
+    assert failures[0].detail == "requested artifact is absent from both trees"
+
+
+def test_measured_scalability_timing_may_differ_but_must_be_nonnegative(
+    tmp_path: Path,
+) -> None:
+    reference = tmp_path / "reference"
+    candidate = tmp_path / "candidate"
+    relative = "results/raw/readout_scalability_v1.csv"
+    _write(reference, relative, "id,solve_wall_seconds\n1,0.1\n")
+    _write(candidate, relative, "id,solve_wall_seconds\n1,0.2\n")
+
+    assert compare_artifact_trees(reference, candidate) == []
+
+    _write(candidate, relative, "id,solve_wall_seconds\n1,-0.2\n")
+    failures = compare_artifact_trees(reference, candidate)
+    assert failures[0].detail == (
+        "measured timing column 'solve_wall_seconds' contains invalid values"
+    )
 
 
 def test_missing_row_and_empty_png_fail(tmp_path: Path) -> None:

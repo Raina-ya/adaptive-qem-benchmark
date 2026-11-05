@@ -83,6 +83,9 @@ $env:MPLCONFIGDIR = ".matplotlib-cache"
 .\.venv\Scripts\python.exe -m src.run_with_log src.generate_combined_qem
 .\.venv\Scripts\python.exe -m src.run_with_log src.readout_scalability_metrics
 .\.venv\Scripts\python.exe -m src.run_with_log src.generate_readout_tensor_validation
+.\.venv\Scripts\python.exe -m src.run_with_log src.generate_readout_subspace_validation
+.\.venv\Scripts\python.exe -m src.run_with_log src.generate_readout_matrix_free_validation
+.\.venv\Scripts\python.exe -m src.run_with_log src.generate_readout_scalability_benchmark
 tectonic paper/main.tex --outdir paper
 ```
 
@@ -90,7 +93,12 @@ Verify committed deterministic outputs:
 
 ```powershell
 python -m src.verify_generated_artifacts --current
+python -m src.verify_generated_artifacts --include-expensive
 ```
+
+The second command includes the approximately 35-minute width-scalability benchmark.
+Routine CI validates its committed schema and coverage through the test suite without
+rerunning that expensive grid on every push.
 
 `results/processed/day08_12_audit_manifest.csv` is generated from the repository
 artifacts. It records deterministic paths, byte sizes, SHA-256 hashes, and parsed CSV
@@ -122,8 +130,45 @@ estimates, width-2/4 full-matrix feasibility references, and a 20-repeat tensor-
 validation at widths 2, 4, and 6. Under independent and asymmetric per-qubit readout
 models, tensor correction had lower RMSE in 19 of 24 fixed-budget cells while using
 `2*w` rather than `2**w` calibration circuits. This validates the implementation in
-its assumed model; it is not evidence of robustness to correlated readout. Observed-
-subspace, matrix-free, and correlated-mismatch outcomes are not yet available.
+its assumed model; it is not evidence of robustness to correlated readout.
+
+The observed-subspace study adds 50-repeat full-matrix comparisons at widths 2, 4,
+and 6 and 10-repeat sparse pilots at widths 8 and 10. Support is selected only from
+noisy target counts with a frozen minimum count of two. All 2,480 rows completed under
+their declared shot budgets. Mean retained support fell to 22.6% at width 8 and 8.3%
+at width 10 for sparse outputs, while expectation RMSE increased with width. The
+result demonstrates a classical memory reduction, not a quantum-shot saving, and
+does not establish robustness to broad or correlated-error cases. Correlated-mismatch
+outcomes are not yet available.
+
+The matrix-free validation applies tensor-factorized assignment operators without
+forming a support-square matrix. All 1,280 planned rows converged with exact shot
+accounting and zero materialized matrix entries; observed iterations rose from a
+width-2 mean of 23.3 to a width-10 mean of 94.6. This validates deterministic solver
+behavior for independent and asymmetric local readout models. It does not establish
+an advantage under correlated errors, and the length-`2**w` working vector remains
+exponential. Correlated-mismatch outcomes are not yet available.
+
+The unified width-2--12 scalability benchmark contains 5,760 repeat-level rows. Full
+matrix correction completes 1,242 rows, fails 38 width-8 repeats as ill-conditioned,
+and is resource-limited for 160 width-10/12 rows. Dense observed-subspace correction
+is resource-limited for 140 rows whose count-derived support exceeds 128 and fails
+two additional width-12 rows. Tensor and matrix-free correction complete all 1,440
+rows each. At width 8, mean measured full-matrix solve time is 10.9 seconds versus
+0.057 seconds for matrix-free correction. Every method amplifies sampling standard
+deviation on average; lower classical storage therefore does not imply lower
+statistical uncertainty. These conclusions remain limited to synthetic independent
+and asymmetric local readout errors.
+
+The correlated-mismatch stress test adds 9,600 paired rows at widths 2, 4, and 6.
+It compares full, tensor-product, observed-subspace, and matrix-free correction under
+matched independent, asymmetric, pair-correlated, and deliberately mismatched
+calibration channels. All methods use the same 20/80 calibration/target budget split.
+For the representative width-6 broad-output, 16,384-shot cell, calibration mismatch
+raises expectation RMSE to 0.074--0.078 and the error probability of a preregistered
+0.05-margin threshold decision to 0.88--0.94. This is simulated evidence that reduced
+classical storage cannot compensate for a wrong calibration model; it is not a
+hardware-robustness claim.
 
 ## Repository structure
 

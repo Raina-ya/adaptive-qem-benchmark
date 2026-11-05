@@ -71,3 +71,68 @@ Every planned cell must finish as `complete`, `failed`, `not_applicable`, or
 - A matrix-free implementation must not materialize the matrix internally.
 - Sparse and broad distributions are summarized separately.
 - Correlated-error mismatch must remain an explicit experimental factor.
+
+## Observed-subspace implementation
+
+The observed-subspace validation selects computational-basis states from noisy
+target counts using the frozen rule `count >= 2`. The selector never receives the
+exact expectation or reference distribution. A preregistered protected-state input
+exists for decision-critical states and is covered by a regression test, but the v1
+validation does not add protected states. One calibration circuit is allocated per
+retained state within the same 20% calibration fraction used by full correction.
+
+The reduced assignment matrix contains only retained observed rows and prepared
+columns. The solver normalizes its non-negative solution, so retained and discarded
+observed probability mass are reported separately to expose truncation. Reduced
+matrix bytes are a classical storage metric; calibration shots remain fixed at 20%
+of the total budget and are not reported as saved shots.
+
+## Matrix-free implementation
+
+The matrix-free method uses the same count-derived support rule and fixed 20% local
+calibration budget. A tensor-factorized operator embeds a support vector in a
+length-`2**w` workspace, applies one sampled 2-by-2 assignment map per qubit, and
+projects back to the support. Its transpose is applied in reverse through transposed
+local maps. No support-square or full assignment matrix is constructed.
+
+Non-negative least squares is solved by deterministic projected FISTA with a
+predeclared limit of 1,000 iterations and relative update tolerance `1e-10`.
+Iteration count, convergence, residual norm, operator storage, and working-vector
+storage are recorded separately. A converged update does not imply a small residual:
+support truncation can leave probability outside the modeled rows, so residual norm
+remains a reported diagnostic rather than a hidden acceptance adjustment.
+
+## Unified scalability execution
+
+The unified benchmark executes all four methods with paired target seeds. Widths
+2--6 use 50 repeats; widths 8--12 use 10. Full matrix follows the original resource
+gates. A preflight found that dense observed-subspace solves near dimension 256 were
+both slow and sometimes ill-conditioned, so its method-specific gate is frozen at a
+count-derived support of 128 before the full run. Rows beyond that gate are retained
+as `resource_limited`; their target sampling is preserved, but calibration and solve
+work are not claimed as executed.
+
+Classical solve times are measured by replaying only the correction from preserved
+counts and calibration data. They are explicitly labeled `measured` and are not
+expected to be byte- or value-identical across hosts. Reproducibility checks require
+the same missing-value pattern and finite non-negative timings while continuing to
+compare all scientific CSV columns numerically. Uncertainty amplification is the
+repeat standard deviation of corrected errors divided by the paired raw-error
+standard deviation; it is distinct from bias and RMSE.
+
+## Correlated readout and calibration mismatch
+
+The mismatch benchmark uses widths 2, 4, and 6, sparse and broad output families,
+budgets 4,096 and 16,384, and 50 paired repeats. Target counts are shared by all four
+correction methods within a paired cell. Calibration always assumes independent
+single-qubit assignment error. Targets are matched independent, asymmetric,
+pair-correlated (disjoint simultaneous bit flips), or deliberately mismatched
+asymmetric channels. The single-qubit-sensitive observable avoids the parity blind
+spot of global-Z and neighboring-ZZ observables under simultaneous pair flips.
+
+Approximation bias is reported separately from repeat-level sampling standard
+deviation. Downstream reliability uses a threshold fixed exactly 0.05 from the
+analytic expectation; its exact decision is therefore known before sampling. Wilson
+intervals accompany the observed decision-error probability. These synthetic models
+test estimator failure under misspecification; they do not approximate a calibrated
+device or establish robustness to drift, leakage, or general crosstalk.

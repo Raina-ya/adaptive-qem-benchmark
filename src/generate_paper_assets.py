@@ -64,6 +64,15 @@ def write_metrics() -> None:
         combined_decisions["cell_id"] == "decision_near_tie",
         "decision_error_probability",
     ]
+    mismatch = pd.read_csv(
+        ROOT / "results/processed/readout_mismatch_summary_v1.csv"
+    )
+    mismatch_selected = mismatch.loc[
+        (mismatch["width"] == 6)
+        & (mismatch["distribution"] == "broad")
+        & (mismatch["total_shot_budget"] == 16384)
+        & (mismatch["target_model"] == "calibration_mismatch")
+    ]
     hardware_validity = zne_validity["circuit_id"].str.startswith("hardware_efficient")
     labels = regimes["oracle_label"].value_counts()
     macros = {
@@ -112,6 +121,13 @@ def write_metrics() -> None:
         "CombinedInteractionCells": len(combined_interactions),
         "CombinedNearTieMinimum": f"{combined_near_tie.min():.2f}",
         "CombinedNearTieMaximum": f"{combined_near_tie.max():.2f}",
+        "MismatchRows": 9600,
+        "MismatchDecisionMinimum": (
+            f"{mismatch_selected['decision_error_probability'].min():.2f}"
+        ),
+        "MismatchDecisionMaximum": (
+            f"{mismatch_selected['decision_error_probability'].max():.2f}"
+        ),
     }
     text = "\n".join(
         f"\\newcommand{{\\{name}}}{{{value}}}" for name, value in macros.items()
@@ -193,6 +209,9 @@ def copy_repository_figures() -> None:
         "combined_overhead_vs_gain.png",
         "combined_interaction_effect.png",
         "combined_decision_error.png",
+        "readout_mismatch_accuracy.png",
+        "readout_mismatch_decision_error.png",
+        "readout_mismatch_bias_vs_sampling.png",
     ):
         shutil.copyfile(ROOT / "figures" / name, FIGURES / name)
 

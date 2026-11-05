@@ -1,0 +1,30 @@
+{
+  "run_id": "2d876522-2629-40ac-a4be-3bab0017420a",
+  "script": "src.generate_readout_matrix_free_validation",
+  "started_at_utc": "2026-11-04T07:09:01.205774Z",
+  "finished_at_utc": "2026-11-04T07:11:00.009626Z",
+  "wall_seconds": 119.064536,
+  "python_version": "3.12.14",
+  "package_versions": {
+    "qiskit": "2.2.3",
+    "qiskit-aer": "0.17.2",
+    "numpy": "2.3.4",
+    "pandas": "2.3.3",
+    "matplotlib": "3.10.7",
+    "scipy": "1.16.3"
+  },
+  "git_commit_before": "15a8acf44b1039cec187774056023ecaed1f42dd",
+  "git_dirty_before": true,
+  "git_commit_after": "15a8acf44b1039cec187774056023ecaed1f42dd",
+  "git_dirty_after": true,
+  "host": "TP-1302774-NB",
+  "args": [],
+  "seed_root": 20261102,
+  "output_hashes": {
+    "results/processed/readout_matrix_free_validation_summary_v1.csv": "8d6d765088683e9c8b53fa89e6b6822b92b7cf3a24e130346fa3919c8e320236",
+    "results/raw/readout_matrix_free_validation_v1.csv": "4f94d35aa55e186491d43773b154125e9addbd900a30c6fe906012d7119f67e4",
+    "figures/readout_matrix_free_convergence.png": "d70abc62f9d597e9914fd5714225366493d99d892b93efbbfc056c5a65848383"
+  },
+  "status": "ok",
+  "error": null
+}

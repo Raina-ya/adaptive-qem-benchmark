@@ -140,6 +140,9 @@ GHZ depths 3 and 6 remain explicit \texttt{not\_applicable} cells. All seeds der
 from root seed 20261102. Qiskit Aer supplies ideal statevectors and finite-shot noisy
 simulation \cite{qiskitaer}. The main model combines independent assignment error
 with one- and two-qubit depolarizing channels.
+The method comparison follows the broader need for common QEM benchmarks
+\cite{bultrini2021}; the scalable-readout track is motivated by assignment-matrix
+growth and reduced calibration models \cite{nation2021}.
 
 A separate 4,096-shot shift set tests intermediate mixed noise, asymmetric readout,
 coherent over-rotation, and correlated $ZZ$ error. These are controlled synthetic
@@ -317,6 +320,31 @@ substantial Wilson-bounded error and no consistent combined-QEM advantage.}
 \label{fig:combined-decision}
 \end{figure}
 
+\subsection{Scalable readout correction under model mismatch}
+The scalable-readout track compares full assignment, tensor-product,
+observed-subspace, and matrix-free observed-subspace correction. Its final stress
+test contains \MismatchRows{} paired simulated rows. All methods share target counts
+and one fixed total budget; the calibration model remains independent while the
+target channel is matched independent, asymmetric, pair-correlated, or deliberately
+mismatched. Bias and repeat sampling spread are reported separately.
+
+In the representative width-6 broad-output, 16,384-shot cell, deliberate
+calibration mismatch raises the 0.05-margin threshold-decision error to
+\MismatchDecisionMinimum{}--\MismatchDecisionMaximum{} across methods. The matched
+independent condition remains near zero. Figure~\ref{fig:readout-mismatch} therefore
+shows that classical memory reduction and solver convergence do not establish
+readout-model validity. Decision risk is evaluated separately from expectation RMSE,
+consistent with recent cost-aware QEM analysis \cite{scavino2026}.
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=\columnwidth]{readout_mismatch_decision_error.png}
+\caption{A deliberately mismatched simulated calibration channel causes high
+0.05-margin decision error for every correction strategy; reduced storage does not
+repair model misspecification.}
+\label{fig:readout-mismatch}
+\end{figure}
+
 \section{Conclusion}
 No QEM method is uniformly useful under the declared fixed-budget simulator grid.
 Most operating cells are practical ties, some favor readout or ZNE, and low-shot
@@ -339,7 +367,8 @@ and decision reliability. The deterministic holdout also shows that intuitive ru
 do not generalize reliably across the present circuit and noise grid. The ZNE
 negative control further shows that improvement toward a reference is insufficient
 evidence unless signal retention, physicality, uncertainty, and a matched-cost
-control agree. The combined experiment further supports a separation between
+control agree, matching concerns about artefactual ZNE improvement
+\cite{koster2026}. The combined experiment further supports a separation between
 estimator performance and mechanism validity: lower RMSE can coexist with rejected
 ZNE diagnostics and unresolved near-tie decisions.
 
@@ -357,6 +386,9 @@ is trained, and no post-holdout rule tuning is performed. The combined study cov
 only six preregistered cells, two budgets, and two allocation policies; it does not
 compare extrapolate-then-correct ordering or establish that readout and gate errors
 are separable on hardware.
+The scalable-readout mismatch study is limited to synthetic disjoint pair flips,
+one independent calibration approximation, widths at most six, and a single fixed
+decision margin; its negative result cannot quantify hardware crosstalk or drift.
 
 \appendix
 \section{Reproducibility}

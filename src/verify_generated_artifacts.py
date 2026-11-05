@@ -31,7 +31,13 @@ GENERATORS = (
     "src.generate_zne_validity_gate",
     "src.readout_scalability_metrics",
     "src.generate_readout_tensor_validation",
+    "src.generate_readout_subspace_validation",
+    "src.generate_readout_matrix_free_validation",
     "src.generate_audit_manifest",
+)
+EXPENSIVE_GENERATORS = (
+    "src.generate_readout_scalability_benchmark",
+    "src.generate_readout_mismatch_benchmark",
 )
 ARTIFACT_ROOTS = (
     "results",
@@ -42,6 +48,12 @@ ARTIFACT_ROOTS = (
 )
 SINGLE_ARTIFACTS = ("docs/day08_12_runtime_report.pdf",)
 AUDIT_MANIFEST = "results/processed/day08_12_audit_manifest.csv"
+MEASURED_TIMING_COLUMNS = {
+    "results/raw/readout_scalability_v1.csv": {"solve_wall_seconds"},
+    "results/processed/readout_scalability_summary_v1.csv": {
+        "mean_solve_wall_seconds"
+    },
+}
 PDF_REQUIREMENTS = {
     "docs/day08_12_runtime_report.pdf": (
         2,
@@ -135,6 +147,19 @@ def _compare_csv(reference: Path, candidate: Path, relative: str) -> list[str]:
     for column in left.columns:
         left_column = left[column]
         right_column = right[column]
+        if column in MEASURED_TIMING_COLUMNS.get(relative, set()):
+            if not left_column.isna().equals(right_column.isna()):
+                failures.append(f"measured timing column {column!r} missing-value pattern differs")
+                continue
+            finite_left = left_column.dropna().map(
+                lambda value: math.isfinite(value) and value >= 0
+            )
+            finite_right = right_column.dropna().map(
+                lambda value: math.isfinite(value) and value >= 0
+            )
+            if not finite_left.all() or not finite_right.all():
+                failures.append(f"measured timing column {column!r} contains invalid values")
+            continue
         if pd.api.types.is_integer_dtype(left_column) and pd.api.types.is_integer_dtype(
             right_column
         ):
@@ -179,15 +204,28 @@ def _validate_pdf(path: Path, relative: str) -> list[str]:
     return failures
 
 
-def compare_artifact_trees(reference_root: Path, candidate_root: Path) -> list[ComparisonFailure]:
+def compare_artifact_trees(
+    reference_root: Path,
+    candidate_root: Path,
+    only_artifacts: set[str] | None = None,
+) -> list[ComparisonFailure]:
     """Return semantic differences between committed and regenerated artifacts."""
 
     reference_paths = _artifact_paths(reference_root)
     candidate_paths = _artifact_paths(candidate_root)
-    failures = [
+    failures = []
+    if only_artifacts is not None:
+        missing_from_both = only_artifacts - (reference_paths | candidate_paths)
+        failures.extend(
+            ComparisonFailure(path, "requested artifact is absent from both trees")
+            for path in sorted(missing_from_both)
+        )
+        reference_paths &= only_artifacts
+        candidate_paths &= only_artifacts
+    failures.extend(
         ComparisonFailure(path, "missing from regenerated artifacts")
         for path in sorted(reference_paths - candidate_paths)
-    ]
+    )
     failures.extend(
         ComparisonFailure(path, "unexpected regenerated artifact")
         for path in sorted(candidate_paths - reference_paths)
@@ -239,7 +277,13 @@ def _copy_run_logs(generated_root: Path, output: Path) -> None:
         shutil.copy2(path, output / path.name)
 
 
-def _regenerate(root: Path, destination: Path, run_log_output: Path | None) -> None:
+def _regenerate(
+    root: Path,
+    destination: Path,
+    run_log_output: Path | None,
+    *,
+    include_expensive: bool,
+) -> None:
     subprocess.run(
         ["git", "clone", "--quiet", "--no-hardlinks", str(root), str(destination)],
         check=True,
@@ -247,7 +291,8 @@ def _regenerate(root: Path, destination: Path, run_log_output: Path | None) -> N
     environment = os.environ.copy()
     environment.update({"MPLBACKEND": "Agg", "MPLCONFIGDIR": str(destination / ".mpl")})
     try:
-        for module in GENERATORS:
+        modules = (*GENERATORS, *EXPENSIVE_GENERATORS) if include_expensive else GENERATORS
+        for module in modules:
             subprocess.run(
                 [sys.executable, "-m", "src.run_with_log", module],
                 cwd=destination,
@@ -271,7 +316,21 @@ def main(argv: list[str] | None = None) -> int:
         type=Path,
         help="Copy isolated generation run logs to this directory",
     )
+    parser.add_argument(
+        "--include-expensive",
+        action="store_true",
+        help="Also regenerate long-running benchmark artifacts",
+    )
+    parser.add_argument(
+        "--only-artifact",
+        action="append",
+        default=[],
+        metavar="RELATIVE_PATH",
+        help="With --current, compare only this artifact path (repeatable)",
+    )
     parsed = parser.parse_args(argv)
+    if parsed.only_artifact and not parsed.current:
+        parser.error("--only-artifact requires --current")
     root = Path(__file__).resolve().parents[1]
     with tempfile.TemporaryDirectory(prefix="qem-artifact-check-") as temporary:
         temporary_root = Path(temporary)
@@ -282,8 +341,17 @@ def main(argv: list[str] | None = None) -> int:
             candidate = root
         else:
             candidate = temporary_root / "generated"
-            _regenerate(root, candidate, parsed.run_log_output)
-        failures = compare_artifact_trees(reference, candidate)
+            _regenerate(
+                root,
+                candidate,
+                parsed.run_log_output,
+                include_expensive=parsed.include_expensive,
+            )
+        failures = compare_artifact_trees(
+            reference,
+            candidate,
+            set(parsed.only_artifact) if parsed.only_artifact else None,
+        )
 
     if failures:
         for failure in failures:

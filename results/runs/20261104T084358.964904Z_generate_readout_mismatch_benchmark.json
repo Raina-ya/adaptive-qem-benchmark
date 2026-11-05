@@ -1,0 +1,32 @@
+{
+  "run_id": "b2f05362-2f1a-4369-a129-8aa4a5d0a546",
+  "script": "src.generate_readout_mismatch_benchmark",
+  "started_at_utc": "2026-11-04T08:40:49.749034Z",
+  "finished_at_utc": "2026-11-04T08:43:58.964904Z",
+  "wall_seconds": 189.690979,
+  "python_version": "3.12.14",
+  "package_versions": {
+    "qiskit": "2.2.3",
+    "qiskit-aer": "0.17.2",
+    "numpy": "2.3.4",
+    "pandas": "2.3.3",
+    "matplotlib": "3.10.7",
+    "scipy": "1.16.3"
+  },
+  "git_commit_before": "15a8acf44b1039cec187774056023ecaed1f42dd",
+  "git_dirty_before": true,
+  "git_commit_after": "15a8acf44b1039cec187774056023ecaed1f42dd",
+  "git_dirty_after": true,
+  "host": "TP-1302774-NB",
+  "args": [],
+  "seed_root": 20261102,
+  "output_hashes": {
+    "results/processed/readout_mismatch_summary_v1.csv": "502a2ada5023478c79c47c920d9b6dd4b35c40ceb5d88ba54c35532df20c28cb",
+    "results/raw/readout_mismatch_v1.csv": "ed56c7d91e22f02ce598d3682584ebb7e5a0e7a3f9191722deefb8cd5bb6d975",
+    "figures/readout_mismatch_accuracy.png": "eb652c1aa5052a0a5e0ac8cdfba3fe3a84752e38f3b4fa1459e55c2afd7f37a0",
+    "figures/readout_mismatch_bias_vs_sampling.png": "58d707319fe7e9f01f17fdaf013cc7525ba653ad79556d727ef9ec8a7d29f614",
+    "figures/readout_mismatch_decision_error.png": "d6f9f0fd46631094d7bd7f9d80f9b73fabe83ce32f4e4dab6f3d8317a2d90a7b"
+  },
+  "status": "ok",
+  "error": null
+}
