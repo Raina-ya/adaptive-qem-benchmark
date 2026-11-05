@@ -26,6 +26,9 @@
     "additional_control"
   ],
   "methods": ["raw", "readout", "zne"],
+  "noise_model": "mixed_medium",
+  "zne_factors": [1, 3, 5],
+  "readout_calibration_fraction_of_selection_budget": 0.20,
   "total_selection_budgets": [4096, 16384],
   "selection_budget_fraction": 0.50,
   "final_evaluation_budget_fraction": 0.50,
@@ -38,5 +41,5 @@
   "approximate_success_metric": "fraction of sampled cuts at least alpha times the exact optimum",
   "certification_boundary": "optimality is verified only by the small-n classical exact solver; the quantum sampler does not certify optimality",
   "candidate_generation_boundary": "candidate creation, ranking, and selection use graph structure and noiseless statevectors only",
-  "status_values": ["pending", "complete", "failed", "not_applicable", "unresolved"]
+  "status_values": ["pending", "complete", "failed", "ill_conditioned", "nonphysical", "not_applicable", "unresolved"]
 }

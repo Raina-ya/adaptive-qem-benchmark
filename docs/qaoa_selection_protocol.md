@@ -89,6 +89,27 @@ evaluation. Later readout calibration, ZNE factors, and folded executions must f
 inside the same `B`; they cannot be added as uncharged overhead. The Phase F-B
 manifest records this contract but does not execute it.
 
+Phase F-C freezes the simulator condition at `mixed_medium`. Within the selection
+half of `B`, raw sampling divides all shots across the five candidates. Readout
+mitigation spends 20% of the selection half on one assignment-matrix calibration
+shared by the five candidates, then divides the remainder across their target
+circuits. Linear ZNE divides the selection half first across candidates and then
+across preregistered fold factors 1, 3, and 5. The untouched final-evaluation half
+remains reserved; it is not silently reused during selection.
+
+Raw and readout target circuits use a common-random-number seed derived without the
+method label. This pairs simulator randomness where the physical target circuit is
+the same, but differing shot counts remain fully charged. ZNE factor seeds are
+independent deterministic children of the same candidate seed because folded circuits
+are distinct executions. Calibration data are shared only within one graph, budget,
+repeat, and readout-method group; no method receives another method's samples.
+
+Every output row retains one candidate even after execution failure. Ill-conditioned
+readout correction, solver failure, and ZNE values outside the physical cut range are
+reported explicitly. ZNE estimates are never clipped. Candidate execution counts and
+selection-group execution counts are separate, and a complete bitstring shot supplies
+all edge contributions without creating extra per-edge executions.
+
 The frozen reporting value is `top_k = 2`. The pilot uses three repeats; the intended
 full run uses 50. Changing the allocation, candidate set, or `k` after inspecting
 noisy outcomes would create a new protocol version.

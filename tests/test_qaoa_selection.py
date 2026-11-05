@@ -14,6 +14,7 @@ from src.applications.qaoa_selection import (
     benchmark_graphs,
     build_candidate_manifest,
     candidate_pool_frame,
+    candidate_shot_allocation,
     certify_sampled_cuts,
     cut_value,
     exact_maxcut,
@@ -232,6 +233,19 @@ def test_selection_budget_is_frozen_at_half_selection_half_final() -> None:
         selection_budget_split(4095)
 
 
+def test_candidate_shot_allocations_charge_every_selection_shot() -> None:
+    raw = candidate_shot_allocation("raw", 4096, 5, width=4)
+    readout = candidate_shot_allocation("readout", 4096, 5, width=4)
+    zne = candidate_shot_allocation("zne", 4096, 5, width=4)
+
+    assert sum(raw["candidate_target_shots"]) == 2048
+    assert sum(readout["candidate_target_shots"]) + readout["calibration_shots"] == 2048
+    assert sum(sum(shots) for shots in zne["factor_shots"]) == 2048
+    assert all(sum(factors) == total for factors, total in zip(
+        zne["factor_shots"], zne["candidate_target_shots"], strict=True
+    ))
+
+
 def test_sampled_cut_certification_uses_exact_classical_optimum() -> None:
     graph = benchmark_graphs()[0]
     result = certify_sampled_cuts(graph, {"0101": 3, "0000": 1}, alpha=0.95)
@@ -276,4 +290,5 @@ def test_frozen_config_records_budget_and_certification_boundaries() -> None:
     assert config["top_k"] == 2
     assert config["success_alpha"] == 0.95
     assert config["near_tie_unavailable_graphs"] == ["ring4"]
+    assert config["noise_model"] == "mixed_medium"
     assert "classical exact solver" in config["certification_boundary"]

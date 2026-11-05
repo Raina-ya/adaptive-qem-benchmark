@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import json
 import math
 from collections.abc import Mapping, Sequence
 from dataclasses import dataclass, replace
@@ -10,10 +11,19 @@ from pathlib import Path
 
 import numpy as np
 import pandas as pd
-from qiskit import QuantumCircuit
+from qiskit import QuantumCircuit, transpile
 from qiskit.quantum_info import SparsePauliOp, Statevector
 
 from src.config import derive_seed
+from src.mitigation.folding import fold_global
+from src.mitigation.readout import (
+    constrained_readout_correction,
+    counts_probability_vector,
+    estimate_assignment_matrix,
+)
+from src.mitigation.zne import linear_extrapolate
+from src.noise_models import NoiseSpec, aer_simulator
+from src.resource_accounting import readout_mitigation_ledger, split_shots
 
 Edge = tuple[int, int]
 
@@ -29,6 +39,7 @@ NEAR_TIE_RELATIVE_GAP = 0.02
 CLEAR_RELATIVE_GAP = 0.10
 ENERGY_TOLERANCE = 1e-12
 SUCCESS_ALPHA = 0.95
+ZNE_FACTORS = (1, 3, 5)
 
 
 @dataclass(frozen=True)
@@ -267,6 +278,228 @@ def expected_cut_from_counts(graph: MaxCutGraph, counts: Mapping[str, int]) -> f
     if total_shots <= 0:
         raise ValueError("Counts must contain at least one shot")
     return weighted_cut / total_shots
+
+
+def expected_cut_from_corrected_probabilities(
+    graph: MaxCutGraph, probabilities: np.ndarray
+) -> float:
+    """Evaluate MaxCut energy from a corrected computational-basis distribution."""
+
+    return expected_cut_from_probabilities(graph, probabilities)
+
+
+def candidate_shot_allocation(
+    method: str, total_selection_budget: int, candidate_count: int, *, width: int
+) -> dict[str, object]:
+    """Allocate one graph-method-repeat budget without hidden executions."""
+
+    selection_shots, final_shots = selection_budget_split(total_selection_budget)
+    if candidate_count < 1:
+        raise ValueError("Candidate count must be positive")
+    if method == "raw":
+        candidate_shots = split_shots(selection_shots, candidate_count)
+        return {
+            "candidate_target_shots": candidate_shots,
+            "calibration_shots": 0,
+            "factor_shots": tuple(() for _ in candidate_shots),
+            "final_evaluation_shots": final_shots,
+        }
+    if method == "readout":
+        ledger = readout_mitigation_ledger(selection_shots, width)
+        candidate_shots = split_shots(ledger.target_shots, candidate_count)
+        return {
+            "candidate_target_shots": candidate_shots,
+            "calibration_shots": ledger.calibration_shots,
+            "factor_shots": tuple(() for _ in candidate_shots),
+            "final_evaluation_shots": final_shots,
+        }
+    if method == "zne":
+        candidate_totals = split_shots(selection_shots, candidate_count)
+        factor_shots = tuple(split_shots(shots, len(ZNE_FACTORS)) for shots in candidate_totals)
+        return {
+            "candidate_target_shots": candidate_totals,
+            "calibration_shots": 0,
+            "factor_shots": factor_shots,
+            "final_evaluation_shots": final_shots,
+        }
+    raise ValueError(f"Unsupported QAOA selection method: {method}")
+
+
+def _sample_complete_bitstrings(
+    circuit: QuantumCircuit,
+    *,
+    shots: int,
+    seed: int,
+    noise: NoiseSpec,
+) -> dict[str, int]:
+    """Sample complete cuts; one execution supplies every graph-edge contribution."""
+
+    measured = circuit.copy()
+    measured.measure_all()
+    simulator = aer_simulator(noise)
+    compiled = transpile(measured, simulator, optimization_level=0, seed_transpiler=seed)
+    counts = simulator.run(compiled, shots=shots, seed_simulator=seed).result().get_counts()
+    return {str(key).replace(" ", ""): int(value) for key, value in sorted(counts.items())}
+
+
+def _counts_json(counts: Mapping[str, int]) -> str:
+    return json.dumps(dict(sorted(counts.items())), sort_keys=True, separators=(",", ":"))
+
+
+def _energy_from_vector(graph: MaxCutGraph, probabilities: np.ndarray) -> float:
+    return expected_cut_from_corrected_probabilities(graph, probabilities)
+
+
+def run_candidate_selection_group(
+    graph: MaxCutGraph,
+    candidates: Sequence[QAOACandidate],
+    *,
+    method: str,
+    total_selection_budget: int,
+    repeat: int,
+    manifest_seeds: Sequence[int],
+    noise: NoiseSpec,
+) -> list[dict[str, object]]:
+    """Run one fixed-budget graph-method-repeat selection group."""
+
+    if len(candidates) != len(manifest_seeds):
+        raise ValueError("Every candidate must have one frozen manifest seed")
+    allocation = candidate_shot_allocation(
+        method, total_selection_budget, len(candidates), width=graph.width
+    )
+    target_shots = allocation["candidate_target_shots"]
+    factor_shots = allocation["factor_shots"]
+    calibration_shots = int(allocation["calibration_shots"])
+    final_shots = int(allocation["final_evaluation_shots"])
+    calibration_counts = ""
+    assignment_json = ""
+    corrected_matrix: np.ndarray | None = None
+    condition_number: float | None = None
+    calibration_status = "ok"
+    if method == "readout":
+        corrected_matrix, _, calibration_counts = estimate_assignment_matrix(
+            graph.width,
+            calibration_shots,
+            noise,
+            seed=derive_seed(
+                "qaoa-readout-calibration", graph.seed, total_selection_budget, repeat
+            ),
+        )
+        assignment_json = json.dumps(corrected_matrix.tolist(), separators=(",", ":"))
+
+    rows: list[dict[str, object]] = []
+    for candidate_index, (candidate, manifest_seed) in enumerate(
+        zip(candidates, manifest_seeds, strict=True)
+    ):
+        paired_seed = derive_seed(
+            "qaoa-selection-paired-target",
+            graph.seed,
+            total_selection_budget,
+            repeat,
+            candidate_index,
+        )
+        candidate_executions = 1 if method in {"raw", "readout"} else len(ZNE_FACTORS)
+        row: dict[str, object] = {
+            "graph_id": graph.graph_id,
+            "width": graph.width,
+            "graph_family": graph.family,
+            "edge_count": len(graph.edges),
+            "candidate_id": candidate.candidate_id,
+            "candidate_role": candidate.candidate_role,
+            "beta_parameters": f"[{candidate.beta:.17g}]",
+            "gamma_parameters": f"[{candidate.gamma:.17g}]",
+            "exact_classical_maxcut": exact_maxcut(graph).optimum,
+            "exact_ideal_energy": candidate.exact_ideal_energy,
+            "ideal_rank": candidate.ideal_rank,
+            "ideal_gap_to_best": candidate.ideal_gap_to_best,
+            "decision_regime": candidate.decision_regime,
+            "method": method,
+            "noise": noise.name,
+            "total_selection_budget": total_selection_budget,
+            "selection_shots": total_selection_budget - final_shots,
+            "final_evaluation_shots": final_shots,
+            "candidate_target_shots": int(target_shots[candidate_index]),
+            "calibration_shots": calibration_shots,
+            "factor_level_shots": json.dumps(factor_shots[candidate_index]),
+            "repeat": repeat,
+            "seed": int(manifest_seed),
+            "target_seed": paired_seed,
+            "raw_counts": "",
+            "factor_level_counts": "",
+            "calibration_data": calibration_counts if candidate_index == 0 else "",
+            "assignment_matrix": assignment_json if candidate_index == 0 else "",
+            "raw_energy": math.nan,
+            "corrected_or_extrapolated_estimate": math.nan,
+            "condition_number": math.nan,
+            "candidate_execution_count": candidate_executions,
+            "selection_execution_count": (
+                len(candidates) + (2**graph.width if method == "readout" else 0)
+                if method != "zne"
+                else len(candidates) * len(ZNE_FACTORS)
+            ),
+            "wall_seconds": math.nan,
+            "result_label": "noisy_simulated",
+            "status": "pending",
+            "failure_reason": "",
+        }
+        try:
+            circuit = qaoa_circuit(graph, betas=(candidate.beta,), gammas=(candidate.gamma,))
+            if method in {"raw", "readout"}:
+                counts = _sample_complete_bitstrings(
+                    circuit,
+                    shots=int(target_shots[candidate_index]),
+                    seed=paired_seed,
+                    noise=noise,
+                )
+                row["raw_counts"] = _counts_json(counts)
+                row["raw_energy"] = expected_cut_from_counts(graph, counts)
+                estimate = float(row["raw_energy"])
+                if method == "readout":
+                    observed = counts_probability_vector(str(row["raw_counts"]), graph.width)
+                    corrected, condition_number, calibration_status = (
+                        constrained_readout_correction(corrected_matrix, observed)
+                    )
+                    row["condition_number"] = condition_number
+                    if corrected is None:
+                        row["status"] = calibration_status
+                        row["failure_reason"] = calibration_status
+                        rows.append(row)
+                        continue
+                    estimate = _energy_from_vector(graph, corrected)
+            else:
+                estimates: list[float] = []
+                counts_by_factor: dict[str, dict[str, int]] = {}
+                for factor, shots in zip(
+                    ZNE_FACTORS, factor_shots[candidate_index], strict=True
+                ):
+                    counts = _sample_complete_bitstrings(
+                        fold_global(circuit, factor),
+                        shots=shots,
+                        seed=derive_seed("qaoa-zne-factor", paired_seed, factor),
+                        noise=noise,
+                    )
+                    counts_by_factor[str(factor)] = counts
+                    estimates.append(expected_cut_from_counts(graph, counts))
+                row["factor_level_counts"] = json.dumps(
+                    counts_by_factor, sort_keys=True, separators=(",", ":")
+                )
+                row["raw_counts"] = _counts_json(counts_by_factor["1"])
+                row["raw_energy"] = estimates[0]
+                row["factor_level_estimates"] = json.dumps(estimates, separators=(",", ":"))
+                estimate, slope, residual = linear_extrapolate(ZNE_FACTORS, tuple(estimates))
+                row["zne_slope"] = slope
+                row["zne_residual_sum_squares"] = residual
+            row["corrected_or_extrapolated_estimate"] = estimate
+            row["status"] = (
+                "nonphysical" if not 0.0 <= estimate <= len(graph.edges) else "complete"
+            )
+            if row["status"] == "nonphysical":
+                row["failure_reason"] = "estimate_outside_physical_cut_range"
+        except Exception as error:  # preserve every frozen candidate row
+            row["status"] = "failed"
+            row["failure_reason"] = f"{type(error).__name__}: {error}"
+        rows.append(row)
+    return rows
 
 
 def selection_budget_split(total_selection_budget: int) -> tuple[int, int]:
