@@ -38,6 +38,7 @@ GENERATORS = (
 EXPENSIVE_GENERATORS = (
     "src.generate_readout_scalability_benchmark",
     "src.generate_readout_mismatch_benchmark",
+    "src.generate_qaoa_selection",
 )
 ARTIFACT_ROOTS = (
     "results",

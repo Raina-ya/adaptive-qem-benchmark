@@ -1,0 +1,33 @@
+{
+  "run_id": "eba786be-83f9-4e61-a7e9-e3cbe758f7e7",
+  "script": "src.generate_qaoa_selection",
+  "started_at_utc": "2026-11-05T04:09:39.283863Z",
+  "finished_at_utc": "2026-11-05T04:09:46.525610Z",
+  "wall_seconds": 7.650302,
+  "python_version": "3.12.14",
+  "package_versions": {
+    "qiskit": "2.2.3",
+    "qiskit-aer": "0.17.2",
+    "numpy": "2.3.4",
+    "pandas": "2.3.3",
+    "matplotlib": "3.10.7",
+    "scipy": "1.16.3"
+  },
+  "git_commit_before": "68ab2001ac477e4c3d9a8bbbaa0da79a87cf3bb1",
+  "git_dirty_before": true,
+  "git_commit_after": "68ab2001ac477e4c3d9a8bbbaa0da79a87cf3bb1",
+  "git_dirty_after": true,
+  "host": "TP-1302774-NB",
+  "args": [
+    "--process-only"
+  ],
+  "seed_root": 20261102,
+  "output_hashes": {
+    "results/processed/qaoa_selection_summary_v1.csv": "b6c54a7783d0caff0f9eb03cdc061e87115761f40ec9006d26b35bb8e98db5b9",
+    "figures/qaoa_selection_error.png": "2b0c22e17fb715ccdf2044d03ea51bbe18de71ad0a244cc81402d4cdfa174ff9",
+    "figures/qaoa_shots_to_decision.png": "634676a8f4fece103ea46605ec8a56487deede6fb59976834229bbd77acad4c9",
+    "figures/qaoa_simple_regret.png": "6bcdff15570664936ef7046a3bc64f014f31a0d29d3c6c1258d9daed161572f9"
+  },
+  "status": "ok",
+  "error": null
+}

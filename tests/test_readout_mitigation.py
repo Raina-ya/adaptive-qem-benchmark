@@ -78,3 +78,15 @@ def test_fixed_matrix_correction_is_bitwise_stable_across_thread_settings() -> N
     assert first[1].hex() == second[1].hex()
     assert first[0] is not None and second[0] is not None
     assert first[0].tobytes() == second[0].tobytes()
+
+
+def test_large_full_matrix_uses_convergent_projected_solver() -> None:
+    matrix = np.eye(128)
+    observed = np.zeros(128)
+    observed[[3, 17]] = (0.7, 0.3)
+
+    corrected, condition, status = constrained_readout_correction(matrix, observed)
+
+    assert status == "ok"
+    assert condition == 1.0
+    np.testing.assert_allclose(corrected, observed, rtol=0.0, atol=1e-12)

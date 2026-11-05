@@ -1,0 +1,30 @@
+{
+  "run_id": "f86ff8cc-ec78-4ff0-b2fa-4b6118955317",
+  "script": "src.generate_qaoa_selection",
+  "started_at_utc": "2026-11-05T03:46:10.009659Z",
+  "finished_at_utc": "2026-11-05T03:48:00.383892Z",
+  "wall_seconds": 111.34207,
+  "python_version": "3.12.14",
+  "package_versions": {
+    "qiskit": "2.2.3",
+    "qiskit-aer": "0.17.2",
+    "numpy": "2.3.4",
+    "pandas": "2.3.3",
+    "matplotlib": "3.10.7",
+    "scipy": "1.16.3"
+  },
+  "git_commit_before": "68ab2001ac477e4c3d9a8bbbaa0da79a87cf3bb1",
+  "git_dirty_before": true,
+  "git_commit_after": "68ab2001ac477e4c3d9a8bbbaa0da79a87cf3bb1",
+  "git_dirty_after": true,
+  "host": "TP-1302774-NB",
+  "args": [
+    "--pilot"
+  ],
+  "seed_root": 20261102,
+  "output_hashes": {
+    "results/raw/qaoa_selection_pilot_v1.csv": "b4af017ff436826f17123c29c8f648e782a6016720fd87c7725042840a2105da"
+  },
+  "status": "ok",
+  "error": null
+}

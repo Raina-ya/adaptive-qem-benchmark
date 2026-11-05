@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import json
 import math
+from collections import Counter
 from collections.abc import Mapping, Sequence
 from dataclasses import dataclass, replace
 from functools import cache
@@ -520,6 +521,8 @@ def selection_metrics_frame(frame: pd.DataFrame, *, top_k: int) -> pd.DataFrame:
 
     required = {
         "graph_id",
+        "graph_family",
+        "width",
         "method",
         "total_selection_budget",
         "repeat",
@@ -540,55 +543,86 @@ def selection_metrics_frame(frame: pd.DataFrame, *, top_k: int) -> pd.DataFrame:
     group_columns = ["graph_id", "method", "total_selection_budget", "repeat"]
     for keys, group in frame.groupby(group_columns, sort=True, dropna=False):
         graph_id, method, budget, repeat = keys
-        estimates = pd.to_numeric(
-            group["corrected_or_extrapolated_estimate"], errors="coerce"
-        )
-        resolved = group.status.isin({"complete", "nonphysical"}).all() and estimates.notna().all()
         overhead_shots = int(group.calibration_shots.max())
         if method == "zne":
             overhead_shots += sum(
                 sum(json.loads(value)[1:]) for value in group.factor_level_shots
             )
-        row: dict[str, object] = {
-            "graph_id": graph_id,
-            "method": method,
-            "total_selection_budget": int(budget),
-            "repeat": int(repeat),
-            "resolved": bool(resolved),
-            "unresolved": not resolved,
-            "overhead_shots": overhead_shots,
-            "shot_overhead_fraction": overhead_shots / int(group.selection_shots.iloc[0]),
-            "selection_execution_count": int(group.selection_execution_count.iloc[0]),
-            "execution_overhead_ratio": int(group.selection_execution_count.iloc[0])
-            / len(group),
-            "shots_to_certified_decision": math.nan,
-            "certification_status": "unresolved",
-        }
-        if resolved:
-            metrics = evaluate_candidate_selection(
-                group.candidate_id.tolist(),
-                group.exact_ideal_energy.tolist(),
-                estimates.tolist(),
-                top_k=top_k,
+        regime_groups = [("overall", group)]
+        incumbent = group[group.candidate_role == "incumbent"]
+        for regime, role in (
+            ("clear", "clear_challenger"),
+            ("near_tie", "near_tie_challenger"),
+        ):
+            challenger = group[group.candidate_role == role]
+            if not incumbent.empty and not challenger.empty:
+                regime_groups.append((regime, pd.concat([incumbent, challenger])))
+        for regime, regime_group in regime_groups:
+            estimates = pd.to_numeric(
+                regime_group["corrected_or_extrapolated_estimate"], errors="coerce"
             )
-            row.update(
-                {
-                    "selected_candidate_id": metrics.selected_candidate_id,
-                    "noisy_winner_ids": json.dumps(metrics.noisy_winner_ids),
-                    "exact_winner_ids": json.dumps(metrics.exact_winner_ids),
-                    "noisy_tie": len(metrics.noisy_winner_ids) > 1,
-                    "exact_degeneracy": len(metrics.exact_winner_ids) > 1,
-                    "best_candidate_selection_indicator": int(
-                        metrics.set_valued_correct
-                    ),
-                    "unique_winner_indicator": metrics.unique_winner_correct,
-                    "top_k_recall": metrics.top_k_recall,
-                    "simple_regret": metrics.simple_regret,
-                    "energy_rmse": metrics.energy_rmse,
-                    "decision_error": metrics.decision_error,
-                }
+            resolved = (
+                regime_group.status.isin({"complete", "nonphysical"}).all()
+                and estimates.notna().all()
             )
-        rows.append(row)
+            certification_status = (
+                str(group.certification_status.iloc[0])
+                if regime == "overall" and "certification_status" in group
+                else "not_evaluated"
+            )
+            certification_shots = (
+                pd.to_numeric(group.shots_to_certified_decision, errors="coerce").iloc[0]
+                if regime == "overall" and "shots_to_certified_decision" in group
+                else math.nan
+            )
+            row: dict[str, object] = {
+                "graph_id": graph_id,
+                "graph_family": str(group.graph_family.iloc[0]),
+                "width": int(group.width.iloc[0]),
+                "candidate_gap_regime": regime,
+                "method": method,
+                "total_selection_budget": int(budget),
+                "repeat": int(repeat),
+                "resolved": bool(resolved),
+                "unresolved": not resolved,
+                "overhead_shots": overhead_shots,
+                "shot_overhead_fraction": overhead_shots
+                / int(group.selection_shots.iloc[0]),
+                "selection_execution_count": int(
+                    group.selection_execution_count.iloc[0]
+                ),
+                "execution_overhead_ratio": int(
+                    group.selection_execution_count.iloc[0]
+                )
+                / len(group),
+                "shots_to_certified_decision": certification_shots,
+                "certification_status": certification_status,
+            }
+            if resolved:
+                metrics = evaluate_candidate_selection(
+                    regime_group.candidate_id.tolist(),
+                    regime_group.exact_ideal_energy.tolist(),
+                    estimates.tolist(),
+                    top_k=min(top_k, len(regime_group)),
+                )
+                row.update(
+                    {
+                        "selected_candidate_id": metrics.selected_candidate_id,
+                        "noisy_winner_ids": json.dumps(metrics.noisy_winner_ids),
+                        "exact_winner_ids": json.dumps(metrics.exact_winner_ids),
+                        "noisy_tie": len(metrics.noisy_winner_ids) > 1,
+                        "exact_degeneracy": len(metrics.exact_winner_ids) > 1,
+                        "best_candidate_selection_indicator": int(
+                            metrics.set_valued_correct
+                        ),
+                        "unique_winner_indicator": metrics.unique_winner_correct,
+                        "top_k_recall": metrics.top_k_recall,
+                        "simple_regret": metrics.simple_regret,
+                        "energy_rmse": metrics.energy_rmse,
+                        "decision_error": metrics.decision_error,
+                    }
+                )
+            rows.append(row)
     return pd.DataFrame(rows)
 
 
@@ -599,10 +633,16 @@ def summarize_selection_results(
 
     decisions = selection_metrics_frame(frame, top_k=top_k)
     rows: list[dict[str, object]] = []
-    for keys, group in decisions.groupby(
-        ["graph_id", "method", "total_selection_budget"], sort=True
-    ):
-        graph_id, method, budget = keys
+    summary_groups = [
+        "graph_id",
+        "graph_family",
+        "width",
+        "candidate_gap_regime",
+        "method",
+        "total_selection_budget",
+    ]
+    for keys, group in decisions.groupby(summary_groups, sort=True):
+        graph_id, graph_family, width, regime, method, budget = keys
         resolved = group[group.resolved]
         unresolved_count = int(group.unresolved.sum())
         unresolved_low, unresolved_high = wilson_interval(
@@ -610,6 +650,9 @@ def summarize_selection_results(
         )
         row: dict[str, object] = {
             "graph_id": graph_id,
+            "graph_family": graph_family,
+            "width": int(width),
+            "candidate_gap_regime": regime,
             "method": method,
             "total_selection_budget": int(budget),
             "repeats": len(group),
@@ -620,33 +663,58 @@ def summarize_selection_results(
             "mean_overhead_shots": group.overhead_shots.mean(),
             "mean_shot_overhead_fraction": group.shot_overhead_fraction.mean(),
             "mean_selection_execution_count": group.selection_execution_count.mean(),
+            "total_selection_executions": int(group.selection_execution_count.sum()),
             "mean_execution_overhead_ratio": group.execution_overhead_ratio.mean(),
+            "total_charged_shots": int(budget) * len(group),
         }
         if resolved.empty:
             row.update(
                 {
                     "best_candidate_selection_probability": math.nan,
+                    "selection_probability_wilson_low": math.nan,
+                    "selection_probability_wilson_high": math.nan,
                     "mean_top_k_recall": math.nan,
                     "mean_simple_regret": math.nan,
+                    "simple_regret_standard_error": math.nan,
                     "energy_rmse": math.nan,
                     "decision_error_probability": math.nan,
                     "decision_error_wilson_low": math.nan,
                     "decision_error_wilson_high": math.nan,
                     "mean_shots_to_certified_decision": math.nan,
+                    "certified_probability": math.nan,
                 }
             )
         else:
             errors = int(resolved.decision_error.sum())
+            successes = len(resolved) - errors
             error_low, error_high = wilson_interval(
                 errors, len(resolved), confidence=confidence
+            )
+            success_low, success_high = wilson_interval(
+                successes, len(resolved), confidence=confidence
+            )
+            certified_shots = pd.to_numeric(
+                resolved.loc[
+                    resolved.certification_status == "certified",
+                    "shots_to_certified_decision",
+                ],
+                errors="coerce",
+            ).dropna()
+            regret_standard_error = (
+                float(resolved.simple_regret.std(ddof=1) / math.sqrt(len(resolved)))
+                if len(resolved) > 1
+                else math.nan
             )
             row.update(
                 {
                     "best_candidate_selection_probability": resolved[
                         "best_candidate_selection_indicator"
                     ].mean(),
+                    "selection_probability_wilson_low": success_low,
+                    "selection_probability_wilson_high": success_high,
                     "mean_top_k_recall": resolved.top_k_recall.mean(),
                     "mean_simple_regret": resolved.simple_regret.mean(),
+                    "simple_regret_standard_error": regret_standard_error,
                     "energy_rmse": math.sqrt(
                         math.fsum(float(value) ** 2 for value in resolved.energy_rmse)
                         / len(resolved)
@@ -657,6 +725,22 @@ def summarize_selection_results(
                     "mean_shots_to_certified_decision": resolved[
                         "shots_to_certified_decision"
                     ].mean(),
+                    "median_shots_to_certified_decision": (
+                        certified_shots.median() if not certified_shots.empty else math.nan
+                    ),
+                    "q25_shots_to_certified_decision": (
+                        certified_shots.quantile(0.25)
+                        if not certified_shots.empty
+                        else math.nan
+                    ),
+                    "q75_shots_to_certified_decision": (
+                        certified_shots.quantile(0.75)
+                        if not certified_shots.empty
+                        else math.nan
+                    ),
+                    "certified_probability": resolved.certification_status.eq(
+                        "certified"
+                    ).mean(),
                 }
             )
         rows.append(row)
@@ -717,6 +801,107 @@ def _sample_complete_bitstrings(
     return {str(key).replace(" ", ""): int(value) for key, value in sorted(counts.items())}
 
 
+def _sample_complete_bitstring_memory(
+    circuit: QuantumCircuit,
+    *,
+    shots: int,
+    seed: int,
+    noise: NoiseSpec,
+) -> tuple[str, ...]:
+    """Return an ordered sample record so checkpoints can use true prefixes."""
+
+    measured = circuit.copy()
+    measured.measure_all()
+    simulator = aer_simulator(noise)
+    compiled = transpile(measured, simulator, optimization_level=0, seed_transpiler=seed)
+    memory = simulator.run(
+        compiled, shots=shots, seed_simulator=seed, memory=True
+    ).result().get_memory()
+    return tuple(str(value).replace(" ", "") for value in memory)
+
+
+def _memory_counts(memory: Sequence[str]) -> dict[str, int]:
+    return dict(sorted(Counter(memory).items()))
+
+
+def _cut_standard_error(graph: MaxCutGraph, counts: Mapping[str, int]) -> float:
+    shots = sum(counts.values())
+    if shots < 2:
+        return math.inf
+    mean = expected_cut_from_counts(graph, counts)
+    squared_deviations = math.fsum(
+        count * (cut_value(graph, bitstring) - mean) ** 2
+        for bitstring, count in counts.items()
+    )
+    return math.sqrt(squared_deviations / (shots - 1) / shots)
+
+
+def _zne_intercept_weights() -> tuple[float, ...]:
+    design = np.column_stack((np.ones(len(ZNE_FACTORS)), np.asarray(ZNE_FACTORS, dtype=float)))
+    return tuple(float(value) for value in np.linalg.pinv(design)[0])
+
+
+def _attach_group_certification(
+    rows: list[dict[str, object]],
+    candidates: Sequence[QAOACandidate],
+    estimates: Mapping[str, Sequence[float]],
+    standard_errors: Mapping[str, Sequence[float]],
+    candidate_shots: Mapping[str, Sequence[int]],
+    *,
+    calibration_shots: int,
+) -> None:
+    candidate_ids = tuple(candidate.candidate_id for candidate in candidates)
+    maximum_shots = int(rows[0]["selection_shots"])
+    if any(candidate_id not in estimates for candidate_id in candidate_ids):
+        for row in rows:
+            row["certification_status"] = "unresolved"
+            row["maximum_certification_shots"] = maximum_shots
+        return
+    checkpoints: list[CertificationCheckpoint] = []
+    records: list[dict[str, object]] = []
+    for checkpoint_index in range(4):
+        cumulative_candidate_shots = {
+            candidate_id: int(candidate_shots[candidate_id][checkpoint_index])
+            for candidate_id in candidate_ids
+        }
+        total_shots = calibration_shots + sum(cumulative_candidate_shots.values())
+        checkpoint_estimates = {
+            candidate_id: float(estimates[candidate_id][checkpoint_index])
+            for candidate_id in candidate_ids
+        }
+        checkpoint_errors = {
+            candidate_id: float(standard_errors[candidate_id][checkpoint_index])
+            for candidate_id in candidate_ids
+        }
+        checkpoints.append(
+            CertificationCheckpoint(
+                total_shots,
+                checkpoint_estimates,
+                checkpoint_errors,
+                cumulative_candidate_shots,
+            )
+        )
+        records.append(
+            {
+                "total_shots": total_shots,
+                "estimates": checkpoint_estimates,
+                "standard_errors": checkpoint_errors,
+                "candidate_shots": cumulative_candidate_shots,
+            }
+        )
+    result = certify_candidate_winner(checkpoints)
+    checkpoint_json = json.dumps(records, sort_keys=True, separators=(",", ":"))
+    for row_index, row in enumerate(rows):
+        row["certification_status"] = result.status
+        row["shots_to_certified_decision"] = (
+            result.shots_to_certified_decision
+            if result.shots_to_certified_decision is not None
+            else math.nan
+        )
+        row["maximum_certification_shots"] = result.maximum_shots
+        row["certification_checkpoint_data"] = checkpoint_json if row_index == 0 else ""
+
+
 def _counts_json(counts: Mapping[str, int]) -> str:
     return json.dumps(dict(sorted(counts.items())), sort_keys=True, separators=(",", ":"))
 
@@ -734,6 +919,7 @@ def run_candidate_selection_group(
     repeat: int,
     manifest_seeds: Sequence[int],
     noise: NoiseSpec,
+    collect_checkpoints: bool = False,
 ) -> list[dict[str, object]]:
     """Run one fixed-budget graph-method-repeat selection group."""
 
@@ -751,6 +937,9 @@ def run_candidate_selection_group(
     corrected_matrix: np.ndarray | None = None
     condition_number: float | None = None
     calibration_status = "ok"
+    checkpoint_estimates: dict[str, list[float]] = {}
+    checkpoint_standard_errors: dict[str, list[float]] = {}
+    checkpoint_candidate_shots: dict[str, list[int]] = {}
     if method == "readout":
         corrected_matrix, _, calibration_counts = estimate_assignment_matrix(
             graph.width,
@@ -806,6 +995,8 @@ def run_candidate_selection_group(
             "raw_energy": math.nan,
             "corrected_or_extrapolated_estimate": math.nan,
             "condition_number": math.nan,
+            "correction_status": "not_applicable",
+            "nonphysical_estimate": False,
             "candidate_execution_count": candidate_executions,
             "selection_execution_count": (
                 len(candidates) + (2**graph.width if method == "readout" else 0)
@@ -816,43 +1007,114 @@ def run_candidate_selection_group(
             "result_label": "noisy_simulated",
             "status": "pending",
             "failure_reason": "",
+            "certification_status": "not_evaluated",
+            "shots_to_certified_decision": math.nan,
+            "maximum_certification_shots": math.nan,
+            "certification_checkpoint_data": "",
         }
         try:
             circuit = qaoa_circuit(graph, betas=(candidate.beta,), gammas=(candidate.gamma,))
             if method in {"raw", "readout"}:
-                counts = _sample_complete_bitstrings(
-                    circuit,
-                    shots=int(target_shots[candidate_index]),
-                    seed=paired_seed,
-                    noise=noise,
-                )
+                shots = int(target_shots[candidate_index])
+                checkpoint_counts: list[dict[str, int]] = []
+                if collect_checkpoints:
+                    memory = _sample_complete_bitstring_memory(
+                        circuit, shots=shots, seed=paired_seed, noise=noise
+                    )
+                    counts = _memory_counts(memory)
+                    checkpoint_counts = [
+                        _memory_counts(memory[:checkpoint])
+                        for checkpoint in nested_shot_checkpoints(shots)
+                    ]
+                else:
+                    counts = _sample_complete_bitstrings(
+                        circuit, shots=shots, seed=paired_seed, noise=noise
+                    )
                 row["raw_counts"] = _counts_json(counts)
                 row["raw_energy"] = expected_cut_from_counts(graph, counts)
                 estimate = float(row["raw_energy"])
+                candidate_checkpoint_estimates = [
+                    expected_cut_from_counts(graph, prefix) for prefix in checkpoint_counts
+                ]
+                candidate_checkpoint_errors = [
+                    _cut_standard_error(graph, prefix) for prefix in checkpoint_counts
+                ]
                 if method == "readout":
                     observed = counts_probability_vector(str(row["raw_counts"]), graph.width)
                     corrected, condition_number, calibration_status = (
-                        constrained_readout_correction(corrected_matrix, observed)
+                        constrained_readout_correction(
+                            corrected_matrix,
+                            observed,
+                            precomputed_condition_number=condition_number,
+                        )
                     )
                     row["condition_number"] = condition_number
+                    row["correction_status"] = calibration_status
                     if corrected is None:
-                        row["status"] = calibration_status
+                        row["status"] = "failed"
                         row["failure_reason"] = calibration_status
                         rows.append(row)
                         continue
                     estimate = _energy_from_vector(graph, corrected)
+                    corrected_checkpoint_estimates: list[float] = []
+                    corrected_checkpoint_errors: list[float] = []
+                    for prefix, raw_error in zip(
+                        checkpoint_counts, candidate_checkpoint_errors, strict=True
+                    ):
+                        prefix_observed = counts_probability_vector(
+                            _counts_json(prefix), graph.width
+                        )
+                        prefix_corrected, prefix_condition, prefix_status = (
+                            constrained_readout_correction(
+                                corrected_matrix,
+                                prefix_observed,
+                                precomputed_condition_number=condition_number,
+                            )
+                        )
+                        if prefix_corrected is None:
+                            raise RuntimeError(
+                                f"checkpoint readout correction {prefix_status}"
+                            )
+                        corrected_checkpoint_estimates.append(
+                            _energy_from_vector(graph, prefix_corrected)
+                        )
+                        corrected_checkpoint_errors.append(
+                            raw_error * prefix_condition
+                        )
+                    candidate_checkpoint_estimates = corrected_checkpoint_estimates
+                    candidate_checkpoint_errors = corrected_checkpoint_errors
+                if collect_checkpoints:
+                    checkpoint_estimates[candidate.candidate_id] = (
+                        candidate_checkpoint_estimates
+                    )
+                    checkpoint_standard_errors[candidate.candidate_id] = (
+                        candidate_checkpoint_errors
+                    )
+                    checkpoint_candidate_shots[candidate.candidate_id] = list(
+                        nested_shot_checkpoints(shots)
+                    )
             else:
                 estimates: list[float] = []
                 counts_by_factor: dict[str, dict[str, int]] = {}
+                checkpoint_counts_by_factor: dict[int, list[dict[str, int]]] = {}
                 for factor, shots in zip(
                     ZNE_FACTORS, factor_shots[candidate_index], strict=True
                 ):
-                    counts = _sample_complete_bitstrings(
-                        fold_global(circuit, factor),
-                        shots=shots,
-                        seed=derive_seed("qaoa-zne-factor", paired_seed, factor),
-                        noise=noise,
-                    )
+                    folded = fold_global(circuit, factor)
+                    factor_seed = derive_seed("qaoa-zne-factor", paired_seed, factor)
+                    if collect_checkpoints:
+                        memory = _sample_complete_bitstring_memory(
+                            folded, shots=shots, seed=factor_seed, noise=noise
+                        )
+                        counts = _memory_counts(memory)
+                        checkpoint_counts_by_factor[factor] = [
+                            _memory_counts(memory[:checkpoint])
+                            for checkpoint in nested_shot_checkpoints(shots)
+                        ]
+                    else:
+                        counts = _sample_complete_bitstrings(
+                            folded, shots=shots, seed=factor_seed, noise=noise
+                        )
                     counts_by_factor[str(factor)] = counts
                     estimates.append(expected_cut_from_counts(graph, counts))
                 row["factor_level_counts"] = json.dumps(
@@ -864,16 +1126,73 @@ def run_candidate_selection_group(
                 estimate, slope, residual = linear_extrapolate(ZNE_FACTORS, tuple(estimates))
                 row["zne_slope"] = slope
                 row["zne_residual_sum_squares"] = residual
+                if collect_checkpoints:
+                    weights = _zne_intercept_weights()
+                    candidate_checkpoint_estimates = []
+                    candidate_checkpoint_errors = []
+                    candidate_checkpoint_totals = []
+                    for checkpoint_index in range(4):
+                        prefix_estimates = tuple(
+                            expected_cut_from_counts(
+                                graph, checkpoint_counts_by_factor[factor][checkpoint_index]
+                            )
+                            for factor in ZNE_FACTORS
+                        )
+                        prefix_errors = tuple(
+                            _cut_standard_error(
+                                graph, checkpoint_counts_by_factor[factor][checkpoint_index]
+                            )
+                            for factor in ZNE_FACTORS
+                        )
+                        extrapolated, _, _ = linear_extrapolate(
+                            ZNE_FACTORS, prefix_estimates
+                        )
+                        candidate_checkpoint_estimates.append(extrapolated)
+                        candidate_checkpoint_errors.append(
+                            math.sqrt(
+                                math.fsum(
+                                    (weight * error) ** 2
+                                    for weight, error in zip(
+                                        weights, prefix_errors, strict=True
+                                    )
+                                )
+                            )
+                        )
+                        candidate_checkpoint_totals.append(
+                            sum(
+                                sum(
+                                    checkpoint_counts_by_factor[factor][checkpoint_index].values()
+                                )
+                                for factor in ZNE_FACTORS
+                            )
+                        )
+                    checkpoint_estimates[candidate.candidate_id] = (
+                        candidate_checkpoint_estimates
+                    )
+                    checkpoint_standard_errors[candidate.candidate_id] = (
+                        candidate_checkpoint_errors
+                    )
+                    checkpoint_candidate_shots[candidate.candidate_id] = (
+                        candidate_checkpoint_totals
+                    )
             row["corrected_or_extrapolated_estimate"] = estimate
-            row["status"] = (
-                "nonphysical" if not 0.0 <= estimate <= len(graph.edges) else "complete"
-            )
-            if row["status"] == "nonphysical":
+            row["nonphysical_estimate"] = not 0.0 <= estimate <= len(graph.edges)
+            row["status"] = "complete"
+            if row["nonphysical_estimate"]:
                 row["failure_reason"] = "estimate_outside_physical_cut_range"
         except Exception as error:  # preserve every frozen candidate row
             row["status"] = "failed"
             row["failure_reason"] = f"{type(error).__name__}: {error}"
         rows.append(row)
+    if collect_checkpoints:
+        _attach_group_certification(
+            rows,
+            candidates,
+            checkpoint_estimates,
+            checkpoint_standard_errors,
+            checkpoint_candidate_shots,
+            calibration_shots=calibration_shots,
+        )
     return rows
 
 

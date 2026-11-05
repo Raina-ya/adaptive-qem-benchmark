@@ -1,0 +1,31 @@
+{
+  "run_id": "e129c724-2f3a-4436-8e9d-8d419421f076",
+  "script": "src.generate_qaoa_selection",
+  "started_at_utc": "2026-11-05T03:48:26.223237Z",
+  "finished_at_utc": "2026-11-05T04:09:08.330462Z",
+  "wall_seconds": 1242.483624,
+  "python_version": "3.12.14",
+  "package_versions": {
+    "qiskit": "2.2.3",
+    "qiskit-aer": "0.17.2",
+    "numpy": "2.3.4",
+    "pandas": "2.3.3",
+    "matplotlib": "3.10.7",
+    "scipy": "1.16.3"
+  },
+  "git_commit_before": "68ab2001ac477e4c3d9a8bbbaa0da79a87cf3bb1",
+  "git_dirty_before": true,
+  "git_commit_after": "68ab2001ac477e4c3d9a8bbbaa0da79a87cf3bb1",
+  "git_dirty_after": true,
+  "host": "TP-1302774-NB",
+  "args": [
+    "--full"
+  ],
+  "seed_root": 20261102,
+  "output_hashes": {
+    "results/processed/qaoa_selection_summary_v1.csv": "85df63022a6deb6f396aa313c4d31e31ccf89ae003c205b5a8396bdd51c6c0bc",
+    "results/raw/qaoa_selection_v1.csv": "47d7f5693e91387e712f7c112bedff055ece4c9891d6c6a15c0888ca85a932c9"
+  },
+  "status": "failed",
+  "error": "Traceback (most recent call last):\n  File \"<frozen runpy>\", line 198, in _run_module_as_main\n  File \"<frozen runpy>\", line 88, in _run_code\n  File \"C:\\Users\\wits\\Documents\\Codex\\2026-10-30\\adaptive-qem-benchmark\\work\\phase-d-publish\\src\\generate_qaoa_selection.py\", line 356, in <module>\n    main()\n  File \"C:\\Users\\wits\\Documents\\Codex\\2026-10-30\\adaptive-qem-benchmark\\work\\phase-d-publish\\src\\generate_qaoa_selection.py\", line 350, in main\n    summary = process_results(frame)\n              ^^^^^^^^^^^^^^^^^^^^^^\n  File \"C:\\Users\\wits\\Documents\\Codex\\2026-10-30\\adaptive-qem-benchmark\\work\\phase-d-publish\\src\\generate_qaoa_selection.py\", line 308, in process_results\n    _plot_selection_error(decisions)\n  File \"C:\\Users\\wits\\Documents\\Codex\\2026-10-30\\adaptive-qem-benchmark\\work\\phase-d-publish\\src\\generate_qaoa_selection.py\", line 196, in _plot_selection_error\n    figure, axes = plt.subplots(1, 2, figsize=(10.5, 4.2), sharey=True)\n                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"C:\\Users\\wits\\Documents\\Codex\\2026-10-30\\adaptive-qem-benchmark\\.venv\\Lib\\site-packages\\matplotlib\\pyplot.py\", line 1776, in subplots\n    fig = figure(**fig_kw)\n          ^^^^^^^^^^^^^^^^\n  File \"C:\\Users\\wits\\Documents\\Codex\\2026-10-30\\adaptive-qem-benchmark\\.venv\\Lib\\site-packages\\matplotlib\\pyplot.py\", line 1041, in figure\n    manager = new_figure_manager(\n              ^^^^^^^^^^^^^^^^^^^\n  File \"C:\\Users\\wits\\Documents\\Codex\\2026-10-30\\adaptive-qem-benchmark\\.venv\\Lib\\site-packages\\matplotlib\\pyplot.py\", line 551, in new_figure_manager\n    return _get_backend_mod().new_figure_manager(*args, **kwargs)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"C:\\Users\\wits\\Documents\\Codex\\2026-10-30\\adaptive-qem-benchmark\\.venv\\Lib\\site-packages\\matplotlib\\backend_bases.py\", line 3504, in new_figure_manager\n    return cls.new_figure_manager_given_figure(num, fig)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"C:\\Users\\wits\\Documents\\Codex\\2026-10-30\\adaptive-qem-benchmark\\.venv\\Lib\\site-packages\\matplotlib\\backend_bases.py\", line 3509, in new_figure_manager_given_figure\n    return cls.FigureCanvas.new_manager(figure, num)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"C:\\Users\\wits\\Documents\\Codex\\2026-10-30\\adaptive-qem-benchmark\\.venv\\Lib\\site-packages\\matplotlib\\backend_bases.py\", line 1785, in new_manager\n    return cls.manager_class.create_with_canvas(cls, figure, num)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"C:\\Users\\wits\\Documents\\Codex\\2026-10-30\\adaptive-qem-benchmark\\.venv\\Lib\\site-packages\\matplotlib\\backends\\_backend_tk.py\", line 535, in create_with_canvas\n    window = tk.Tk(className=\"matplotlib\")\n             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"C:\\Users\\wits\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python\\Lib\\tkinter\\__init__.py\", line 2346, in __init__\n    self.tk = _tkinter.create(screenName, baseName, className, interactive, wantobjects, useTk, sync, use)\n              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n_tkinter.TclError: Can't find a usable init.tcl in the following directories: \n    {C:\\Users\\wits\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python\\tcl\\tcl8.6}\n\n\n\nThis probably means that Tcl wasn't installed properly."
+}

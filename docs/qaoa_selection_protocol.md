@@ -154,6 +154,21 @@ relative to the factor-1 estimate. Execution overhead is the selection-group cir
 count divided by the raw one-execution-per-candidate baseline. These quantities do not
 change the fixed total budget.
 
+For full assignment matrices below dimension 128, correction retains the fixed-order
+active-set NNLS solver. At dimensions 128 and above, the same nonnegative least-squares
+objective uses deterministic projected FISTA with a fixed tolerance and iteration cap.
+A Varah diagonal-dominance bound replaces explicit dense inversion for the large-matrix
+condition gate. A non-dominant matrix is conservatively reported as ill-conditioned;
+non-convergence is retained as a failed row. This solver switch changes classical
+runtime, not calibration data, shot allocation, or the correction objective.
+
+Checkpoint standard errors use the empirical complete-cut variance for raw sampling.
+Readout checkpoint errors multiply that raw standard error by the assignment-matrix
+condition estimate, a deliberately conservative amplification bound. ZNE propagates
+the three independent factor-level empirical variances through the preregistered
+linear-intercept weights. These approximations are used only for stopping/certification;
+they do not alter the reported point estimates.
+
 ## Sampled-cut verification
 
 Every sampled computational-basis bitstring has a cut value that can be evaluated
@@ -175,5 +190,6 @@ The instances have at most eight vertices and remain classically trivial. They t
 accounting, ranking, and mitigation behavior rather than quantum advantage. Candidate
 parameters, ranking, `top_k`, the 50/50 selection/final allocation, noise model,
 method-specific budget splitting, application metrics, and certification rule are now
-frozen. Certification still requires method-appropriate standard errors from the
-future full runner; Phase F-D does not infer them from aggregate smoke counts.
+frozen. The readout condition-amplified interval is conservative rather than a full
+bootstrap of constrained correction, and this limitation must accompany claims about
+the low certification rate.

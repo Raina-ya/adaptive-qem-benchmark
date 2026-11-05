@@ -174,6 +174,76 @@ def _inverse_and_condition_inf(matrix: np.ndarray) -> tuple[list[list[float]] | 
     return inverse, matrix_norm * inverse_norm
 
 
+def _diagonal_dominance_condition_bound(matrix: np.ndarray) -> float:
+    """Return Varah's deterministic infinity-condition upper bound."""
+
+    matrix_norm = max(math.fsum(abs(float(value)) for value in row) for row in matrix)
+    margins = [
+        abs(float(matrix[index, index]))
+        - math.fsum(
+            abs(float(matrix[index, column]))
+            for column in range(matrix.shape[1])
+            if column != index
+        )
+        for index in range(matrix.shape[0])
+    ]
+    minimum_margin = min(margins)
+    return matrix_norm / minimum_margin if minimum_margin > 0.0 else math.inf
+
+
+class _DenseAssignmentOperator:
+    def __init__(self, matrix: np.ndarray) -> None:
+        self.matrix = matrix
+        self.shape = matrix.shape
+
+    def matvec(self, vector: np.ndarray) -> np.ndarray:
+        return self.matrix @ vector
+
+    def rmatvec(self, vector: np.ndarray) -> np.ndarray:
+        return self.matrix.T @ vector
+
+
+def _projected_fista_nnls(
+    matrix: np.ndarray,
+    observed: np.ndarray,
+    *,
+    max_iterations: int = 2000,
+    tolerance: float = 1e-9,
+) -> tuple[np.ndarray | None, str]:
+    """Solve dense NNLS with the same fixed projected-FISTA update as the E track."""
+
+    operator = _DenseAssignmentOperator(matrix)
+    row_norm = float(np.max(operator.matvec(np.ones(matrix.shape[1]))))
+    column_norm = float(np.max(operator.rmatvec(np.ones(matrix.shape[0]))))
+    lipschitz = row_norm * column_norm
+    if not math.isfinite(lipschitz) or lipschitz <= 0.0:
+        return None, "invalid_operator"
+    total = math.fsum(float(value) for value in observed)
+    if total <= 0.0:
+        return None, "empty_observation"
+    solution = np.maximum(observed / total, 0.0)
+    accelerated = solution.copy()
+    momentum = 1.0
+    for _ in range(max_iterations):
+        residual = operator.matvec(accelerated) - observed
+        gradient = operator.rmatvec(residual)
+        updated = np.maximum(accelerated - gradient / lipschitz, 0.0)
+        delta = float(np.linalg.norm(updated - solution))
+        scale = max(1.0, float(np.linalg.norm(solution)))
+        if delta <= tolerance * scale:
+            corrected_total = math.fsum(float(value) for value in updated)
+            if corrected_total <= 0.0:
+                return None, "solver_failed"
+            return updated / corrected_total, "ok"
+        next_momentum = (1.0 + math.sqrt(1.0 + 4.0 * momentum**2)) / 2.0
+        accelerated = updated + ((momentum - 1.0) / next_momentum) * (
+            updated - solution
+        )
+        solution = updated
+        momentum = next_momentum
+    return None, "not_converged"
+
+
 def _deterministic_nnls(
     assignment_matrix: np.ndarray, observed_probabilities: np.ndarray
 ) -> np.ndarray | None:
@@ -257,13 +327,26 @@ def constrained_readout_correction(
     observed_probabilities: np.ndarray,
     *,
     condition_threshold: float = 1e8,
+    precomputed_condition_number: float | None = None,
 ) -> tuple[np.ndarray | None, float, str]:
     """Solve a fixed-order non-negative least-squares correction."""
 
-    _, condition_number = _inverse_and_condition_inf(assignment_matrix)
+    condition_number = precomputed_condition_number
+    if condition_number is None:
+        if assignment_matrix.shape[0] >= 128:
+            condition_number = _diagonal_dominance_condition_bound(assignment_matrix)
+        else:
+            _, condition_number = _inverse_and_condition_inf(assignment_matrix)
     if not np.isfinite(condition_number) or condition_number > condition_threshold:
         return None, condition_number, "ill_conditioned"
-    corrected = _deterministic_nnls(assignment_matrix, observed_probabilities)
+    if assignment_matrix.shape[0] >= 128:
+        corrected, solve_status = _projected_fista_nnls(
+            assignment_matrix, observed_probabilities
+        )
+        if corrected is None:
+            return None, condition_number, solve_status
+    else:
+        corrected = _deterministic_nnls(assignment_matrix, observed_probabilities)
     if corrected is None:
         return None, condition_number, "solver_failed"
     return corrected, condition_number, "ok"
