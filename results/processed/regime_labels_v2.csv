@@ -1,0 +1,145 @@
+family,circuit_id,width,depth,noise,shots,split,oracle_label,oracle_method,equivalent_methods_json,utility_gap,raw_win_basis,label_reason
+ghz,ghz_w2,2,1,high,1024,rule_design,readout,readout,"[""readout""]",0.089135251251,,lowest cost-aware utility with conclusive gain
+ghz,ghz_w2,2,1,high,4096,rule_design,readout,readout,"[""readout""]",0.083909939502,,lowest cost-aware utility with conclusive gain
+ghz,ghz_w2,2,1,high,16384,rule_design,readout,readout,"[""readout""]",0.093083570196,,lowest cost-aware utility with conclusive gain
+ghz,ghz_w2,2,1,low,1024,holdout,practical_tie,raw,"[""raw"",""zne""]",0.0046428043838,,best two cost-aware utilities are practically equivalent
+ghz,ghz_w2,2,1,low,4096,holdout,practical_tie,readout,"[""readout"",""zne""]",0.0006431982655,,best two cost-aware utilities are practically equivalent
+ghz,ghz_w2,2,1,low,16384,rule_design,practical_tie,readout,"[""readout"",""zne""]",0.0016815620209,,best two cost-aware utilities are practically equivalent
+ghz,ghz_w2,2,1,medium,1024,rule_design,readout,readout,"[""readout""]",0.0295196268043,,lowest cost-aware utility with conclusive gain
+ghz,ghz_w2,2,1,medium,4096,rule_design,readout,readout,"[""readout""]",0.0357337374466,,lowest cost-aware utility with conclusive gain
+ghz,ghz_w2,2,1,medium,16384,holdout,readout,readout,"[""readout""]",0.0364871735231,,lowest cost-aware utility with conclusive gain
+ghz,ghz_w2,2,1,zero,1024,rule_design,practical_tie,raw,"[""raw"",""zne""]",0.004,,best two cost-aware utilities are practically equivalent
+ghz,ghz_w2,2,1,zero,4096,rule_design,practical_tie,raw,"[""raw"",""zne""]",0.004,,best two cost-aware utilities are practically equivalent
+ghz,ghz_w2,2,1,zero,16384,rule_design,practical_tie,raw,"[""raw"",""zne""]",0.004,,best two cost-aware utilities are practically equivalent
+ghz,ghz_w4,4,1,high,1024,rule_design,readout,readout,"[""readout""]",0.139766787431,,lowest cost-aware utility with conclusive gain
+ghz,ghz_w4,4,1,high,4096,rule_design,readout,readout,"[""readout""]",0.168193402199,,lowest cost-aware utility with conclusive gain
+ghz,ghz_w4,4,1,high,16384,holdout,readout,readout,"[""readout""]",0.160580417039,,lowest cost-aware utility with conclusive gain
+ghz,ghz_w4,4,1,low,1024,holdout,zne,zne,"[""zne""]",0.0171415467397,,lowest cost-aware utility with conclusive gain
+ghz,ghz_w4,4,1,low,4096,rule_design,zne,zne,"[""zne""]",0.00913336190965,,lowest cost-aware utility with conclusive gain
+ghz,ghz_w4,4,1,low,16384,rule_design,practical_tie,readout,"[""readout"",""zne""]",0.000382782438653,,best two cost-aware utilities are practically equivalent
+ghz,ghz_w4,4,1,medium,1024,rule_design,readout,readout,"[""readout""]",0.0407155246194,,lowest cost-aware utility with conclusive gain
+ghz,ghz_w4,4,1,medium,4096,rule_design,readout,readout,"[""readout""]",0.0484597553914,,lowest cost-aware utility with conclusive gain
+ghz,ghz_w4,4,1,medium,16384,rule_design,readout,readout,"[""readout""]",0.0550750985124,,lowest cost-aware utility with conclusive gain
+ghz,ghz_w4,4,1,zero,1024,rule_design,practical_tie,raw,"[""raw"",""zne""]",0.00117647058824,,best two cost-aware utilities are practically equivalent
+ghz,ghz_w4,4,1,zero,4096,rule_design,practical_tie,raw,"[""raw"",""zne""]",0.00117647058824,,best two cost-aware utilities are practically equivalent
+ghz,ghz_w4,4,1,zero,16384,rule_design,practical_tie,raw,"[""raw"",""zne""]",0.00117647058824,,best two cost-aware utilities are practically equivalent
+ghz,ghz_w6,6,1,high,1024,rule_design,inconclusive,,[],,,one or more methods lack 50 complete repeats
+ghz,ghz_w6,6,1,high,4096,holdout,readout,readout,"[""readout""]",0.196652675882,,lowest cost-aware utility with conclusive gain
+ghz,ghz_w6,6,1,high,16384,rule_design,readout,readout,"[""readout""]",0.202984665692,,lowest cost-aware utility with conclusive gain
+ghz,ghz_w6,6,1,low,1024,rule_design,zne,zne,"[""zne""]",0.0464653737104,,lowest cost-aware utility with conclusive gain
+ghz,ghz_w6,6,1,low,4096,rule_design,zne,zne,"[""zne""]",0.0222535339648,,lowest cost-aware utility with conclusive gain
+ghz,ghz_w6,6,1,low,16384,rule_design,practical_tie,zne,"[""readout"",""zne""]",0.00275809324816,,best two cost-aware utilities are practically equivalent
+ghz,ghz_w6,6,1,medium,1024,rule_design,inconclusive,,[],,,one or more methods lack 50 complete repeats
+ghz,ghz_w6,6,1,medium,4096,rule_design,readout,readout,"[""readout""]",0.0640797261815,,lowest cost-aware utility with conclusive gain
+ghz,ghz_w6,6,1,medium,16384,rule_design,readout,readout,"[""readout""]",0.0817838179185,,lowest cost-aware utility with conclusive gain
+ghz,ghz_w6,6,1,zero,1024,rule_design,practical_tie,raw,"[""raw"",""zne""]",0.000307692307693,,best two cost-aware utilities are practically equivalent
+ghz,ghz_w6,6,1,zero,4096,rule_design,practical_tie,raw,"[""raw"",""zne""]",0.000307692307693,,best two cost-aware utilities are practically equivalent
+ghz,ghz_w6,6,1,zero,16384,rule_design,practical_tie,raw,"[""raw"",""zne""]",0.000307692307693,,best two cost-aware utilities are practically equivalent
+hardware_efficient,he_w2_d1,2,1,high,1024,holdout,raw,raw,"[""raw""]",0.0413380126977,accuracy,raw has the lowest cost-aware utility by at least the practical threshold
+hardware_efficient,he_w2_d1,2,1,high,4096,holdout,raw,raw,"[""raw""]",0.0186265813971,accuracy,raw has the lowest cost-aware utility by at least the practical threshold
+hardware_efficient,he_w2_d1,2,1,high,16384,rule_design,raw,raw,"[""raw""]",0.0103072220444,accuracy,raw has the lowest cost-aware utility by at least the practical threshold
+hardware_efficient,he_w2_d1,2,1,low,1024,rule_design,raw,raw,"[""raw""]",0.0099020372965,cost_only,raw has the lowest cost-aware utility by at least the practical threshold
+hardware_efficient,he_w2_d1,2,1,low,4096,rule_design,raw,raw,"[""raw""]",0.0115459242566,cost_only,raw has the lowest cost-aware utility by at least the practical threshold
+hardware_efficient,he_w2_d1,2,1,low,16384,holdout,raw,raw,"[""raw""]",0.00847893460348,cost_only,raw has the lowest cost-aware utility by at least the practical threshold
+hardware_efficient,he_w2_d1,2,1,medium,1024,rule_design,raw,raw,"[""raw""]",0.0282912514752,accuracy,raw has the lowest cost-aware utility by at least the practical threshold
+hardware_efficient,he_w2_d1,2,1,medium,4096,holdout,raw,raw,"[""raw""]",0.0119005873868,cost_only,raw has the lowest cost-aware utility by at least the practical threshold
+hardware_efficient,he_w2_d1,2,1,medium,16384,rule_design,raw,raw,"[""raw""]",0.0133248128967,accuracy,raw has the lowest cost-aware utility by at least the practical threshold
+hardware_efficient,he_w2_d1,2,1,zero,1024,rule_design,raw,raw,"[""raw""]",0.0108028113634,cost_only,raw has the lowest cost-aware utility by at least the practical threshold
+hardware_efficient,he_w2_d1,2,1,zero,4096,holdout,raw,raw,"[""raw""]",0.0121235549465,cost_only,raw has the lowest cost-aware utility by at least the practical threshold
+hardware_efficient,he_w2_d1,2,1,zero,16384,rule_design,raw,raw,"[""raw""]",0.0084857974866,cost_only,raw has the lowest cost-aware utility by at least the practical threshold
+hardware_efficient,he_w2_d3,2,3,high,1024,rule_design,raw,raw,"[""raw""]",0.0367195833673,accuracy,raw has the lowest cost-aware utility by at least the practical threshold
+hardware_efficient,he_w2_d3,2,3,high,4096,holdout,raw,raw,"[""raw""]",0.0091412317006,cost_only,raw has the lowest cost-aware utility by at least the practical threshold
+hardware_efficient,he_w2_d3,2,3,high,16384,holdout,practical_tie,raw,"[""raw"",""readout""]",0.0037213927758,,best two cost-aware utilities are practically equivalent
+hardware_efficient,he_w2_d3,2,3,low,1024,rule_design,raw,raw,"[""raw""]",0.0159411607089,cost_only,raw has the lowest cost-aware utility by at least the practical threshold
+hardware_efficient,he_w2_d3,2,3,low,4096,rule_design,raw,raw,"[""raw""]",0.0104949670161,cost_only,raw has the lowest cost-aware utility by at least the practical threshold
+hardware_efficient,he_w2_d3,2,3,low,16384,holdout,raw,raw,"[""raw""]",0.0087677813831,cost_only,raw has the lowest cost-aware utility by at least the practical threshold
+hardware_efficient,he_w2_d3,2,3,medium,1024,holdout,raw,raw,"[""raw""]",0.0328185953535,accuracy,raw has the lowest cost-aware utility by at least the practical threshold
+hardware_efficient,he_w2_d3,2,3,medium,4096,holdout,raw,raw,"[""raw""]",0.0123874724138,accuracy,raw has the lowest cost-aware utility by at least the practical threshold
+hardware_efficient,he_w2_d3,2,3,medium,16384,rule_design,raw,raw,"[""raw""]",0.0068352800848,cost_only,raw has the lowest cost-aware utility by at least the practical threshold
+hardware_efficient,he_w2_d3,2,3,zero,1024,rule_design,raw,raw,"[""raw""]",0.0157613499493,cost_only,raw has the lowest cost-aware utility by at least the practical threshold
+hardware_efficient,he_w2_d3,2,3,zero,4096,rule_design,raw,raw,"[""raw""]",0.0089955009499,cost_only,raw has the lowest cost-aware utility by at least the practical threshold
+hardware_efficient,he_w2_d3,2,3,zero,16384,rule_design,raw,raw,"[""raw""]",0.00844898781089,cost_only,raw has the lowest cost-aware utility by at least the practical threshold
+hardware_efficient,he_w2_d6,2,6,high,1024,rule_design,raw,raw,"[""raw""]",0.005892542721,cost_only,raw has the lowest cost-aware utility by at least the practical threshold
+hardware_efficient,he_w2_d6,2,6,high,4096,rule_design,practical_tie,raw,"[""raw"",""readout"",""zne""]",0.0014640057449,,best two cost-aware utilities are practically equivalent
+hardware_efficient,he_w2_d6,2,6,high,16384,holdout,practical_tie,zne,"[""raw"",""zne""]",0.0037428364235,,best two cost-aware utilities are practically equivalent
+hardware_efficient,he_w2_d6,2,6,low,1024,rule_design,raw,raw,"[""raw""]",0.0190971111793,accuracy,raw has the lowest cost-aware utility by at least the practical threshold
+hardware_efficient,he_w2_d6,2,6,low,4096,rule_design,raw,raw,"[""raw""]",0.009617563591,cost_only,raw has the lowest cost-aware utility by at least the practical threshold
+hardware_efficient,he_w2_d6,2,6,low,16384,holdout,raw,raw,"[""raw""]",0.0069667820801,cost_only,raw has the lowest cost-aware utility by at least the practical threshold
+hardware_efficient,he_w2_d6,2,6,medium,1024,holdout,raw,raw,"[""raw""]",0.01095698851,cost_only,raw has the lowest cost-aware utility by at least the practical threshold
+hardware_efficient,he_w2_d6,2,6,medium,4096,rule_design,practical_tie,zne,"[""raw"",""zne""]",0.0011025947114,,best two cost-aware utilities are practically equivalent
+hardware_efficient,he_w2_d6,2,6,medium,16384,rule_design,practical_tie,zne,"[""raw"",""zne""]",0.0044010061851,,best two cost-aware utilities are practically equivalent
+hardware_efficient,he_w2_d6,2,6,zero,1024,rule_design,raw,raw,"[""raw""]",0.0086757594064,cost_only,raw has the lowest cost-aware utility by at least the practical threshold
+hardware_efficient,he_w2_d6,2,6,zero,4096,holdout,raw,raw,"[""raw""]",0.0103302932767,cost_only,raw has the lowest cost-aware utility by at least the practical threshold
+hardware_efficient,he_w2_d6,2,6,zero,16384,rule_design,raw,raw,"[""raw""]",0.00976967808437,cost_only,raw has the lowest cost-aware utility by at least the practical threshold
+hardware_efficient,he_w4_d1,4,1,high,1024,rule_design,raw,raw,"[""raw""]",0.0298441078902,accuracy,raw has the lowest cost-aware utility by at least the practical threshold
+hardware_efficient,he_w4_d1,4,1,high,4096,rule_design,raw,raw,"[""raw""]",0.0121326382558,accuracy,raw has the lowest cost-aware utility by at least the practical threshold
+hardware_efficient,he_w4_d1,4,1,high,16384,holdout,raw,raw,"[""raw""]",0.00637950075604,accuracy,raw has the lowest cost-aware utility by at least the practical threshold
+hardware_efficient,he_w4_d1,4,1,low,1024,rule_design,raw,raw,"[""raw""]",0.0198551137753,accuracy,raw has the lowest cost-aware utility by at least the practical threshold
+hardware_efficient,he_w4_d1,4,1,low,4096,holdout,raw,raw,"[""raw""]",0.0139822013551,accuracy,raw has the lowest cost-aware utility by at least the practical threshold
+hardware_efficient,he_w4_d1,4,1,low,16384,holdout,raw,raw,"[""raw""]",0.00863807020351,accuracy,raw has the lowest cost-aware utility by at least the practical threshold
+hardware_efficient,he_w4_d1,4,1,medium,1024,rule_design,raw,raw,"[""raw""]",0.0405749861282,accuracy,raw has the lowest cost-aware utility by at least the practical threshold
+hardware_efficient,he_w4_d1,4,1,medium,4096,rule_design,raw,raw,"[""raw""]",0.0227493454073,accuracy,raw has the lowest cost-aware utility by at least the practical threshold
+hardware_efficient,he_w4_d1,4,1,medium,16384,rule_design,raw,raw,"[""raw""]",0.00670246013694,accuracy,raw has the lowest cost-aware utility by at least the practical threshold
+hardware_efficient,he_w4_d1,4,1,zero,1024,rule_design,raw,raw,"[""raw""]",0.00991470199068,cost_only,raw has the lowest cost-aware utility by at least the practical threshold
+hardware_efficient,he_w4_d1,4,1,zero,4096,rule_design,raw,raw,"[""raw""]",0.00915986148968,cost_only,raw has the lowest cost-aware utility by at least the practical threshold
+hardware_efficient,he_w4_d1,4,1,zero,16384,rule_design,raw,raw,"[""raw""]",0.0111069055116,cost_only,raw has the lowest cost-aware utility by at least the practical threshold
+hardware_efficient,he_w4_d3,4,3,high,1024,rule_design,inconclusive,readout,"[""readout""]",0.00914813193335,,paired RMSE-gain interval includes zero
+hardware_efficient,he_w4_d3,4,3,high,4096,rule_design,readout,readout,"[""readout""]",0.0296492680934,,lowest cost-aware utility with conclusive gain
+hardware_efficient,he_w4_d3,4,3,high,16384,rule_design,readout,readout,"[""readout""]",0.0241340721524,,lowest cost-aware utility with conclusive gain
+hardware_efficient,he_w4_d3,4,3,low,1024,rule_design,practical_tie,zne,"[""raw"",""zne""]",0.000247328321065,,best two cost-aware utilities are practically equivalent
+hardware_efficient,he_w4_d3,4,3,low,4096,rule_design,zne,zne,"[""zne""]",0.0188624786044,,lowest cost-aware utility with conclusive gain
+hardware_efficient,he_w4_d3,4,3,low,16384,rule_design,zne,zne,"[""zne""]",0.025320924353,,lowest cost-aware utility with conclusive gain
+hardware_efficient,he_w4_d3,4,3,medium,1024,holdout,zne,zne,"[""zne""]",0.00530022379565,,lowest cost-aware utility with conclusive gain
+hardware_efficient,he_w4_d3,4,3,medium,4096,rule_design,zne,zne,"[""zne""]",0.0127489471476,,lowest cost-aware utility with conclusive gain
+hardware_efficient,he_w4_d3,4,3,medium,16384,rule_design,zne,zne,"[""zne""]",0.0104493782546,,lowest cost-aware utility with conclusive gain
+hardware_efficient,he_w4_d3,4,3,zero,1024,holdout,raw,raw,"[""raw""]",0.0114174798324,cost_only,raw has the lowest cost-aware utility by at least the practical threshold
+hardware_efficient,he_w4_d3,4,3,zero,4096,rule_design,raw,raw,"[""raw""]",0.0123438364084,cost_only,raw has the lowest cost-aware utility by at least the practical threshold
+hardware_efficient,he_w4_d3,4,3,zero,16384,rule_design,raw,raw,"[""raw""]",0.0101218002553,accuracy,raw has the lowest cost-aware utility by at least the practical threshold
+hardware_efficient,he_w4_d6,4,6,high,1024,rule_design,practical_tie,raw,"[""raw"",""zne""]",0.000177129834235,,best two cost-aware utilities are practically equivalent
+hardware_efficient,he_w4_d6,4,6,high,4096,rule_design,practical_tie,readout,"[""raw"",""readout"",""zne""]",0.000409213170353,,best two cost-aware utilities are practically equivalent
+hardware_efficient,he_w4_d6,4,6,high,16384,rule_design,practical_tie,readout,"[""raw"",""readout""]",0.00449813646612,,best two cost-aware utilities are practically equivalent
+hardware_efficient,he_w4_d6,4,6,low,1024,rule_design,zne,zne,"[""zne""]",0.0248738225699,,lowest cost-aware utility with conclusive gain
+hardware_efficient,he_w4_d6,4,6,low,4096,rule_design,zne,zne,"[""zne""]",0.0348229204199,,lowest cost-aware utility with conclusive gain
+hardware_efficient,he_w4_d6,4,6,low,16384,rule_design,zne,zne,"[""zne""]",0.031922674914,,lowest cost-aware utility with conclusive gain
+hardware_efficient,he_w4_d6,4,6,medium,1024,rule_design,practical_tie,zne,"[""readout"",""zne""]",0.00188163498065,,best two cost-aware utilities are practically equivalent
+hardware_efficient,he_w4_d6,4,6,medium,4096,rule_design,zne,zne,"[""zne""]",0.00753504099065,,lowest cost-aware utility with conclusive gain
+hardware_efficient,he_w4_d6,4,6,medium,16384,rule_design,zne,zne,"[""zne""]",0.00802276000565,,lowest cost-aware utility with conclusive gain
+hardware_efficient,he_w4_d6,4,6,zero,1024,holdout,raw,raw,"[""raw""]",0.013742624794,cost_only,raw has the lowest cost-aware utility by at least the practical threshold
+hardware_efficient,he_w4_d6,4,6,zero,4096,rule_design,raw,raw,"[""raw""]",0.0105174523178,cost_only,raw has the lowest cost-aware utility by at least the practical threshold
+hardware_efficient,he_w4_d6,4,6,zero,16384,rule_design,raw,raw,"[""raw""]",0.00846796814493,accuracy,raw has the lowest cost-aware utility by at least the practical threshold
+hardware_efficient,he_w6_d1,6,1,high,1024,rule_design,inconclusive,,[],,,one or more methods lack 50 complete repeats
+hardware_efficient,he_w6_d1,6,1,high,4096,rule_design,raw,raw,"[""raw""]",0.0161051459942,accuracy,raw has the lowest cost-aware utility by at least the practical threshold
+hardware_efficient,he_w6_d1,6,1,high,16384,rule_design,raw,raw,"[""raw""]",0.00804394036603,accuracy,raw has the lowest cost-aware utility by at least the practical threshold
+hardware_efficient,he_w6_d1,6,1,low,1024,holdout,raw,raw,"[""raw""]",0.0299932175449,accuracy,raw has the lowest cost-aware utility by at least the practical threshold
+hardware_efficient,he_w6_d1,6,1,low,4096,rule_design,raw,raw,"[""raw""]",0.0125445459466,accuracy,raw has the lowest cost-aware utility by at least the practical threshold
+hardware_efficient,he_w6_d1,6,1,low,16384,rule_design,raw,raw,"[""raw""]",0.00988623904713,accuracy,raw has the lowest cost-aware utility by at least the practical threshold
+hardware_efficient,he_w6_d1,6,1,medium,1024,rule_design,inconclusive,,[],,,one or more methods lack 50 complete repeats
+hardware_efficient,he_w6_d1,6,1,medium,4096,rule_design,raw,raw,"[""raw""]",0.0168788298015,accuracy,raw has the lowest cost-aware utility by at least the practical threshold
+hardware_efficient,he_w6_d1,6,1,medium,16384,rule_design,raw,raw,"[""raw""]",0.00789264418846,accuracy,raw has the lowest cost-aware utility by at least the practical threshold
+hardware_efficient,he_w6_d1,6,1,zero,1024,rule_design,raw,raw,"[""raw""]",0.0135395982244,cost_only,raw has the lowest cost-aware utility by at least the practical threshold
+hardware_efficient,he_w6_d1,6,1,zero,4096,rule_design,raw,raw,"[""raw""]",0.00923109719945,cost_only,raw has the lowest cost-aware utility by at least the practical threshold
+hardware_efficient,he_w6_d1,6,1,zero,16384,rule_design,raw,raw,"[""raw""]",0.0101128108972,accuracy,raw has the lowest cost-aware utility by at least the practical threshold
+hardware_efficient,he_w6_d3,6,3,high,1024,rule_design,inconclusive,,[],,,one or more methods lack 50 complete repeats
+hardware_efficient,he_w6_d3,6,3,high,4096,rule_design,raw,raw,"[""raw""]",0.00783911123169,cost_only,raw has the lowest cost-aware utility by at least the practical threshold
+hardware_efficient,he_w6_d3,6,3,high,16384,rule_design,raw,raw,"[""raw""]",0.00625554913259,accuracy,raw has the lowest cost-aware utility by at least the practical threshold
+hardware_efficient,he_w6_d3,6,3,low,1024,rule_design,raw,raw,"[""raw""]",0.0232747674208,accuracy,raw has the lowest cost-aware utility by at least the practical threshold
+hardware_efficient,he_w6_d3,6,3,low,4096,holdout,raw,raw,"[""raw""]",0.0156436002941,accuracy,raw has the lowest cost-aware utility by at least the practical threshold
+hardware_efficient,he_w6_d3,6,3,low,16384,rule_design,raw,raw,"[""raw""]",0.00591050473389,accuracy,raw has the lowest cost-aware utility by at least the practical threshold
+hardware_efficient,he_w6_d3,6,3,medium,1024,holdout,inconclusive,,[],,,one or more methods lack 50 complete repeats
+hardware_efficient,he_w6_d3,6,3,medium,4096,rule_design,raw,raw,"[""raw""]",0.00686222835149,cost_only,raw has the lowest cost-aware utility by at least the practical threshold
+hardware_efficient,he_w6_d3,6,3,medium,16384,rule_design,practical_tie,raw,"[""raw"",""zne""]",0.00251603332519,,best two cost-aware utilities are practically equivalent
+hardware_efficient,he_w6_d3,6,3,zero,1024,rule_design,raw,raw,"[""raw""]",0.0216962705562,accuracy,raw has the lowest cost-aware utility by at least the practical threshold
+hardware_efficient,he_w6_d3,6,3,zero,4096,rule_design,raw,raw,"[""raw""]",0.0137533328121,cost_only,raw has the lowest cost-aware utility by at least the practical threshold
+hardware_efficient,he_w6_d3,6,3,zero,16384,rule_design,raw,raw,"[""raw""]",0.0103856068668,accuracy,raw has the lowest cost-aware utility by at least the practical threshold
+hardware_efficient,he_w6_d6,6,6,high,1024,rule_design,inconclusive,,[],,,one or more methods lack 50 complete repeats
+hardware_efficient,he_w6_d6,6,6,high,4096,rule_design,practical_tie,zne,"[""raw"",""zne""]",0.00173474996781,,best two cost-aware utilities are practically equivalent
+hardware_efficient,he_w6_d6,6,6,high,16384,rule_design,raw,raw,"[""raw""]",0.00600462117919,accuracy,raw has the lowest cost-aware utility by at least the practical threshold
+hardware_efficient,he_w6_d6,6,6,low,1024,rule_design,raw,raw,"[""raw""]",0.0239591250987,accuracy,raw has the lowest cost-aware utility by at least the practical threshold
+hardware_efficient,he_w6_d6,6,6,low,4096,rule_design,raw,raw,"[""raw""]",0.0136980726863,accuracy,raw has the lowest cost-aware utility by at least the practical threshold
+hardware_efficient,he_w6_d6,6,6,low,16384,rule_design,raw,raw,"[""raw""]",0.00597063562289,accuracy,raw has the lowest cost-aware utility by at least the practical threshold
+hardware_efficient,he_w6_d6,6,6,medium,1024,rule_design,inconclusive,,[],,,one or more methods lack 50 complete repeats
+hardware_efficient,he_w6_d6,6,6,medium,4096,rule_design,raw,raw,"[""raw""]",0.00993322272649,accuracy,raw has the lowest cost-aware utility by at least the practical threshold
+hardware_efficient,he_w6_d6,6,6,medium,16384,rule_design,raw,raw,"[""raw""]",0.00585833084889,cost_only,raw has the lowest cost-aware utility by at least the practical threshold
+hardware_efficient,he_w6_d6,6,6,zero,1024,rule_design,raw,raw,"[""raw""]",0.0205937181294,accuracy,raw has the lowest cost-aware utility by at least the practical threshold
+hardware_efficient,he_w6_d6,6,6,zero,4096,rule_design,raw,raw,"[""raw""]",0.010381237017,cost_only,raw has the lowest cost-aware utility by at least the practical threshold
+hardware_efficient,he_w6_d6,6,6,zero,16384,rule_design,raw,raw,"[""raw""]",0.0101318029775,cost_only,raw has the lowest cost-aware utility by at least the practical threshold

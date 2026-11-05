@@ -35,6 +35,7 @@ GENERATORS = (
     "src.generate_readout_matrix_free_validation",
     "src.calibration_drift",
     "src.sequential_decision",
+    "src.regime_labels_v2",
     "src.generate_audit_manifest",
 )
 EXPENSIVE_GENERATORS = (

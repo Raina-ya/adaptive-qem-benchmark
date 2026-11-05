@@ -1,0 +1,16 @@
+{
+  "version": "selector_audit_v1",
+  "evidence_label": "noisy_simulated",
+  "simulator_only": true,
+  "status": "post_hoc_reanalysis_of_inspected_v1_results",
+  "practical_rmse_threshold": 0.005,
+  "overhead_penalty": 0.01,
+  "negligible_regret_max": 0.005,
+  "catastrophic_regret_absolute": 0.05,
+  "catastrophic_regret_relative_to_absolute_reference": 1.0,
+  "catastrophic_rule": "regret >= catastrophic_regret_absolute or regret >= abs(reference) * catastrophic_regret_relative_to_absolute_reference",
+  "label_fix": "a raw winner with utility gap at or above the practical threshold is labeled raw instead of practical_tie; every other v1 rule is unchanged",
+  "regret_definition": "selected RMSE minus the lowest RMSE among methods with results in the cell; overhead is reported separately",
+  "abstention_rule": "abstain and inconclusive selections keep missing regret and stay counted in every denominator that reports cells",
+  "holdout_note": "v1 outcomes were inspected before this file was written, so v2 metrics are diagnostic and cannot serve as an independent holdout"
+}
