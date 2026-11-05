@@ -3,8 +3,10 @@
 \usepackage{amsmath,amssymb,booktabs,graphicx,microtype,xcolor,hyperref,enumitem}
 \hypersetup{colorlinks=true,linkcolor=blue!55!black,citecolor=blue!55!black,urlcolor=blue!55!black}
 \setlist{nosep,leftmargin=*}
+\setlength{\belowcaptionskip}{4pt}
 \graphicspath{{figures/}}
 \input{generated/adaptive_metrics.tex}
+\input{generated/audit_metrics.tex}
 \title{Adaptive Quantum Error Mitigation Under Fixed Shot Budgets:\
 Operating Regimes, Abstention, and Noise-Model Shift}
 \author{Zhen-Jun Liu}
@@ -21,12 +23,16 @@ readout mitigation, and linear zero-noise extrapolation (ZNE) under identical to
 shot budgets. The simulator benchmark combines GHZ and fixed-seed
 hardware-efficient circuits with widths 2, 4, and 6, depths 1, 3, and 6 where
 applicable, four main noise levels, three shot budgets, and 50 deterministic repeats.
-A cost-aware oracle labels \OperatingCells{} operating cells as \PracticalTies{}
-practical ties, \ReadoutWinners{} readout winners, \ZNEWinners{} ZNE winners, and
-\InconclusiveCells{} inconclusive. A frozen, non-ML rule selector reaches only
-\HoldoutCompatibility{} decision compatibility on a \HoldoutCells{}-cell
-deterministic holdout and \ShiftCompatibility{} under four unseen synthetic noise
-shifts. The benchmark retains \HardwareFailures{} explicit readout failures and
+A cost-aware oracle labels \OperatingCells{} operating cells as \VTwoRawWinners{}
+raw winners, \VTwoPracticalTies{} practical ties, \VTwoReadoutWinners{} readout
+winners, \VTwoZNEWinners{} ZNE winners, and \VTwoInconclusive{} inconclusive, after
+correcting an implementation error that had labeled every decisive raw win as a tie.
+A frozen, non-ML rule selector reaches \HoldoutCompatibilityVTwo{} decision
+compatibility on a \HoldoutCells{}-cell deterministic holdout and
+\ShiftCompatibilityVTwo{} under four synthetic noise shifts. A consequence audit shows
+that fixed policies match or beat it on several measures even before its diagnostic
+cost is charged.
+The benchmark retains \HardwareFailures{} explicit readout failures and
 \NegativeGains{} of \SummaryRows{} method summaries with negative RMSE gain.
 An additional preregistered ZNE validity gate accepts only \ZNECredibleCells{} of
 \ZNEValidityCells{} simulated circuit--noise--budget cells; none of the
@@ -39,6 +45,13 @@ remains between \CombinedNearTieMinimum{} and \CombinedNearTieMaximum{}.
 In a fixed-budget MaxCut application, lower energy RMSE does not reliably improve
 top-1 QAOA-candidate selection, and only 2 of 828 completed selections certify a
 winner under simultaneous intervals.
+Sequential stopping with corrected repeated looks saves shots on clear decisions while
+keeping false certification below 3\% at zero margin, compared with 22--25\% for
+uncorrected peeking. It cannot detect bias: under strong gate-noise imbalance, raw
+estimation certifies the wrong candidate in every repeat after about 2,000 shots.
+Under synthetic readout drift, triggered recalibration uses about
+\TriggerShotSaving{} fewer shots than recalibrating at every decision with similar
+reliability, whereas indefinite reuse fails under directed drift.
 These simulated results support selective mitigation and abstention as research
 questions, but do not validate a general selector or establish hardware performance.
 \end{abstract}
@@ -55,7 +68,10 @@ practically indistinguishable, whether a simple selector can choose safely witho
 the exact reference, when apparent ZNE improvement is credible, and whether readout
 correction and ZNE cooperate under one resource ledger. We also ask whether a
 mitigated energy estimate improves a complete MaxCut/QAOA candidate-selection
-decision rather than only an expectation metric. The contribution is a
+decision rather than only an expectation metric. Finally, we ask whether a decision
+can stop early without losing error control, how long a calibration can be reused,
+and what the selector's outcomes cost rather than only how often its labels match.
+The contribution is a
 reproducible simulator benchmark with repeat-level data, explicit execution ledgers,
 cost-aware labels, abstention rules, and evaluation under noise-model mismatch. It is
 not a proposal for new QEM theory or a claim of quantum-hardware advantage.
@@ -133,10 +149,57 @@ For each fully completed cell, the oracle combines RMSE with an execution-overhe
 penalty. Differences below the preregistered RMSE threshold 0.005 are labeled
 \texttt{practical\_tie}; incomplete three-method comparisons are
 \texttt{inconclusive}. A deterministic hash split reserves at least 20\% of cells.
-The selector is then frozen before holdout outcomes are inspected. It uses only
-width, depth, declared noise regime, shots, calibration conditioning, and ZNE fit
-residuals. It can select raw, readout, or ZNE, or abstain; it never receives the
-statevector reference or oracle label.
+The selector uses width, depth, declared noise regime, shots, calibration
+conditioning, and ZNE fit residuals. It can select raw, readout, or ZNE, or abstain;
+it never receives the statevector reference or oracle label.
+
+Two limits apply to this baseline. Its diagnostics are 50-repeat cell means, which a
+runtime policy would not have, and acquiring them is not charged to the selector.
+Its rules also name the shifted noise channels, so the shift test measures known
+channel types rather than unknown ones.
+
+The first implementation of the oracle could not assign the label \texttt{raw}: a raw
+winner has zero gain over itself, so it always reached the practical-tie branch. This
+paper reports corrected labels, in which a raw winner with a utility gap of at least
+0.005 is labeled \texttt{raw}; every other rule is unchanged. Corrected regret is
+selected RMSE minus the lowest RMSE in the cell, so it cannot be negative, and
+abstaining cells are counted separately. Because the original results had already been
+inspected, this reanalysis is diagnostic rather than an independent holdout. The
+original labels remain in the repository.
+
+\subsection{Consequence audit and reliability ranges}
+The audit assigns each selection to one category. A compatible selection is useful or
+tied. An incompatible selection has negligible regret (at most 0.005), material regret,
+or catastrophic regret (at least 0.05 or at least $|\mu_{\rm ref}|$). An abstention
+avoided failure if the selector with its abstention gates removed would have chosen a
+method with incomplete repeats or regret above 0.005; otherwise it was unnecessary.
+The same rules score always-raw, always-readout, and always-ZNE policies.
+
+A method is reliable in a cell if it completes all 50 repeats with regret at most
+0.005. A feature level is supported if it has at least 10 rule-design cells, a reliable
+rate of at least 80\%, and a Wilson lower bound of at least 50\%. Stability is the
+share of two-stage bootstrap resamples, over repeats and then cells, in which that level
+stays supported.
+
+\subsection{Sequential certification}
+Two candidates with exact expectations $b\pm m/2$ are sampled in batches of 256 target
+shots until an interval for their gap excludes zero or the budget ends, leaving the
+decision unresolved. Every sequential rule tests at $\alpha/K$ with $\alpha=0.05$ and
+$K$ available looks. Calibration and folded shots are charged to the same budget. We
+compare one final test with Wilson-based, Hoeffding gap-confidence, and
+empirical-Bernstein variance-aware stopping, and keep uncorrected Wald peeking only as a
+negative control. Readout intervals use a delta-method linearization that includes
+calibration uncertainty, and combining Wilson components is approximate, so validity is
+also measured directly at zero margin.
+
+\subsection{Calibration reuse under drift}
+A one-qubit threshold decision has true one-state probability 0.53 and threshold 0.50.
+Each decision spends 1,024 target shots and each calibration 1,024 shots. Assignment
+errors drift by a slow monotonic, abrupt, asymmetric, or random-bounded synthetic model.
+The first three deliberately push the corrected estimate toward the threshold, so they
+are stress tests; random-bounded drift is the bidirectional control. Policies recalibrate
+at every decision, every 10 decisions, when an age-based uncertainty bound reaches its
+frozen trigger, or never, and they cannot see the true drift or decision outcome.
 
 \subsection{MaxCut/QAOA application decision}
 For a graph $G=(V,E)$ and bitstring $z$, the exactly checkable cut value is
@@ -190,32 +253,44 @@ selection groups. Candidate construction uses graph structure and ideal statevec
 values only. The exact classical solver is used for post hoc certification, never to
 guide the noisy selector.
 
+The sequential study uses 13 task--margin pairs, up to four noise levels, budgets of
+1,024, 4,096, and 16,384 shots, three methods, five stopping rules, and 100 repeats, for
+\SequentialRows{} rows. A symmetric task has equal circuit depth; the imbalanced tasks
+give candidates depths 6 and 1, or four times the readout error on one candidate, so
+bias can reverse the noisy ordering. Shots are sampled from exact channel probabilities,
+checked against an Aer density-matrix simulation. Alpha, batch size, and grids were
+written before the full grid was generated, and no threshold was tuned. The calibration
+study has workloads of 1, 5, 20, and 100 decisions, four drift models, four policies, and
+30 repeats, for \LifetimeRows{} decision rows.
+
 \section{Results}
 \subsection{Operating regimes}
 \begin{table}[t]
 \centering
-\caption{Most simulated operating cells are practical ties; a single universal
-mitigation winner is not supported.}
+\caption{After correcting the oracle, raw wins most simulated cells, mainly where the
+reference is near zero; no method wins everywhere.}
 \label{tab:regimes}
 \begin{tabular}{lr}
 \toprule
 Cost-aware label & Cells\\
 \midrule
-\input{generated/adaptive_regime_rows.tex}
+\input{generated/regime_rows_v2.tex}
 \end{tabular}
 \end{table}
 
-Table~\ref{tab:regimes} shows that practical equivalence dominates the grid.
-Readout and ZNE win distinct subsets, while nine cells are inconclusive because the
-50-repeat completeness contract is not met. Figure~\ref{fig:regimes} shows how
-these labels vary with simulated noise. The map prevents small numerical RMSE
-differences from being presented as scientific method changes.
+Table~\ref{tab:regimes} shows \VTwoRawWinners{} raw wins, \VTwoPracticalTies{} true
+practical ties, and distinct readout and ZNE subsets. Nine cells are inconclusive,
+eight because the 50-repeat completeness contract is not met. Raw wins require care:
+\RawWinsAccuracy{} win on accuracy and \RawWinsCostOnly{} on cost alone, and
+\RawWinsLowSignal{} have $|\mu_{\rm ref}|<0.06$, where noise moves the estimate toward a
+reference already near zero. They do not show that raw recovers a strong signal.
+Figure~\ref{fig:regimes} shows how the labels vary with simulated noise.
 
 \begin{figure}[t]
 \centering
-\includegraphics[width=\columnwidth]{operating_regime_map_v1.png}
-\caption{Cost-aware labels retain practical ties and incomplete comparisons instead
-of forcing every simulated cell to declare a winner.}
+\includegraphics[width=\columnwidth]{operating_regime_map_v2.png}
+\caption{Corrected labels show raw winning most noisy hardware-efficient cells, while
+readout wins strong-signal GHZ cells at medium and high noise.}
 \label{fig:regimes}
 \end{figure}
 
@@ -296,34 +371,77 @@ claim.}
 \label{fig:combined-interaction}
 \end{figure}
 
-\subsection{Selector holdout and noise shift}
-On \HoldoutCells{} held-out cells, the frozen selector achieves
-\HoldoutCompatibility{} decision compatibility. Mean RMSE regret is
-\HoldoutMeanRegret{} and median regret is \HoldoutMedianRegret{}. Strict label
-agreement is lower because a practical tie can contain several acceptable methods;
-compatibility is therefore the primary decision metric.
+\subsection{Selector consequences}
+On \HoldoutCells{} held-out cells, the selector reaches \HoldoutCompatibilityVTwo{}
+decision compatibility and \HoldoutStrictVTwo{} strict label agreement; under the four
+noise shifts these are \ShiftCompatibilityVTwo{} and \ShiftStrictVTwo{}. Table~\ref{tab:audit}
+and Fig.~\ref{fig:audit} show what those choices cost.
 
-\begin{figure}[t]
+\begin{table}[t]
 \centering
-\includegraphics[width=\columnwidth]{selector_rmse_regret.png}
-\caption{The frozen selector often has small regret but retains substantial positive
-outliers, so the holdout does not validate a generally reliable policy.}
-\label{fig:holdout}
-\end{figure}
+\caption{Even without charging its diagnostics, the selector has more harmful outcomes
+than always-raw across all 180 evaluated cells.}
+\label{tab:audit}
+\small
+\begin{tabular}{lrrrr}
+\toprule
+Category & Sel. & Raw & Read. & ZNE\\
+\midrule
+\input{generated/audit_category_rows.tex}
+\end{tabular}
+\end{table}
 
-Under the four unseen noise shifts, compatibility is \ShiftCompatibility{}, mean
-regret is \ShiftMeanRegret{}, and median regret is \ShiftMedianRegret{}. Negative
-regret can occur because the cost-aware oracle penalizes overhead while the plotted
-quantity is RMSE alone; it is not evidence that the selector beats the oracle's
-declared utility.
-
-\begin{figure}[t]
+\begin{figure*}[t]
 \centering
-\includegraphics[width=\columnwidth]{regret_under_noise_shift.png}
-\caption{Noise-model mismatch exposes method-dependent regret and outliers; median
-performance alone would hide these failures.}
-\label{fig:shift}
-\end{figure}
+\includegraphics[width=\textwidth]{selector_regret_categories.png}
+\caption{Label agreement hides the size of errors: the selector still makes material and
+catastrophic errors, and no policy dominates across every evaluation set.}
+\label{fig:audit}
+\end{figure*}
+
+Averages hide the worst errors. Holdout regret has median \HoldoutRegretMedian{} and mean
+\HoldoutRegretMean{}, yet reaches \HoldoutRegretMax{}. Of \SelectorCatastrophic{}
+catastrophic cells, \SelectorCatastrophicGHZ{} are high-noise GHZ cells where the selector
+chose raw and readout was far better. The other \SelectorCatastrophicLowSignal{} meet only
+the relative rule, at references near zero. Mean holdout regret is \HoldoutAlwaysReadout{}
+for always-readout, \HoldoutRegretMean{} for the selector, and \HoldoutAlwaysRaw{} for
+always-raw. Under noise shift it is \ShiftAlwaysRaw{} for always-raw, \ShiftRegretMean{}
+for the selector, and \ShiftAlwaysReadout{} for always-readout.
+
+Across all cells, the selector has \SelectorHarm{} material or catastrophic outcomes and
+always-raw has \AlwaysRawHarm{}. That does not make raw a general policy: all of raw's
+harmful outcomes occur in the \StrongSignalCells{} cells with $|\mu_{\rm ref}|\geq0.06$,
+where the counts are \StrongHarmRaw{} for raw, \StrongHarmSelector{} for the selector, and
+\StrongHarmReadout{} for always-readout. This split was chosen after seeing the data and is
+descriptive. Abstention remains untested in practice: the selector abstains in only
+\SelectorAbstentions{} cells, all at width 6 and 1,024 shots, and \SelectorUnnecessaryAbstentions{}
+of those were unnecessary by the frozen counterfactual.
+
+\subsection{Reliability ranges}
+\begin{table}[t]
+\centering
+\caption{Only a few single-feature levels are supported, and none exists for ZNE.}
+\label{tab:envelope}
+\small
+\begin{tabular}{llrr}
+\toprule
+Method & Level & Reliable & Stable\\
+\midrule
+\input{generated/envelope_rows.tex}
+\end{tabular}
+\end{table}
+
+Table~\ref{tab:envelope} lists every supported level; the last column is the share of
+resamples in which the level stays supported, and values below 90\% are unstable. No method
+has a supported level on every feature, and no depth level is supported, so the frozen joint
+envelope is empty. A rule requiring support on every feature would always report no safe
+method on this grid. Margin rows come from the separate width-2, depth-3 decision benchmark.
+
+Among diagnostics, condition number acts only as a warning: readout is reliable in 75\% of
+cells below 1.5, 50\% from 1.5 to 3, 10\% from 3 to 8, and none of the 4 cells at 8 or above.
+ZNE fit residual does not discriminate, with rates of 24--33\% in every adequately sampled
+bin, and the selector's residual limits are never reached. Three cells flip across the
+condition-number gate of 8 under repeat resampling, with means of 7.87, 8.10, and 8.16.
 
 \subsection{Decision reliability}
 Expectation RMSE and decision reliability are distinct. Figure~\ref{fig:decision}
@@ -429,12 +547,94 @@ selections; nearly every completed method--instance--budget repeat remains unres
 \label{fig:qaoa-certification}
 \end{figure}
 
+\subsection{Sequential certification}
+Corrected looks control false certification. At margin 0, where any certification is false,
+Wilson stopping certifies in \NullWilsonMin{}--\NullWilsonMax{} of repeats across methods,
+whereas uncorrected peeking reaches \NullNaiveMin{}--\NullNaiveMax{}. These pooled zero-margin
+cells use shared calibration, so per-candidate readout intervals have no direct null test.
+Table~\ref{tab:sequential} shows the trade-off on the symmetric task: early stopping saves
+shots, yet leaves more decisions unresolved than a single full-budget test because each look
+is stricter. Mitigation delays certification when the estimator already has the right sign.
+With shared calibration, readout correction cannot change the sign of the gap, so it only
+removes target shots.
+
+\begin{table}[t]
+\centering
+\caption{Stopping early saves shots but leaves more symmetric-task decisions unresolved;
+mitigation delays certification further (16,384 shots, margins above 0, nonzero noise).}
+\label{tab:sequential}
+\small
+\begin{tabular}{llrrr}
+\toprule
+Method & Policy & Shots & Unres. & Wrong\\
+\midrule
+\input{generated/sequential_rows.tex}
+\end{tabular}
+\end{table}
+
+Near ties consume the budget (Fig.~\ref{fig:shots}): at margin 0.02, Wilson stopping uses
+\NearTieShareMin{}--\NearTieShareMax{} of 16,384 shots and leaves
+\NearTieUnresolvedMin{}--\NearTieUnresolvedMax{} of repeats unresolved. Certification also
+does not detect bias (Fig.~\ref{fig:tradeoff}). With strong gate-noise imbalance at margin
+0.05, raw certifies the wrong candidate in \BiasedRawWrong{} of repeats after a mean of
+\BiasedRawShots{} shots, and ZNE still does so in \BiasedZNEWrong{}. Readout correction removes
+this reversal when the imbalance is in readout error, at the cost of more unresolved decisions.
+A certificate therefore says on which side of zero the estimator's own limit probably lies,
+not that the exact winner has been found.
+
+\begin{figure*}[t]
+\centering
+\includegraphics[width=\textwidth]{shots_to_certification.png}
+\caption{Clear decisions stop early under corrected rules, whereas near ties use nearly the
+whole budget; mitigation shifts every curve toward more shots.}
+\label{fig:shots}
+\end{figure*}
+
+\begin{figure*}[t]
+\centering
+\includegraphics[width=\textwidth]{certification_error_tradeoff.png}
+\caption{Corrected looks keep false certification low when no winner exists, but stopping
+rules cannot remove estimator bias, as the imbalanced tasks show.}
+\label{fig:tradeoff}
+\end{figure*}
+
+\subsection{Calibration reuse under drift}
+Table~\ref{tab:lifetime} compares policies over 100 decisions, averaged across drift models.
+Triggered recalibration has decision error close to recalibrating every time at about
+\TriggerShotSaving{} lower cost. Never recalibrating is cheapest but least reliable, and that
+depends strongly on drift direction (Fig.~\ref{fig:lifetime}): its error is \NeverAbrupt{} under
+abrupt change, \NeverAsymmetric{} under asymmetric drift, \NeverSlow{} under slow drift, and
+\NeverRandom{} under the bidirectional control.
+
+\begin{table}[t]
+\centering
+\caption{A triggered policy approaches every-decision reliability at lower cost, while
+indefinite reuse is unsafe on average under these stress models (100 decisions).}
+\label{tab:lifetime}
+\small
+\begin{tabular}{lrr}
+\toprule
+Recalibration & Shots per decision & Error\\
+\midrule
+\input{generated/calibration_lifetime_rows.tex}
+\end{tabular}
+\end{table}
+
+\begin{figure}[!ht]
+\centering
+\includegraphics[width=\columnwidth]{calibration_age_vs_decision_error.png}
+\caption{Decision error grows with calibration age under directed synthetic drift but not
+under the bidirectional control.}
+\label{fig:lifetime}
+\end{figure}
+
 \section{Conclusion}
 No QEM method is uniformly useful under the declared fixed-budget simulator grid.
-Most operating cells are practical ties, some favor readout or ZNE, and low-shot
-readout calibration can fail explicitly. The frozen rule selector is reproducible
-and explainable, but its modest holdout and shift compatibility make it a baseline
-for further study rather than a successful adaptive policy. The strongest supported
+Raw wins most cells, largely where the reference is near zero, some cells favor readout or
+ZNE, and low-shot readout calibration can fail explicitly. The frozen rule selector is
+reproducible and explainable, but it does not clearly beat fixed policies even without being
+charged for its diagnostics, so it is a baseline for further study rather than a successful
+adaptive policy. The strongest supported
 conclusion is operational: mitigation should be compared with raw estimation under
 equal resource accounting, with ties, negative gains, abstention, and failed ZNE
 validity checks preserved. In this benchmark, apparent extrapolation gains are more
@@ -445,6 +645,9 @@ claim, and no combined condition passes the frozen validity gate.
 The MaxCut application strengthens that boundary: lower energy RMSE is not a reliable
 proxy for top-1 selection, simple regret, or certified decision, and the added QEM
 executions do not produce a general application advantage.
+Sequential stopping can save shots with corrected looks, but a certified decision is only as
+sound as the estimator's bias, and calibration reuse is safe only for the drift it was tested
+against.
 
 \section{Discussion}
 \subsection{Supported findings}
@@ -460,6 +663,11 @@ estimator performance and mechanism validity: lower RMSE can coexist with reject
 ZNE diagnostics and unresolved near-tie decisions.
 
 \subsection{Hypotheses and limitations}
+The selector's freeze before holdout evaluation is a process claim: its rules and first results
+appeared in one commit, so version history alone cannot prove the order. We found no evidence of
+tuning, but the corrected analysis is not an independent test. A runtime selector with charged
+pilot shots, rules that exclude noise names, and a fresh grid of unseen circuits has been
+preregistered in the repository; its outcomes are not reported here.
 Possible causes of selector error include insufficient features, first-order ZNE,
 and the mismatch between synthetic training and shift channels; the experiment does
 not isolate these causes. The validity gate is conditional on its frozen thresholds,
@@ -469,7 +677,9 @@ is no IBM or other hardware execution, device drift, calibrated crosstalk, leaka
 relaxation, or non-Markovian noise. Width is limited to six, the hardware-efficient ansatz and
 observables are fixed, and full assignment calibration scales exponentially. The
 same seed family and simulator implementation bound generalization. No ML selector
-is trained, and no post-holdout rule tuning is performed. The combined study covers
+is trained. The hardware-efficient grid has one circuit per width and depth, so width and depth
+effects are confounded with specific angles, and reliability ranges are marginal values on a
+coarse grid that must not be interpolated or extrapolated. The combined study covers
 only six preregistered cells, two budgets, and two allocation policies; it does not
 compare extrapolate-then-correct ordering or establish that readout and gate errors
 are separable on hardware.
@@ -482,16 +692,31 @@ known-reference falsification but is too small to support graph-family or scalin
 claims. Hardware evidence would require frozen candidates and budgets followed by
 device jobs that record calibration time, topology, transpilation, drift, leakage,
 and crosstalk; none of those effects is measured here.
+The QAOA candidates are also frozen inputs: exact energy ties are ordered by floating-point noise
+from the machine that generated them, so the selected candidates are not derivable from scratch on
+another platform, although no noisy outcome influenced them.
+The sequential study covers two-qubit circuits and one observable, and its bounds use a union
+over looks rather than an optimized spending rule. The calibration study is a one-qubit threshold
+task under directed synthetic stress models; it does not establish a physical calibration
+lifetime.
 
 \appendix
 \section{Reproducibility}
+{\footnotesize
 \begin{verbatim}
 python -m pytest
 python -m src.verify_generated_artifacts
 python -m src.verify_generated_artifacts --phase-f
+python -m src.sequential_decision
+python -m src.calibration_drift
+python -m src.regime_labels_v2
+python -m src.selector_audit
+python -m src.reliability_envelopes
 python -m src.generate_paper_assets
+python -m src.generate_audit_paper_assets
 tectonic paper/main.tex --outdir paper
 \end{verbatim}
+}
 Repeat-level rows remain under \texttt{results/raw}; processed summaries, manifests,
 run metadata, seeds, diagnostics, and execution counts remain separate and auditable.
 Tests check analytic references, statevector agreement, folding equivalence, shot
