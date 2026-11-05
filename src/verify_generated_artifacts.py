@@ -33,6 +33,7 @@ GENERATORS = (
     "src.generate_readout_tensor_validation",
     "src.generate_readout_subspace_validation",
     "src.generate_readout_matrix_free_validation",
+    "src.calibration_drift",
     "src.generate_audit_manifest",
 )
 EXPENSIVE_GENERATORS = (

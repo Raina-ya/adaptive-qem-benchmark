@@ -36,6 +36,7 @@ def test_comparator_regenerates_adaptive_extension() -> None:
     assert "src.generate_readout_tensor_validation" in GENERATORS
     assert "src.generate_readout_subspace_validation" in GENERATORS
     assert "src.generate_readout_matrix_free_validation" in GENERATORS
+    assert "src.calibration_drift" in GENERATORS
     assert "src.generate_readout_scalability_benchmark" in EXPENSIVE_GENERATORS
     assert "src.generate_readout_mismatch_benchmark" in EXPENSIVE_GENERATORS
     assert "src.generate_qaoa_selection" in EXPENSIVE_GENERATORS
