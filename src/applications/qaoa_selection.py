@@ -40,6 +40,7 @@ FULL_REPEATS = 50
 NEAR_TIE_RELATIVE_GAP = 0.02
 CLEAR_RELATIVE_GAP = 0.10
 ENERGY_TOLERANCE = 1e-12
+POOL_ENERGY_TOLERANCE = 1e-9
 SUCCESS_ALPHA = 0.95
 ZNE_FACTORS = (1, 3, 5)
 
@@ -1243,6 +1244,48 @@ def generate_candidate_pool(graph: MaxCutGraph) -> tuple[QAOACandidate, ...]:
     return tuple(candidates)
 
 
+@cache
+def frozen_candidate_pool(graph: MaxCutGraph) -> tuple[QAOACandidate, ...]:
+    """Return the committed ranking, whose tied order does not depend on the platform."""
+
+    frame = pd.read_csv(CANDIDATE_POOL_PATH, float_precision="round_trip")
+    rows = frame.loc[frame.graph_id == graph.graph_id].sort_values("ideal_rank")
+    if rows.empty:
+        raise ValueError(f"No frozen candidate pool exists for graph: {graph.graph_id}")
+    return tuple(
+        QAOACandidate(
+            graph.graph_id,
+            str(row.candidate_id),
+            float(row.beta),
+            float(row.gamma),
+            float(row.exact_ideal_energy),
+            int(row.ideal_rank),
+            float(row.ideal_gap_to_best),
+        )
+        for row in rows.itertuples()
+    )
+
+
+def frozen_pool_mismatches(frozen: pd.DataFrame, computed: pd.DataFrame) -> list[str]:
+    """Compare a frozen pool with fresh values, allowing only reordering of exact ties."""
+
+    keys = ["graph_id", "candidate_id"]
+    merged = frozen.merge(computed, on=keys, how="outer", suffixes=("", "_computed"))
+    problems: list[str] = []
+    if len(merged) != len(frozen) or len(merged) != len(computed):
+        problems.append("candidate sets differ")
+        return problems
+    for column in ("beta", "gamma", "exact_ideal_energy"):
+        difference = (merged[column] - merged[f"{column}_computed"]).abs()
+        if not bool((difference <= POOL_ENERGY_TOLERANCE).all()):
+            problems.append(f"{column} differs by more than {POOL_ENERGY_TOLERANCE:g}")
+    for graph_id, group in merged.groupby("graph_id", sort=True):
+        ordered = group.sort_values("ideal_rank").exact_ideal_energy_computed.to_numpy()
+        if bool((np.diff(ordered) > POOL_ENERGY_TOLERANCE).any()):
+            problems.append(f"{graph_id}: frozen ranks are not ordered by computed energy")
+    return problems
+
+
 def _first_unused(
     candidates: Sequence[QAOACandidate],
     used: set[str],
@@ -1256,7 +1299,7 @@ def _first_unused(
 def select_benchmark_candidates(graph: MaxCutGraph) -> tuple[QAOACandidate, ...]:
     """Select five candidates by frozen ideal-only gap and quantile rules."""
 
-    pool = generate_candidate_pool(graph)
+    pool = frozen_candidate_pool(graph)
     optimum = exact_maxcut(graph).optimum
     selected: list[QAOACandidate] = []
     used: set[str] = set()
@@ -1412,12 +1455,13 @@ def certify_sampled_cuts(
 
 
 def write_candidate_contract() -> None:
-    """Write the complete ideal pool and frozen noisy-run manifest."""
+    """Write the noisy-run manifest from the frozen pool, never replacing that pool."""
 
     CANDIDATE_POOL_PATH.parent.mkdir(parents=True, exist_ok=True)
-    candidate_pool_frame().to_csv(
-        CANDIDATE_POOL_PATH, index=False, lineterminator="\n", float_format="%.17g"
-    )
+    if not CANDIDATE_POOL_PATH.exists():
+        candidate_pool_frame().to_csv(
+            CANDIDATE_POOL_PATH, index=False, lineterminator="\n", float_format="%.17g"
+        )
     build_candidate_manifest().to_csv(
         CANDIDATE_MANIFEST_PATH,
         index=False,

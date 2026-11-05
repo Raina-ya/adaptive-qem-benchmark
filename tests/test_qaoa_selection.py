@@ -1,5 +1,6 @@
 import inspect
 import json
+from dataclasses import replace
 from pathlib import Path
 
 import numpy as np
@@ -23,6 +24,8 @@ from src.applications.qaoa_selection import (
     exact_maxcut,
     expected_cut_from_counts,
     expected_cut_from_probabilities,
+    frozen_candidate_pool,
+    frozen_pool_mismatches,
     generate_candidate_pool,
     maxcut_cost_operator,
     nested_shot_checkpoints,
@@ -368,12 +371,45 @@ def test_committed_candidate_artifacts_match_deterministic_generation() -> None:
     committed_pool = pd.read_csv(CANDIDATE_POOL_PATH)
     committed_manifest = pd.read_csv(CANDIDATE_MANIFEST_PATH)
 
-    pd.testing.assert_frame_equal(committed_pool, candidate_pool_frame(), rtol=1e-12)
+    assert frozen_pool_mismatches(committed_pool, candidate_pool_frame()) == []
     pd.testing.assert_frame_equal(
         committed_manifest,
         build_candidate_manifest(),
         rtol=1e-12,
     )
+
+
+def test_frozen_pool_comparison_allows_only_exact_tie_reordering() -> None:
+    frozen = pd.DataFrame(
+        {
+            "graph_id": ["g", "g", "g"],
+            "candidate_id": ["a", "b", "c"],
+            "beta": [0.1, 0.2, 0.3],
+            "gamma": [0.4, 0.5, 0.6],
+            "exact_ideal_energy": [2.0, 2.0, 1.0],
+            "ideal_rank": [1, 2, 3],
+        }
+    )
+    tied_noise = frozen.assign(exact_ideal_energy=[2.0, 2.0 + 1e-13, 1.0], ideal_rank=[2, 1, 3])
+    assert frozen_pool_mismatches(frozen, tied_noise) == []
+
+    reversed_order = frozen.assign(exact_ideal_energy=[1.0, 2.0, 2.0])
+    assert any(
+        "exact_ideal_energy" in item for item in frozen_pool_mismatches(frozen, reversed_order)
+    )
+    assert any(
+        "not ordered" in item for item in frozen_pool_mismatches(frozen, reversed_order)
+    )
+    assert frozen_pool_mismatches(frozen, frozen.iloc[:2]) == ["candidate sets differ"]
+
+
+def test_selection_reads_the_frozen_pool_and_rejects_unknown_graphs() -> None:
+    graph = benchmark_graphs()[0]
+    assert frozen_candidate_pool(graph)[0].candidate_id == "p1_b09_g21"
+    assert select_benchmark_candidates(graph)[0].candidate_id == "p1_b09_g21"
+    unknown = replace(graph, graph_id="not_frozen")
+    with pytest.raises(ValueError, match="No frozen candidate pool"):
+        frozen_candidate_pool(unknown)
 
 
 def test_frozen_config_records_budget_and_certification_boundaries() -> None:

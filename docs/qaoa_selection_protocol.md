@@ -72,6 +72,16 @@ noiseless statevector expected cut, descending, with candidate ID as the determi
 tie breaker. No noisy, mitigated, or hardware-derived value enters pool generation,
 ranking, or subset selection.
 
+Known limitation: candidates with mathematically equal energies differ in their last
+floating-point digits, so the committed order within those ties came from the Windows
+machine that generated the pool, not from the candidate-ID tie breaker. A fresh Linux
+computation orders them differently, which could change the selected candidates. The
+committed pool and manifest are therefore frozen inputs: selection reads the committed
+ranking, and generation does not replace an existing pool. Tests check that fresh
+energies match within `1e-9` and that committed ranks remain ordered by energy. The tied
+choice used only noiseless values, so no noisy outcome influenced it, but the selected
+candidates cannot be derived from scratch on another platform.
+
 The benchmark requests five candidates per graph: the incumbent, the closest
 nonzero-gap candidate within 2% of the exact classical optimum, the first challenger
 at least 10% of the exact optimum below the incumbent, a median-rank control, and a
