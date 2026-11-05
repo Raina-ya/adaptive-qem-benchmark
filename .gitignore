@@ -21,3 +21,4 @@ outputs/
 *.pyc
 *.log
 .env
+HANDOFF.md
