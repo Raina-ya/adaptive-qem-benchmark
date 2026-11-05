@@ -8,6 +8,7 @@ from collections.abc import Mapping, Sequence
 from dataclasses import dataclass, replace
 from functools import cache
 from pathlib import Path
+from statistics import NormalDist
 
 import numpy as np
 import pandas as pd
@@ -116,6 +117,45 @@ class SampledCutCertification:
     reaches_exact_optimum: bool
     alpha: float
     at_least_alpha_fraction: float
+
+
+@dataclass(frozen=True)
+class CandidateSelectionMetrics:
+    """Application-level metrics for one resolved candidate selection."""
+
+    selected_candidate_id: str
+    noisy_winner_ids: tuple[str, ...]
+    exact_winner_ids: tuple[str, ...]
+    set_valued_correct: bool
+    unique_winner_correct: bool | None
+    top_k_recall: float
+    simple_regret: float
+    energy_rmse: float
+    decision_error: int
+
+
+@dataclass(frozen=True)
+class CertificationCheckpoint:
+    """One cumulative checkpoint built from nested candidate samples."""
+
+    total_shots: int
+    estimates: Mapping[str, float]
+    standard_errors: Mapping[str, float]
+    candidate_shots: Mapping[str, int]
+
+
+@dataclass(frozen=True)
+class CertificationResult:
+    """First certified winner, or an explicit unresolved result."""
+
+    status: str
+    winner_id: str | None
+    shots_to_certified_decision: int | None
+    maximum_shots: int
+    simultaneous_confidence: float
+    interval_confidence: float
+    critical_value: float
+    winner_tied: bool
 
 
 def _basis_state(graph: MaxCutGraph, assignment: int | str) -> int:
@@ -286,6 +326,341 @@ def expected_cut_from_corrected_probabilities(
     """Evaluate MaxCut energy from a corrected computational-basis distribution."""
 
     return expected_cut_from_probabilities(graph, probabilities)
+
+
+def _validated_candidate_values(
+    candidate_ids: Sequence[str], values: Sequence[float], *, name: str
+) -> dict[str, float]:
+    if not candidate_ids or len(candidate_ids) != len(values):
+        raise ValueError(f"{name} must match a nonempty candidate list")
+    if len(set(candidate_ids)) != len(candidate_ids):
+        raise ValueError("Candidate identifiers must be unique")
+    result = {
+        candidate_id: float(value)
+        for candidate_id, value in zip(candidate_ids, values, strict=True)
+    }
+    if not all(math.isfinite(value) for value in result.values()):
+        raise ValueError(f"{name} must be finite")
+    return result
+
+
+def evaluate_candidate_selection(
+    candidate_ids: Sequence[str],
+    exact_energies: Sequence[float],
+    estimates: Sequence[float],
+    *,
+    top_k: int,
+    tolerance: float = ENERGY_TOLERANCE,
+) -> CandidateSelectionMetrics:
+    """Evaluate one noisy selection without exposing ideal values to the selector."""
+
+    exact = _validated_candidate_values(candidate_ids, exact_energies, name="Exact energies")
+    noisy = _validated_candidate_values(candidate_ids, estimates, name="Estimates")
+    if not 1 <= top_k <= len(candidate_ids):
+        raise ValueError("top_k must lie within the candidate count")
+    noisy_best = max(noisy.values())
+    noisy_winners = tuple(
+        sorted(key for key, value in noisy.items() if noisy_best - value <= tolerance)
+    )
+    selected = noisy_winners[0]
+    exact_best = max(exact.values())
+    exact_winners = tuple(
+        sorted(key for key, value in exact.items() if exact_best - value <= tolerance)
+    )
+
+    exact_order = sorted(candidate_ids, key=lambda key: (-exact[key], key))
+    top_k_boundary = exact[exact_order[top_k - 1]]
+    exact_top_k = {
+        key for key, value in exact.items() if value >= top_k_boundary - tolerance
+    }
+    noisy_top_k = set(sorted(candidate_ids, key=lambda key: (-noisy[key], key))[:top_k])
+    set_valued_correct = selected in exact_winners
+    return CandidateSelectionMetrics(
+        selected_candidate_id=selected,
+        noisy_winner_ids=noisy_winners,
+        exact_winner_ids=exact_winners,
+        set_valued_correct=set_valued_correct,
+        unique_winner_correct=(
+            set_valued_correct if len(exact_winners) == 1 else None
+        ),
+        top_k_recall=len(noisy_top_k & exact_top_k) / len(exact_top_k),
+        simple_regret=max(0.0, exact_best - exact[selected]),
+        energy_rmse=math.sqrt(
+            math.fsum((noisy[key] - exact[key]) ** 2 for key in candidate_ids)
+            / len(candidate_ids)
+        ),
+        decision_error=int(not set_valued_correct),
+    )
+
+
+def wilson_interval(
+    successes: int, total: int, *, confidence: float = 0.95
+) -> tuple[float, float]:
+    """Return a two-sided Wilson score interval for one empirical probability."""
+
+    if total <= 0 or not 0 <= successes <= total:
+        raise ValueError("Wilson counts must satisfy 0 <= successes <= total and total > 0")
+    if not 0.0 < confidence < 1.0:
+        raise ValueError("Confidence must lie in (0, 1)")
+    z = NormalDist().inv_cdf(0.5 + confidence / 2.0)
+    rate = successes / total
+    denominator = 1.0 + z**2 / total
+    center = (rate + z**2 / (2.0 * total)) / denominator
+    radius = z * math.sqrt(rate * (1.0 - rate) / total + z**2 / (4.0 * total**2))
+    radius /= denominator
+    return max(0.0, center - radius), min(1.0, center + radius)
+
+
+def nested_shot_checkpoints(
+    maximum_shots: int, fractions: Sequence[float] = (0.25, 0.5, 0.75, 1.0)
+) -> tuple[int, ...]:
+    """Create preregistered strictly increasing cumulative shot checkpoints."""
+
+    if maximum_shots <= 0 or not fractions:
+        raise ValueError("Maximum shots and checkpoint fractions must be positive")
+    if tuple(fractions) != tuple(sorted(set(fractions))):
+        raise ValueError("Checkpoint fractions must be unique and increasing")
+    if fractions[-1] != 1.0 or any(not 0.0 < value <= 1.0 for value in fractions):
+        raise ValueError("Checkpoint fractions must end at one and lie in (0, 1]")
+    checkpoints = tuple(int(maximum_shots * value) for value in fractions)
+    if checkpoints[0] <= 0 or any(
+        right <= left for left, right in zip(checkpoints, checkpoints[1:], strict=False)
+    ):
+        raise ValueError("Shot budget is too small for distinct nested checkpoints")
+    return checkpoints
+
+
+def certify_candidate_winner(
+    checkpoints: Sequence[CertificationCheckpoint],
+    *,
+    confidence: float = 0.95,
+    tolerance: float = ENERGY_TOLERANCE,
+) -> CertificationResult:
+    """Certify separation using Bonferroni intervals across candidates and looks."""
+
+    if not checkpoints or not 0.0 < confidence < 1.0:
+        raise ValueError("Checkpoints are required and confidence must lie in (0, 1)")
+    candidate_ids = tuple(sorted(checkpoints[0].estimates))
+    if len(candidate_ids) < 2:
+        raise ValueError("Certification requires at least two candidates")
+    previous_total = 0
+    previous_candidate_shots = {candidate_id: 0 for candidate_id in candidate_ids}
+    for checkpoint in checkpoints:
+        if tuple(sorted(checkpoint.estimates)) != candidate_ids:
+            raise ValueError("Every checkpoint must contain the same candidates")
+        if tuple(sorted(checkpoint.standard_errors)) != candidate_ids:
+            raise ValueError("Every checkpoint must contain one standard error per candidate")
+        if tuple(sorted(checkpoint.candidate_shots)) != candidate_ids:
+            raise ValueError("Every checkpoint must contain cumulative candidate shots")
+        if checkpoint.total_shots <= previous_total:
+            raise ValueError("Checkpoint total shots must increase monotonically")
+        for candidate_id in candidate_ids:
+            estimate = float(checkpoint.estimates[candidate_id])
+            standard_error = float(checkpoint.standard_errors[candidate_id])
+            shots = int(checkpoint.candidate_shots[candidate_id])
+            if not math.isfinite(estimate) or not math.isfinite(standard_error):
+                raise ValueError("Checkpoint estimates and errors must be finite")
+            if standard_error < 0.0 or shots <= previous_candidate_shots[candidate_id]:
+                raise ValueError("Candidate shots must be positive and nested monotonically")
+            previous_candidate_shots[candidate_id] = shots
+        previous_total = checkpoint.total_shots
+
+    family_size = len(candidate_ids) * len(checkpoints)
+    alpha = 1.0 - confidence
+    interval_confidence = 1.0 - alpha / family_size
+    critical_value = NormalDist().inv_cdf(1.0 - alpha / (2.0 * family_size))
+    last_tied = False
+    for checkpoint in checkpoints:
+        best_estimate = max(float(value) for value in checkpoint.estimates.values())
+        tied = tuple(
+            sorted(
+                candidate_id
+                for candidate_id, value in checkpoint.estimates.items()
+                if best_estimate - float(value) <= tolerance
+            )
+        )
+        last_tied = len(tied) > 1
+        if last_tied:
+            continue
+        winner = tied[0]
+        lower = float(checkpoint.estimates[winner]) - critical_value * float(
+            checkpoint.standard_errors[winner]
+        )
+        challenger_uppers = [
+            float(checkpoint.estimates[candidate_id])
+            + critical_value * float(checkpoint.standard_errors[candidate_id])
+            for candidate_id in candidate_ids
+            if candidate_id != winner
+        ]
+        if lower > max(challenger_uppers):
+            return CertificationResult(
+                "certified",
+                winner,
+                checkpoint.total_shots,
+                checkpoints[-1].total_shots,
+                confidence,
+                interval_confidence,
+                critical_value,
+                False,
+            )
+    return CertificationResult(
+        "unresolved",
+        None,
+        None,
+        checkpoints[-1].total_shots,
+        confidence,
+        interval_confidence,
+        critical_value,
+        last_tied,
+    )
+
+
+def selection_metrics_frame(frame: pd.DataFrame, *, top_k: int) -> pd.DataFrame:
+    """Reduce candidate rows to one application-decision row per repeat."""
+
+    required = {
+        "graph_id",
+        "method",
+        "total_selection_budget",
+        "repeat",
+        "candidate_id",
+        "exact_ideal_energy",
+        "corrected_or_extrapolated_estimate",
+        "status",
+        "candidate_target_shots",
+        "calibration_shots",
+        "factor_level_shots",
+        "selection_shots",
+        "selection_execution_count",
+    }
+    missing = required - set(frame.columns)
+    if missing:
+        raise ValueError(f"Selection results are missing columns: {sorted(missing)}")
+    rows: list[dict[str, object]] = []
+    group_columns = ["graph_id", "method", "total_selection_budget", "repeat"]
+    for keys, group in frame.groupby(group_columns, sort=True, dropna=False):
+        graph_id, method, budget, repeat = keys
+        estimates = pd.to_numeric(
+            group["corrected_or_extrapolated_estimate"], errors="coerce"
+        )
+        resolved = group.status.isin({"complete", "nonphysical"}).all() and estimates.notna().all()
+        overhead_shots = int(group.calibration_shots.max())
+        if method == "zne":
+            overhead_shots += sum(
+                sum(json.loads(value)[1:]) for value in group.factor_level_shots
+            )
+        row: dict[str, object] = {
+            "graph_id": graph_id,
+            "method": method,
+            "total_selection_budget": int(budget),
+            "repeat": int(repeat),
+            "resolved": bool(resolved),
+            "unresolved": not resolved,
+            "overhead_shots": overhead_shots,
+            "shot_overhead_fraction": overhead_shots / int(group.selection_shots.iloc[0]),
+            "selection_execution_count": int(group.selection_execution_count.iloc[0]),
+            "execution_overhead_ratio": int(group.selection_execution_count.iloc[0])
+            / len(group),
+            "shots_to_certified_decision": math.nan,
+            "certification_status": "unresolved",
+        }
+        if resolved:
+            metrics = evaluate_candidate_selection(
+                group.candidate_id.tolist(),
+                group.exact_ideal_energy.tolist(),
+                estimates.tolist(),
+                top_k=top_k,
+            )
+            row.update(
+                {
+                    "selected_candidate_id": metrics.selected_candidate_id,
+                    "noisy_winner_ids": json.dumps(metrics.noisy_winner_ids),
+                    "exact_winner_ids": json.dumps(metrics.exact_winner_ids),
+                    "noisy_tie": len(metrics.noisy_winner_ids) > 1,
+                    "exact_degeneracy": len(metrics.exact_winner_ids) > 1,
+                    "best_candidate_selection_indicator": int(
+                        metrics.set_valued_correct
+                    ),
+                    "unique_winner_indicator": metrics.unique_winner_correct,
+                    "top_k_recall": metrics.top_k_recall,
+                    "simple_regret": metrics.simple_regret,
+                    "energy_rmse": metrics.energy_rmse,
+                    "decision_error": metrics.decision_error,
+                }
+            )
+        rows.append(row)
+    return pd.DataFrame(rows)
+
+
+def summarize_selection_results(
+    frame: pd.DataFrame, *, top_k: int, confidence: float = 0.95
+) -> pd.DataFrame:
+    """Aggregate application metrics while retaining unresolved probability."""
+
+    decisions = selection_metrics_frame(frame, top_k=top_k)
+    rows: list[dict[str, object]] = []
+    for keys, group in decisions.groupby(
+        ["graph_id", "method", "total_selection_budget"], sort=True
+    ):
+        graph_id, method, budget = keys
+        resolved = group[group.resolved]
+        unresolved_count = int(group.unresolved.sum())
+        unresolved_low, unresolved_high = wilson_interval(
+            unresolved_count, len(group), confidence=confidence
+        )
+        row: dict[str, object] = {
+            "graph_id": graph_id,
+            "method": method,
+            "total_selection_budget": int(budget),
+            "repeats": len(group),
+            "resolved_repeats": len(resolved),
+            "unresolved_probability": unresolved_count / len(group),
+            "unresolved_wilson_low": unresolved_low,
+            "unresolved_wilson_high": unresolved_high,
+            "mean_overhead_shots": group.overhead_shots.mean(),
+            "mean_shot_overhead_fraction": group.shot_overhead_fraction.mean(),
+            "mean_selection_execution_count": group.selection_execution_count.mean(),
+            "mean_execution_overhead_ratio": group.execution_overhead_ratio.mean(),
+        }
+        if resolved.empty:
+            row.update(
+                {
+                    "best_candidate_selection_probability": math.nan,
+                    "mean_top_k_recall": math.nan,
+                    "mean_simple_regret": math.nan,
+                    "energy_rmse": math.nan,
+                    "decision_error_probability": math.nan,
+                    "decision_error_wilson_low": math.nan,
+                    "decision_error_wilson_high": math.nan,
+                    "mean_shots_to_certified_decision": math.nan,
+                }
+            )
+        else:
+            errors = int(resolved.decision_error.sum())
+            error_low, error_high = wilson_interval(
+                errors, len(resolved), confidence=confidence
+            )
+            row.update(
+                {
+                    "best_candidate_selection_probability": resolved[
+                        "best_candidate_selection_indicator"
+                    ].mean(),
+                    "mean_top_k_recall": resolved.top_k_recall.mean(),
+                    "mean_simple_regret": resolved.simple_regret.mean(),
+                    "energy_rmse": math.sqrt(
+                        math.fsum(float(value) ** 2 for value in resolved.energy_rmse)
+                        / len(resolved)
+                    ),
+                    "decision_error_probability": errors / len(resolved),
+                    "decision_error_wilson_low": error_low,
+                    "decision_error_wilson_high": error_high,
+                    "mean_shots_to_certified_decision": resolved[
+                        "shots_to_certified_decision"
+                    ].mean(),
+                }
+            )
+        rows.append(row)
+    return pd.DataFrame(rows)
 
 
 def candidate_shot_allocation(

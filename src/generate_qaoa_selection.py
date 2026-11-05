@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import argparse
+import json
 from pathlib import Path
 
 import pandas as pd
@@ -12,11 +13,14 @@ from src.applications.qaoa_selection import (
     benchmark_graphs,
     run_candidate_selection_group,
     select_benchmark_candidates,
+    summarize_selection_results,
 )
 from src.noise_models import noise_spec
 
 ROOT = Path(__file__).resolve().parents[1]
 SMOKE_OUTPUT = ROOT / "results/raw/qaoa_selection_smoke_v1.csv"
+SMOKE_SUMMARY_OUTPUT = ROOT / "results/processed/qaoa_selection_smoke_summary_v1.csv"
+CONFIG_PATH = ROOT / "experiments/configs/qaoa_selection_v1.yaml"
 SMOKE_GRAPH_ID = "ring4"
 SMOKE_BUDGET = 4096
 SMOKE_REPEAT = 0
@@ -67,7 +71,17 @@ def main() -> None:
     frame = generate_smoke()
     SMOKE_OUTPUT.parent.mkdir(parents=True, exist_ok=True)
     frame.to_csv(SMOKE_OUTPUT, index=False, lineterminator="\n", float_format="%.17g")
+    config = json.loads(CONFIG_PATH.read_text(encoding="utf-8"))
+    summary = summarize_selection_results(frame, top_k=int(config["top_k"]))
+    SMOKE_SUMMARY_OUTPUT.parent.mkdir(parents=True, exist_ok=True)
+    summary.to_csv(
+        SMOKE_SUMMARY_OUTPUT,
+        index=False,
+        lineterminator="\n",
+        float_format="%.17g",
+    )
     print(f"wrote {len(frame)} rows to {SMOKE_OUTPUT.relative_to(ROOT)}")
+    print(f"wrote {len(summary)} rows to {SMOKE_SUMMARY_OUTPUT.relative_to(ROOT)}")
 
 
 if __name__ == "__main__":

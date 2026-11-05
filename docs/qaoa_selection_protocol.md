@@ -114,6 +114,46 @@ The frozen reporting value is `top_k = 2`. The pilot uses three repeats; the int
 full run uses 50. Changing the allocation, candidate set, or `k` after inspecting
 noisy outcomes would create a new protocol version.
 
+## Application decision metrics and certification
+
+The runtime selector sees only finite-shot estimates. It never receives exact ideal
+energies. Estimates are sorted from largest to smallest; an exact numerical tie within
+`1e-12` is broken by lexicographically smallest candidate ID, while every tied ID is
+retained in the output. Exact ideal degeneracy is treated as a set: selection of any
+exact maximizer is correct, and the unique-winner indicator is `not_applicable`.
+
+For each repeat, the benchmark reports set-valued top-1 correctness, top-2 recall,
+simple regret `max_i E_i - E_selected`, and energy RMSE across all candidates. Top-2
+recall uses the set of all exact candidates at or above the second-place energy, so an
+exact tie at the boundary is not silently broken. Across repeats, best-candidate
+selection probability and decision-error probability use resolved repeats only;
+unresolved probability is reported separately. Decision-error and unresolved rates
+receive two-sided 95% Wilson intervals. Simple regret and exact top-1 accuracy remain
+separate because a wrong near-tie decision can have negligible regret.
+
+Certification uses cumulative nested checkpoints at 25%, 50%, 75%, and 100% of the
+selection-shot allocation. Samples at a later checkpoint must extend the earlier
+sample prefix; they are not independent reruns. Let `m` be the number of candidates,
+`T=4` the number of sequential looks, and `alpha=0.05`. Every candidate/checkpoint
+interval uses
+
+`z* = Phi^-1(1 - alpha / (2*m*T))`,
+
+`L_i(t) = estimate_i(t) - z* SE_i(t)`, and
+`U_i(t) = estimate_i(t) + z* SE_i(t)`.
+
+The current noisy winner `w` is certified at the first checkpoint satisfying
+`L_w(t) > max_(j != w) U_j(t)`. This Bonferroni union bound provides at least 95%
+simultaneous coverage over candidates and sequential looks without assuming that
+candidate estimates or checkpoints are independent. A noisy tie cannot be certified.
+If separation never occurs, status remains `unresolved`, shots-to-decision is missing,
+and the maximum charged budget is retained.
+
+Shot overhead counts readout calibration and, for ZNE, factor-3 and factor-5 samples
+relative to the factor-1 estimate. Execution overhead is the selection-group circuit
+count divided by the raw one-execution-per-candidate baseline. These quantities do not
+change the fixed total budget.
+
 ## Sampled-cut verification
 
 Every sampled computational-basis bitstring has a cut value that can be evaluated
@@ -133,7 +173,7 @@ solution becomes intractable.
 
 The instances have at most eight vertices and remain classically trivial. They test
 accounting, ranking, and mitigation behavior rather than quantum advantage. Candidate
-parameters, ranking, `top_k`, the 50/50 selection/final allocation, and sampled-cut
-success metrics are now frozen. Noise models, uncertainty-based stopping, and
-method-specific budget splitting remain Phase F-C/F-D decisions and must be frozen
-before noisy outcomes are inspected.
+parameters, ranking, `top_k`, the 50/50 selection/final allocation, noise model,
+method-specific budget splitting, application metrics, and certification rule are now
+frozen. Certification still requires method-appropriate standard errors from the
+future full runner; Phase F-D does not infer them from aggregate smoke counts.

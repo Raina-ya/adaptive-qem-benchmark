@@ -10,22 +10,27 @@ from qiskit.quantum_info import Statevector
 from src.applications.qaoa_selection import (
     CANDIDATE_MANIFEST_PATH,
     CANDIDATE_POOL_PATH,
+    CertificationCheckpoint,
     MaxCutGraph,
     benchmark_graphs,
     build_candidate_manifest,
     candidate_pool_frame,
     candidate_shot_allocation,
+    certify_candidate_winner,
     certify_sampled_cuts,
     cut_value,
+    evaluate_candidate_selection,
     exact_maxcut,
     expected_cut_from_counts,
     expected_cut_from_probabilities,
     generate_candidate_pool,
     maxcut_cost_operator,
+    nested_shot_checkpoints,
     noiseless_probabilities,
     qaoa_circuit,
     select_benchmark_candidates,
     selection_budget_split,
+    wilson_interval,
 )
 
 
@@ -265,6 +270,100 @@ def test_sampled_cut_certification_does_not_claim_suboptimal_sample_is_optimal()
     assert result.at_least_alpha_fraction == 0.0
 
 
+def test_selection_metrics_exact_and_wrong_winners() -> None:
+    exact = [3.0, 2.9, 1.0]
+    correct = evaluate_candidate_selection(
+        ["a", "b", "c"], exact, [2.8, 2.7, 1.1], top_k=2
+    )
+    wrong = evaluate_candidate_selection(
+        ["a", "b", "c"], exact, [2.7, 2.8, 1.1], top_k=2
+    )
+    large_regret = evaluate_candidate_selection(
+        ["a", "b", "c"], exact, [1.0, 1.1, 2.0], top_k=2
+    )
+
+    assert correct.set_valued_correct and correct.decision_error == 0
+    assert wrong.selected_candidate_id == "b" and wrong.decision_error == 1
+    assert wrong.top_k_recall == 1.0
+    assert wrong.simple_regret == pytest.approx(0.1)
+    assert large_regret.simple_regret > wrong.simple_regret
+
+
+def test_degenerate_exact_winners_use_set_valued_correctness() -> None:
+    result = evaluate_candidate_selection(
+        ["a", "b", "c"], [3.0, 3.0, 1.0], [2.8, 2.9, 1.1], top_k=2
+    )
+
+    assert result.exact_winner_ids == ("a", "b")
+    assert result.set_valued_correct
+    assert result.unique_winner_correct is None
+
+
+def test_noisy_tie_uses_visible_deterministic_candidate_id_rule() -> None:
+    result = evaluate_candidate_selection(
+        ["b", "a", "c"], [3.0, 2.0, 1.0], [2.5, 2.5, 1.0], top_k=2
+    )
+
+    assert result.noisy_winner_ids == ("a", "b")
+    assert result.selected_candidate_id == "a"
+
+
+def _checkpoint(total: int, a: float, b: float, error: float) -> CertificationCheckpoint:
+    return CertificationCheckpoint(
+        total,
+        {"a": a, "b": b},
+        {"a": error, "b": error},
+        {"a": total // 2, "b": total // 2},
+    )
+
+
+def test_certification_preserves_unresolved_and_certifies_separation() -> None:
+    unresolved = certify_candidate_winner(
+        [_checkpoint(100, 1.0, 0.95, 0.2), _checkpoint(200, 1.0, 0.94, 0.12)]
+    )
+    certified = certify_candidate_winner(
+        [_checkpoint(100, 1.0, 0.9, 0.2), _checkpoint(200, 1.5, 0.5, 0.05)]
+    )
+
+    assert unresolved.status == "unresolved"
+    assert unresolved.shots_to_certified_decision is None
+    assert unresolved.maximum_shots == 200
+    assert certified.status == "certified"
+    assert certified.winner_id == "a"
+    assert certified.shots_to_certified_decision == 200
+
+
+def test_certification_corrects_for_candidates_and_sequential_looks() -> None:
+    result = certify_candidate_winner(
+        [_checkpoint(100, 1.0, 0.9, 0.2), _checkpoint(200, 1.5, 0.5, 0.05)]
+    )
+
+    assert result.simultaneous_confidence == 0.95
+    assert result.interval_confidence == pytest.approx(1.0 - 0.05 / 4)
+    assert result.critical_value > 1.96
+
+
+def test_nested_checkpoints_are_monotonic_and_reject_non_nested_input() -> None:
+    assert nested_shot_checkpoints(2048) == (512, 1024, 1536, 2048)
+    invalid = [
+        _checkpoint(100, 1.0, 0.9, 0.2),
+        CertificationCheckpoint(
+            200,
+            {"a": 1.2, "b": 0.8},
+            {"a": 0.1, "b": 0.1},
+            {"a": 50, "b": 150},
+        ),
+    ]
+    with pytest.raises(ValueError, match="nested monotonically"):
+        certify_candidate_winner(invalid)
+
+
+def test_wilson_interval_contains_empirical_rate() -> None:
+    low, high = wilson_interval(7, 10, confidence=0.95)
+
+    assert low <= 0.7 <= high
+
+
 def test_committed_candidate_artifacts_match_deterministic_generation() -> None:
     committed_pool = pd.read_csv(CANDIDATE_POOL_PATH)
     committed_manifest = pd.read_csv(CANDIDATE_MANIFEST_PATH)
@@ -288,6 +387,9 @@ def test_frozen_config_records_budget_and_certification_boundaries() -> None:
     assert config["selection_budget_fraction"] == 0.5
     assert config["final_evaluation_budget_fraction"] == 0.5
     assert config["top_k"] == 2
+    assert config["certification_confidence"] == 0.95
+    assert config["certification_checkpoint_fractions"] == [0.25, 0.5, 0.75, 1.0]
+    assert "Bonferroni" in config["certification_multiplicity"]
     assert config["success_alpha"] == 0.95
     assert config["near_tie_unavailable_graphs"] == ["ring4"]
     assert config["noise_model"] == "mixed_medium"

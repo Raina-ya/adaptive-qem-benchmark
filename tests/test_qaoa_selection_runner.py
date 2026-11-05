@@ -1,6 +1,7 @@
 import json
 
 import pandas as pd
+import pytest
 
 import src.applications.qaoa_selection as qaoa
 from src.noise_models import noise_spec
@@ -88,3 +89,27 @@ def test_fixed_seeds_regenerate_identical_rows(monkeypatch) -> None:
     monkeypatch.setattr(qaoa, "_sample_complete_bitstrings", seeded_counts)
 
     pd.testing.assert_frame_equal(pd.DataFrame(_group("raw")), pd.DataFrame(_group("raw")))
+
+
+def test_summary_reports_probability_regret_rmse_and_unresolved(monkeypatch) -> None:
+    monkeypatch.setattr(
+        qaoa,
+        "_sample_complete_bitstrings",
+        lambda circuit, *, shots, seed, noise: {"0101": shots},
+    )
+    frame = pd.DataFrame(_group("raw"))
+    failed = frame.copy()
+    failed["repeat"] = 1
+    failed.loc[failed.index[0], "status"] = "failed"
+    failed.loc[failed.index[0], "corrected_or_extrapolated_estimate"] = float("nan")
+
+    summary = qaoa.summarize_selection_results(
+        pd.concat([frame, failed], ignore_index=True), top_k=2
+    ).iloc[0]
+
+    assert summary["repeats"] == 2
+    assert summary["resolved_repeats"] == 1
+    assert summary["unresolved_probability"] == pytest.approx(0.5)
+    assert 0.0 <= summary["best_candidate_selection_probability"] <= 1.0
+    assert summary["mean_simple_regret"] >= 0.0
+    assert summary["energy_rmse"] >= 0.0
