@@ -56,10 +56,63 @@ Expected cut from a probability vector is an exact statevector-derived quantity.
 Expected cut from counts is a finite-shot estimator. These values must not be
 described interchangeably.
 
+## Frozen candidate construction
+
+Phase F-B freezes QAOA depth at `p=1`. Depth two is disabled until the noiseless
+candidate study and the later `p=1` noisy benchmark are reviewed. The complete pool
+is the Cartesian grid
+
+- `beta_i = pi*i/24`, for `i=0,...,12`;
+- `gamma_j = pi*j/12`, for `j=0,...,23`.
+
+This creates 312 candidates per graph. Every pool row, including candidates not
+selected for the noisy benchmark, is preserved in
+`experiments/manifests/qaoa_candidate_pool_v1.csv`. Candidates are ranked by exact
+noiseless statevector expected cut, descending, with candidate ID as the deterministic
+tie breaker. No noisy, mitigated, or hardware-derived value enters pool generation,
+ranking, or subset selection.
+
+The benchmark requests five candidates per graph: the incumbent, the closest
+nonzero-gap candidate within 2% of the exact classical optimum, the first challenger
+at least 10% of the exact optimum below the incumbent, a median-rank control, and a
+lowest-rank control. If the near-tie rule has no solution, it is reported rather than
+relaxed. `ring4` has no nonzero-gap candidate within the frozen 2% threshold and uses
+an additional non-tied control; `sparse6` is explicitly a control graph. The selected
+manifest preserves candidate roles, exact ideal energies, ranks, and gaps.
+
+## Selection budget
+
+For one graph, method, and repeat, the total application budget is `B`, shared by all
+candidates and every method-specific execution. The frozen budgets are 4,096 and
+16,384 shots. Exactly 50% is reserved for candidate selection and 50% for final
+evaluation. Later readout calibration, ZNE factors, and folded executions must fit
+inside the same `B`; they cannot be added as uncharged overhead. The Phase F-B
+manifest records this contract but does not execute it.
+
+The frozen reporting value is `top_k = 2`. The pilot uses three repeats; the intended
+full run uses 50. Changing the allocation, candidate set, or `k` after inspecting
+noisy outcomes would create a new protocol version.
+
+## Sampled-cut verification
+
+Every sampled computational-basis bitstring has a cut value that can be evaluated
+exactly by classical computation. For these small graphs, the preregistered exact
+success indicator is `best sampled cut == exact MaxCut optimum`. Complementary
+bitstrings represent the same cut and require no special quantum-side treatment.
+The additional approximate metric is the fraction of samples whose cut is at least
+`alpha * optimum`, with `alpha = 0.95`.
+
+These are externally verified application metrics. A quantum sampler cannot prove
+global optimality by itself. The word *certified* in this track means that the
+small-n classical exhaustive solver independently confirmed the sampled value; it
+does not mean quantum-verifiable optimality and does not scale once exact classical
+solution becomes intractable.
+
 ## Current limitations
 
 The instances have at most eight vertices and remain classically trivial. They test
-accounting, ranking, and mitigation behavior rather than quantum advantage. Phase
-F-A does not define candidate parameters, selection metrics, confidence rules, noise
-models, or mitigation budgets; those decisions must be frozen before noisy outcomes
-are inspected.
+accounting, ranking, and mitigation behavior rather than quantum advantage. Candidate
+parameters, ranking, `top_k`, the 50/50 selection/final allocation, and sampled-cut
+success metrics are now frozen. Noise models, uncertainty-based stopping, and
+method-specific budget splitting remain Phase F-C/F-D decisions and must be frozen
+before noisy outcomes are inspected.

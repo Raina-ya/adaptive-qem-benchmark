@@ -4,15 +4,31 @@ from __future__ import annotations
 
 import math
 from collections.abc import Mapping, Sequence
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
+from functools import cache
+from pathlib import Path
 
 import numpy as np
+import pandas as pd
 from qiskit import QuantumCircuit
 from qiskit.quantum_info import SparsePauliOp, Statevector
 
 from src.config import derive_seed
 
 Edge = tuple[int, int]
+
+ROOT = Path(__file__).resolve().parents[2]
+CANDIDATE_POOL_PATH = ROOT / "experiments/manifests/qaoa_candidate_pool_v1.csv"
+CANDIDATE_MANIFEST_PATH = ROOT / "experiments/manifests/qaoa_selection_v1_manifest.csv"
+BETA_GRID = tuple(math.pi * index / 24.0 for index in range(13))
+GAMMA_GRID = tuple(math.pi * index / 12.0 for index in range(24))
+METHODS = ("raw", "readout", "zne")
+SELECTION_BUDGETS = (4096, 16384)
+FULL_REPEATS = 50
+NEAR_TIE_RELATIVE_GAP = 0.02
+CLEAR_RELATIVE_GAP = 0.10
+ENERGY_TOLERANCE = 1e-12
+SUCCESS_ALPHA = 0.95
 
 
 @dataclass(frozen=True)
@@ -63,6 +79,32 @@ class ExactMaxCutSolution:
         """Return Qiskit-style q[n-1]...q[0] strings."""
 
         return tuple(format(state, f"0{self.width}b") for state in self.optimal_states)
+
+
+@dataclass(frozen=True)
+class QAOACandidate:
+    """One deterministic p=1 parameter candidate and its ideal-only rank."""
+
+    graph_id: str
+    candidate_id: str
+    beta: float
+    gamma: float
+    exact_ideal_energy: float
+    ideal_rank: int
+    ideal_gap_to_best: float
+    candidate_role: str = "pool"
+    decision_regime: str = "unassigned"
+
+
+@dataclass(frozen=True)
+class SampledCutCertification:
+    """Classical verification of sampled cuts against the exact small-n optimum."""
+
+    exact_optimum: int
+    best_sampled_cut: int
+    reaches_exact_optimum: bool
+    alpha: float
+    at_least_alpha_fraction: float
 
 
 def _basis_state(graph: MaxCutGraph, assignment: int | str) -> int:
@@ -227,6 +269,236 @@ def expected_cut_from_counts(graph: MaxCutGraph, counts: Mapping[str, int]) -> f
     return weighted_cut / total_shots
 
 
+def selection_budget_split(total_selection_budget: int) -> tuple[int, int]:
+    """Apply the frozen 50/50 selection and final-evaluation allocation."""
+
+    if total_selection_budget <= 0 or total_selection_budget % 2:
+        raise ValueError("Total selection budget must be a positive even integer")
+    selection_shots = total_selection_budget // 2
+    return selection_shots, total_selection_budget - selection_shots
+
+
+@cache
+def generate_candidate_pool(graph: MaxCutGraph) -> tuple[QAOACandidate, ...]:
+    """Evaluate the complete deterministic p=1 grid using noiseless statevectors."""
+
+    evaluated: list[tuple[str, float, float, float]] = []
+    for beta_index, beta in enumerate(BETA_GRID):
+        for gamma_index, gamma in enumerate(GAMMA_GRID):
+            circuit = qaoa_circuit(graph, betas=(beta,), gammas=(gamma,))
+            energy = expected_cut_from_probabilities(graph, noiseless_probabilities(circuit))
+            evaluated.append(
+                (
+                    f"p1_b{beta_index:02d}_g{gamma_index:02d}",
+                    beta,
+                    gamma,
+                    energy,
+                )
+            )
+    evaluated.sort(key=lambda item: (-item[3], item[0]))
+    best = evaluated[0][3]
+    candidates = []
+    for rank, (candidate_id, beta, gamma, energy) in enumerate(evaluated, start=1):
+        gap = best - energy
+        if abs(gap) <= ENERGY_TOLERANCE:
+            gap = 0.0
+        candidates.append(
+            QAOACandidate(
+                graph.graph_id,
+                candidate_id,
+                beta,
+                gamma,
+                energy,
+                rank,
+                gap,
+            )
+        )
+    return tuple(candidates)
+
+
+def _first_unused(
+    candidates: Sequence[QAOACandidate],
+    used: set[str],
+) -> QAOACandidate:
+    for candidate in candidates:
+        if candidate.candidate_id not in used:
+            return candidate
+    raise ValueError("Candidate pool cannot satisfy the frozen role assignment")
+
+
+def select_benchmark_candidates(graph: MaxCutGraph) -> tuple[QAOACandidate, ...]:
+    """Select five candidates by frozen ideal-only gap and quantile rules."""
+
+    pool = generate_candidate_pool(graph)
+    optimum = exact_maxcut(graph).optimum
+    selected: list[QAOACandidate] = []
+    used: set[str] = set()
+
+    def add(candidate: QAOACandidate, role: str, regime: str) -> None:
+        selected.append(replace(candidate, candidate_role=role, decision_regime=regime))
+        used.add(candidate.candidate_id)
+
+    add(pool[0], "incumbent", "reference")
+    near = [
+        candidate
+        for candidate in pool[1:]
+        if ENERGY_TOLERANCE < candidate.ideal_gap_to_best <= NEAR_TIE_RELATIVE_GAP * optimum
+    ]
+    if near:
+        add(_first_unused(near, used), "near_tie_challenger", "near_tie")
+
+    clear = [
+        candidate
+        for candidate in pool[1:]
+        if candidate.ideal_gap_to_best >= CLEAR_RELATIVE_GAP * optimum
+    ]
+    add(_first_unused(clear, used), "clear_challenger", "clear")
+
+    median_order = sorted(
+        pool,
+        key=lambda candidate: (
+            abs(candidate.ideal_rank - (len(pool) + 1) / 2),
+            candidate.ideal_rank,
+        ),
+    )
+    add(_first_unused(median_order, used), "median_control", "control")
+    add(_first_unused(tuple(reversed(pool)), used), "low_control", "control")
+
+    if len(selected) < 5:
+        non_tied = [
+            candidate for candidate in pool if candidate.ideal_gap_to_best > ENERGY_TOLERANCE
+        ]
+        add(_first_unused(non_tied, used), "additional_control", "control")
+    return tuple(selected)
+
+
+def candidate_pool_frame(
+    graphs: Sequence[MaxCutGraph] | None = None,
+) -> pd.DataFrame:
+    """Return every ideal-only grid candidate before benchmark subset selection."""
+
+    rows = []
+    for graph in graphs if graphs is not None else benchmark_graphs():
+        classical = exact_maxcut(graph).optimum
+        for candidate in generate_candidate_pool(graph):
+            rows.append(
+                {
+                    "graph_id": graph.graph_id,
+                    "width": graph.width,
+                    "graph_family": graph.family,
+                    "edge_count": len(graph.edges),
+                    "qaoa_depth": 1,
+                    "candidate_id": candidate.candidate_id,
+                    "beta": candidate.beta,
+                    "gamma": candidate.gamma,
+                    "exact_classical_maxcut": classical,
+                    "exact_ideal_energy": candidate.exact_ideal_energy,
+                    "ideal_rank": candidate.ideal_rank,
+                    "ideal_gap_to_best": candidate.ideal_gap_to_best,
+                    "evidence_label": "noiseless_simulated",
+                }
+            )
+    return pd.DataFrame(rows)
+
+
+def build_candidate_manifest(repeats: int = FULL_REPEATS) -> pd.DataFrame:
+    """Build the frozen full-run manifest without executing noisy circuits."""
+
+    if repeats < 1:
+        raise ValueError("Manifest repeats must be positive")
+    rows = []
+    for graph_index, graph in enumerate(benchmark_graphs()):
+        classical = exact_maxcut(graph).optimum
+        for candidate_index, candidate in enumerate(select_benchmark_candidates(graph)):
+            for method_index, method in enumerate(METHODS):
+                for budget_index, budget in enumerate(SELECTION_BUDGETS):
+                    selection_shots, final_shots = selection_budget_split(budget)
+                    for repeat_index in range(repeats):
+                        rows.append(
+                            {
+                                "graph_id": graph.graph_id,
+                                "width": graph.width,
+                                "graph_family": graph.family,
+                                "edge_count": len(graph.edges),
+                                "qaoa_depth": 1,
+                                "candidate_id": candidate.candidate_id,
+                                "candidate_role": candidate.candidate_role,
+                                "beta_parameters": f"[{candidate.beta:.17g}]",
+                                "gamma_parameters": f"[{candidate.gamma:.17g}]",
+                                "exact_classical_maxcut": classical,
+                                "exact_ideal_energy": candidate.exact_ideal_energy,
+                                "ideal_rank": candidate.ideal_rank,
+                                "ideal_gap_to_best": candidate.ideal_gap_to_best,
+                                "decision_regime": candidate.decision_regime,
+                                "method": method,
+                                "total_selection_budget": budget,
+                                "selection_shots": selection_shots,
+                                "final_evaluation_shots": final_shots,
+                                "repeat": repeat_index,
+                                "seed": derive_seed(
+                                    "qaoa-selection-manifest",
+                                    graph_index,
+                                    candidate_index,
+                                    method_index,
+                                    budget_index,
+                                    repeat_index,
+                                ),
+                                "status": "pending",
+                            }
+                        )
+    return pd.DataFrame(rows)
+
+
+def certify_sampled_cuts(
+    graph: MaxCutGraph,
+    counts: Mapping[str, int],
+    *,
+    alpha: float = SUCCESS_ALPHA,
+) -> SampledCutCertification:
+    """Classically verify sampled cut quality against the exact small-n solution."""
+
+    if not 0.0 < alpha <= 1.0:
+        raise ValueError("Certification alpha must lie in (0, 1]")
+    if not counts:
+        raise ValueError("Counts must contain at least one shot")
+    optimum = exact_maxcut(graph).optimum
+    best = -1
+    qualifying = 0
+    shots = 0
+    for bitstring, count in counts.items():
+        if not isinstance(count, int) or count < 0:
+            raise ValueError("Count values must be nonnegative integers")
+        value = cut_value(graph, bitstring)
+        best = max(best, value)
+        if value >= alpha * optimum:
+            qualifying += count
+        shots += count
+    if shots <= 0:
+        raise ValueError("Counts must contain at least one shot")
+    return SampledCutCertification(
+        optimum,
+        best,
+        best == optimum,
+        alpha,
+        qualifying / shots,
+    )
+
+
+def write_candidate_contract() -> None:
+    """Write the complete ideal pool and frozen noisy-run manifest."""
+
+    CANDIDATE_POOL_PATH.parent.mkdir(parents=True, exist_ok=True)
+    candidate_pool_frame().to_csv(
+        CANDIDATE_POOL_PATH, index=False, lineterminator="\n", float_format="%.17g"
+    )
+    build_candidate_manifest().to_csv(
+        CANDIDATE_MANIFEST_PATH,
+        index=False,
+        lineterminator="\n",
+        float_format="%.17g",
+    )
+
+
 def maxcut_cost_operator(graph: MaxCutGraph) -> SparsePauliOp:
     """Return C=sum_(i,j)(I-Z_i Z_j)/2 in Qiskit's Pauli order."""
 
@@ -237,3 +509,7 @@ def maxcut_cost_operator(graph: MaxCutGraph) -> SparsePauliOp:
         label[graph.width - 1 - right] = "Z"
         terms.append(("".join(label), -0.5))
     return SparsePauliOp.from_list(terms).simplify()
+
+
+if __name__ == "__main__":
+    write_candidate_contract()
