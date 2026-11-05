@@ -8,6 +8,7 @@ import matplotlib.pyplot as plt
 from src.verify_generated_artifacts import (
     EXPENSIVE_GENERATORS,
     GENERATORS,
+    PHASE_F_ARTIFACTS,
     compare_artifact_trees,
 )
 
@@ -38,6 +39,18 @@ def test_comparator_regenerates_adaptive_extension() -> None:
     assert "src.generate_readout_scalability_benchmark" in EXPENSIVE_GENERATORS
     assert "src.generate_readout_mismatch_benchmark" in EXPENSIVE_GENERATORS
     assert "src.generate_qaoa_selection" in EXPENSIVE_GENERATORS
+
+
+def test_phase_f_scope_covers_application_artifacts() -> None:
+    assert PHASE_F_ARTIFACTS == {
+        "experiments/manifests/qaoa_selection_v1_manifest.csv",
+        "experiments/manifests/qaoa_selection_v1_manifest.sha256",
+        "figures/qaoa_selection_error.png",
+        "figures/qaoa_shots_to_decision.png",
+        "figures/qaoa_simple_regret.png",
+        "results/processed/qaoa_selection_summary_v1.csv",
+        "results/raw/qaoa_selection_v1.csv",
+    }
 
 
 def test_float_and_json_noise_within_tolerance_passes(tmp_path: Path) -> None:

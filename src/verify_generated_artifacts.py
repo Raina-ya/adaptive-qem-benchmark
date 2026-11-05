@@ -40,6 +40,15 @@ EXPENSIVE_GENERATORS = (
     "src.generate_readout_mismatch_benchmark",
     "src.generate_qaoa_selection",
 )
+PHASE_F_ARTIFACTS = {
+    "experiments/manifests/qaoa_selection_v1_manifest.csv",
+    "experiments/manifests/qaoa_selection_v1_manifest.sha256",
+    "figures/qaoa_selection_error.png",
+    "figures/qaoa_shots_to_decision.png",
+    "figures/qaoa_simple_regret.png",
+    "results/processed/qaoa_selection_summary_v1.csv",
+    "results/raw/qaoa_selection_v1.csv",
+}
 ARTIFACT_ROOTS = (
     "results",
     "experiments/manifests",
@@ -329,16 +338,23 @@ def main(argv: list[str] | None = None) -> int:
         metavar="RELATIVE_PATH",
         help="With --current, compare only this artifact path (repeatable)",
     )
+    parser.add_argument(
+        "--phase-f",
+        action="store_true",
+        help="Compare committed and current Phase F artifacts without regeneration",
+    )
     parsed = parser.parse_args(argv)
     if parsed.only_artifact and not parsed.current:
         parser.error("--only-artifact requires --current")
+    if parsed.phase_f and (parsed.only_artifact or parsed.include_expensive):
+        parser.error("--phase-f cannot be combined with artifact or generation filters")
     root = Path(__file__).resolve().parents[1]
     with tempfile.TemporaryDirectory(prefix="qem-artifact-check-") as temporary:
         temporary_root = Path(temporary)
         reference = temporary_root / "reference"
         reference.mkdir()
         _extract_head(root, reference)
-        if parsed.current:
+        if parsed.current or parsed.phase_f:
             candidate = root
         else:
             candidate = temporary_root / "generated"
@@ -351,7 +367,11 @@ def main(argv: list[str] | None = None) -> int:
         failures = compare_artifact_trees(
             reference,
             candidate,
-            set(parsed.only_artifact) if parsed.only_artifact else None,
+            PHASE_F_ARTIFACTS
+            if parsed.phase_f
+            else set(parsed.only_artifact)
+            if parsed.only_artifact
+            else None,
         )
 
     if failures:

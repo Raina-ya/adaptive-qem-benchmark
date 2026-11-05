@@ -31,6 +31,19 @@ assessments were rejected by at least one frozen negative-control criterion. On 
 and did not consistently improve on readout mitigation. These simulated results show
 estimation gains, not credible universal ZNE behavior or improved decisions.
 
+The application case study asks whether those estimator changes improve a complete
+fixed-budget decision: selecting one of five preregistered $p=1$ QAOA candidates for
+each of three exact MaxCut instances. Exhaustive classical search fixes each graph's
+MaxCut optimum, while noiseless statevector simulation fixes candidate energies and
+ranks before noisy sampling. Clear rankings were always selected correctly, but
+near-tie error remained method-dependent. At 4,096 shots it was 0.28 for raw, 0.32
+for readout among completed selections, and 0.36 for ZNE; at 16,384 shots it was
+0.17, 0.179, and 0.42. On the completed 4,096-shot ring and sparse strata, readout
+reduced energy RMSE but worsened top-1 selection relative to raw; its medium/dense
+stratum failed entirely. Only 2 of 828 completed selections met the
+preregistered simultaneous-interval certification rule. Thus lower energy RMSE did
+not reliably buy a better application decision.
+
 ![Operating-regime map showing raw, readout, ZNE, and failed cells](paper/figures/operating_regime_map.png)
 
 Read the full paper: **[Adaptive Quantum Error Mitigation Under Fixed Shot Budgets](paper/main.pdf)**
@@ -93,6 +106,7 @@ Verify committed deterministic outputs:
 
 ```powershell
 python -m src.verify_generated_artifacts --current
+python -m src.verify_generated_artifacts --phase-f
 python -m src.verify_generated_artifacts --include-expensive
 ```
 
@@ -169,6 +183,16 @@ raises expectation RMSE to 0.074--0.078 and the error probability of a preregist
 0.05-margin threshold decision to 0.88--0.94. This is simulated evidence that reduced
 classical storage cannot compensate for a wrong calibration model; it is not a
 hardware-robustness claim.
+
+The MaxCut/QAOA case study is also simulator-only and deliberately small: one fixed
+ring, sparse, and medium/dense graph at widths 4, 6, and 8, five curated candidates
+per graph, $p=1$, two budgets, and synthetic noise. Of 900 selection groups, 72
+medium/dense readout groups failed assignment conditioning and remain explicit.
+Only two groups certified a winner; all other completed groups remained unresolved
+at the maximum budget. The exact solver certifies sampled cuts only because these
+instances are classically tractable. The results do not establish behavior for
+larger graphs, optimized QAOA parameters, deeper circuits, device-calibrated noise,
+or quantum hardware.
 
 ## Repository structure
 

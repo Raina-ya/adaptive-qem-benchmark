@@ -8,7 +8,7 @@
 \title{Adaptive Quantum Error Mitigation Under Fixed Shot Budgets:\
 Operating Regimes, Abstention, and Noise-Model Shift}
 \author{Zhen-Jun Liu}
-\date{November 4, 2026}
+\date{November 5, 2026}
 
 \begin{document}
 \maketitle
@@ -36,6 +36,9 @@ expectation RMSE in \CombinedExpectationWins{} of \CombinedExpectationCells{}
 preregistered conditions, yet all \CombinedValidityCells{} combined-ZNE conditions
 fail at least one frozen validity criterion. Its near-tie decision-error probability
 remains between \CombinedNearTieMinimum{} and \CombinedNearTieMaximum{}.
+In a fixed-budget MaxCut application, lower energy RMSE does not reliably improve
+top-1 QAOA-candidate selection, and only 2 of 828 completed selections certify a
+winner under simultaneous intervals.
 These simulated results support selective mitigation and abstention as research
 questions, but do not validate a general selector or establish hardware performance.
 \end{abstract}
@@ -50,7 +53,9 @@ method can change with circuit structure, observable, noise, and sampling regime
 This work asks when mitigation improves RMSE at fixed total shots, when methods are
 practically indistinguishable, whether a simple selector can choose safely without
 the exact reference, when apparent ZNE improvement is credible, and whether readout
-correction and ZNE cooperate under one resource ledger. The contribution is a
+correction and ZNE cooperate under one resource ledger. We also ask whether a
+mitigated energy estimate improves a complete MaxCut/QAOA candidate-selection
+decision rather than only an expectation metric. The contribution is a
 reproducible simulator benchmark with repeat-level data, explicit execution ledgers,
 cost-aware labels, abstention rules, and evaluation under noise-model mismatch. It is
 not a proposal for new QEM theory or a claim of quantum-hardware advantage.
@@ -133,6 +138,28 @@ width, depth, declared noise regime, shots, calibration conditioning, and ZNE fi
 residuals. It can select raw, readout, or ZNE, or abstain; it never receives the
 statevector reference or oracle label.
 
+\subsection{MaxCut/QAOA application decision}
+For a graph $G=(V,E)$ and bitstring $z$, the exactly checkable cut value is
+\begin{equation}
+C_G(z)=\sum_{(u,v)\in E}\mathbf{1}[z_u\ne z_v].
+\end{equation}
+Exhaustive enumeration fixes the classical optimum and all degenerate optimal
+bitstrings for one width-4 ring, one deterministic width-6 sparse graph, and one
+deterministic width-8 medium/dense graph. A frozen grid supplies five $p=1$ QAOA
+candidates per graph. Noiseless statevector expectations determine the incumbent,
+challengers, ideal ranks, and clear versus near-tie regimes before noisy data exist.
+One computational-basis shot yields one complete cut sample; edges do not receive
+independent free shots.
+
+Each method receives one application-level budget $B\in\{4096,16384\}$ for selecting
+among all five candidates. Raw estimation divides $B$ among candidates. Readout
+charges calibration within $B$, and ZNE charges all three folded executions within
+$B$. We report exact top-1 accuracy, top-$k$ recall, simple regret against ideal
+candidate energy, energy RMSE, and unresolved probability separately. At nested
+shot checkpoints, a candidate is certified only if its adjusted uncertainty interval
+is separated from every challenger under a Bonferroni simultaneous-coverage rule;
+the runtime selector never receives the ideal winner.
+
 \section{Experiment Setup}
 The main grid crosses widths $2,4,6$, hardware-efficient depths $1,3,6$, noise levels
 zero/low/medium/high, shot budgets 1,024/4,096/16,384, three methods, and 50 repeats.
@@ -156,6 +183,12 @@ gate-noise-dominated, practical-tie, ZNE-invalid, 0.02-margin decision, and
 allocation policies, four factorial methods, and 50 paired repeats. Matched-cost
 garbage folding is used only by the validity gate and is excluded from method
 ranking.
+
+The application manifest contains three graphs, five candidates, three methods, two
+budgets, and 50 deterministic repeats, for 4,500 candidate-level rows and 900
+selection groups. Candidate construction uses graph structure and ideal statevector
+values only. The exact classical solver is used for post hoc certification, never to
+guide the noisy selector.
 
 \section{Results}
 \subsection{Operating regimes}
@@ -345,6 +378,57 @@ repair model misspecification.}
 \label{fig:readout-mismatch}
 \end{figure}
 
+\subsection{MaxCut/QAOA candidate selection}
+All completed clear-ranking selections identify the ideal best candidate. Near ties
+separate estimator quality from decision quality (Fig.~\ref{fig:qaoa-error}). At
+4,096 shots, near-tie error is 0.28 for raw, 0.32 for readout among completed
+selections, and 0.36 for ZNE; at 16,384 shots it is 0.17, 0.179, and 0.42. On the
+completed 4,096-shot ring and sparse strata, readout lowers energy RMSE from
+0.183 to 0.148 and from 0.228 to 0.191, respectively, yet worsens top-1 selection
+on both; its medium/dense stratum fails entirely. Across completed repeats, the
+RMSE--selection-error correlation is only 0.153. Better energy estimation therefore
+does not imply a better discrete choice in this study.
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=\columnwidth]{qaoa_selection_error.png}
+\caption{Clear QAOA candidate rankings are selected correctly, whereas near-tie
+error remains substantial and ZNE worsens when the larger budget is used.}
+\label{fig:qaoa-error}
+\end{figure}
+
+Simple regret is smaller when the wrong candidate is nearly equivalent, so it and
+exact top-1 accuracy lead to different emphasis (Fig.~\ref{fig:qaoa-regret}). At
+16,384 shots, mean regret is 0.0130 for raw, 0.0125 for completed readout selections,
+and 0.0378 for ZNE. Readout fails all 50 medium/dense selections at 4,096 shots and
+22 of 50 at 16,384 shots because its assignment correction is ill-conditioned;
+these 72 failed groups are not treated as abstentions or successes. Results also
+vary by instance: ZNE's 16,384-shot top-1 error is 0.08 on the ring, 0.34 on the
+sparse graph, and 0.50 on the medium/dense graph.
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=\columnwidth]{qaoa_simple_regret.png}
+\caption{Application regret and exact top-1 error are distinct: a wrong near-tie
+choice can have low regret, while mitigation overhead does not ensure lower regret.}
+\label{fig:qaoa-regret}
+\end{figure}
+
+Certification is much stricter than selecting a point-estimate winner. Only two of
+828 completed selection groups certify before exhausting the declared budget, both
+raw width-4 ring cases at 16,384 shots. The remaining 826 completed groups are
+unresolved, and 72 groups fail explicitly (Fig.~\ref{fig:qaoa-certification}). QEM
+overhead therefore buys no scientifically meaningful certification improvement in
+this frozen application grid.
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=\columnwidth]{qaoa_shots_to_decision.png}
+\caption{Simultaneous-interval certification is achieved in only two completed
+selections; nearly every completed method--instance--budget repeat remains unresolved.}
+\label{fig:qaoa-certification}
+\end{figure}
+
 \section{Conclusion}
 No QEM method is uniformly useful under the declared fixed-budget simulator grid.
 Most operating cells are practical ties, some favor readout or ZNE, and low-shot
@@ -358,6 +442,9 @@ common than gains that survive the full falsification gate. Combining readout
 correction with ZNE improves RMSE in selected simulated conditions, but neither its
 factorial interaction nor its downstream decision error supports a universal synergy
 claim, and no combined condition passes the frozen validity gate.
+The MaxCut application strengthens that boundary: lower energy RMSE is not a reliable
+proxy for top-1 selection, simple regret, or certified decision, and the added QEM
+executions do not produce a general application advantage.
 
 \section{Discussion}
 \subsection{Supported findings}
@@ -389,12 +476,19 @@ are separable on hardware.
 The scalable-readout mismatch study is limited to synthetic disjoint pair flips,
 one independent calibration approximation, widths at most six, and a single fixed
 decision margin; its negative result cannot quantify hardware crosstalk or drift.
+The application study covers only three deliberately controlled graph instances,
+five ideal-only candidates per instance, and $p=1$. This curation is useful for
+known-reference falsification but is too small to support graph-family or scaling
+claims. Hardware evidence would require frozen candidates and budgets followed by
+device jobs that record calibration time, topology, transpilation, drift, leakage,
+and crosstalk; none of those effects is measured here.
 
 \appendix
 \section{Reproducibility}
 \begin{verbatim}
 python -m pytest
 python -m src.verify_generated_artifacts
+python -m src.verify_generated_artifacts --phase-f
 python -m src.generate_paper_assets
 tectonic paper/main.tex --outdir paper
 \end{verbatim}
