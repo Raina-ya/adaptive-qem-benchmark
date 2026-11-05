@@ -12,5 +12,30 @@
   "label_fix": "a raw winner with utility gap at or above the practical threshold is labeled raw instead of practical_tie; every other v1 rule is unchanged",
   "regret_definition": "selected RMSE minus the lowest RMSE among methods with results in the cell; overhead is reported separately",
   "abstention_rule": "abstain and inconclusive selections keep missing regret and stay counted in every denominator that reports cells",
-  "holdout_note": "v1 outcomes were inspected before this file was written, so v2 metrics are diagnostic and cannot serve as an independent holdout"
+  "holdout_note": "v1 outcomes were inspected before this file was written, so v2 metrics are diagnostic and cannot serve as an independent holdout",
+  "audit_categories": [
+    "correct_materially_useful",
+    "correct_practically_tied",
+    "incorrect_negligible_regret",
+    "incorrect_material_regret",
+    "catastrophic_regret",
+    "abstention_avoided_failure",
+    "unnecessary_abstention",
+    "inconclusive"
+  ],
+  "category_rules": {
+    "abstain": "selected abstain: compare the method the frozen selector would choose with its abstention gates removed; abstention_avoided_failure if that method has fewer than 50 complete repeats or regret above negligible_regret_max, otherwise unnecessary_abstention",
+    "inconclusive": "selector returned inconclusive, or selected a method in a cell whose oracle label is inconclusive; regret stays recorded",
+    "correct": "decision compatible method: correct_practically_tied when the oracle label is practical_tie, otherwise correct_materially_useful",
+    "incorrect": "otherwise catastrophic_regret when the catastrophic rule holds, incorrect_negligible_regret when regret is at most negligible_regret_max, else incorrect_material_regret"
+  },
+  "abstention_counterfactual": "keep all selector inputs, but cap condition_number at 8 and fit_residual at 0.03 so only the two abstention gates stop firing",
+  "comparison_policies": [
+    "selector",
+    "always_raw",
+    "always_readout",
+    "always_zne"
+  ],
+  "fixed_policy_note": "fixed policies are scored with the same rules and pay no diagnostic or learning cost; the selector's diagnostic cost is also not charged here",
+  "descriptive_low_signal_reference": 0.06
 }

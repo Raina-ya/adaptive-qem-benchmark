@@ -36,6 +36,7 @@ GENERATORS = (
     "src.calibration_drift",
     "src.sequential_decision",
     "src.regime_labels_v2",
+    "src.selector_audit",
     "src.generate_audit_manifest",
 )
 EXPENSIVE_GENERATORS = (

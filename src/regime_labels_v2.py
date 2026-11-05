@@ -23,6 +23,24 @@ CONFIG = json.loads(CONFIG_PATH.read_text(encoding="utf-8"))
 PRACTICAL = float(CONFIG["practical_rmse_threshold"])
 PENALTY = float(CONFIG["overhead_penalty"])
 GHZ_REFERENCE = 1.0
+SHIFT_COLUMNS = [
+    "width",
+    "depth",
+    "noise",
+    "shots",
+    "method",
+    "repeat",
+    "status",
+    "family",
+    "circuit_id",
+    "estimate",
+    "noiseless_statevector_reference",
+    "total_circuit_executions",
+    "folded_two_qubit_gate_count",
+    "condition_number",
+    "fit_residual_sum_squares",
+    "out_of_range",
+]
 
 
 def label_condition(group: pd.DataFrame) -> dict[str, object]:
@@ -205,31 +223,19 @@ def _comparison_rows(
     return pd.DataFrame(rows)
 
 
+def noise_shift_raw() -> pd.DataFrame:
+    """Load only the noise-shift columns that the summary needs."""
+
+    return pd.read_csv(SHIFT_RAW_PATH, usecols=SHIFT_COLUMNS)
+
+
 def main() -> None:
     summary = pd.read_csv(PROCESSED / "benchmark_summary_v1.csv")
     v1_labels = pd.read_csv(PROCESSED / "regime_labels_v1.csv")
     labels = build_labels_v2(summary)
     labels.to_csv(LABELS_PATH, index=False, lineterminator="\n", float_format="%.12g")
 
-    shift_columns = [
-        "width",
-        "depth",
-        "noise",
-        "shots",
-        "method",
-        "repeat",
-        "status",
-        "family",
-        "circuit_id",
-        "estimate",
-        "noiseless_statevector_reference",
-        "total_circuit_executions",
-        "folded_two_qubit_gate_count",
-        "condition_number",
-        "fit_residual_sum_squares",
-        "out_of_range",
-    ]
-    shift_raw = pd.read_csv(SHIFT_RAW_PATH, usecols=shift_columns)
+    shift_raw = noise_shift_raw()
     shift_summary = benchmark_summary(shift_raw, resamples=1000)
     shift_labels = pd.DataFrame(
         label_condition(group)
