@@ -1,0 +1,56 @@
+{
+  "version": "sequential_decision_v1",
+  "evidence_label": "noisy_simulated",
+  "simulator_only": true,
+  "root_seed": 20261102,
+  "confidence_level": 0.95,
+  "batch_target_shots": 256,
+  "max_total_shots": [1024, 4096, 16384],
+  "repeats": 100,
+  "methods": ["raw", "readout", "zne"],
+  "policies": ["fixed_budget", "wilson_stopping", "gap_confidence_stopping", "variance_aware_stopping"],
+  "negative_control_policies": ["naive_wald_peeking"],
+  "look_correction": "bonferroni_alpha_over_available_looks",
+  "readout_calibration_fraction": 0.20,
+  "zne_factors": [1, 3, 5],
+  "noise_strengths": {
+    "zero": {"readout_p01": 0.0, "one_qubit": 0.0, "two_qubit": 0.0},
+    "low": {"readout_p01": 0.005, "one_qubit": 0.001, "two_qubit": 0.01},
+    "medium": {"readout_p01": 0.02, "one_qubit": 0.005, "two_qubit": 0.03},
+    "high": {"readout_p01": 0.05, "one_qubit": 0.01, "two_qubit": 0.08}
+  },
+  "readout_p10_fraction_of_p01": 0.8,
+  "tasks": {
+    "symmetric_gap": {
+      "margins": [0.0, 0.02, 0.05, 0.10, 0.20],
+      "noise": ["zero", "low", "medium", "high"],
+      "base_expectation": 0.0,
+      "depth_a": 3,
+      "depth_b": 3,
+      "readout_multiplier_a": 1.0,
+      "calibration": "shared"
+    },
+    "gate_imbalanced": {
+      "margins": [0.02, 0.05, 0.10, 0.20],
+      "noise": ["low", "medium", "high"],
+      "base_expectation": 0.6,
+      "depth_a": 6,
+      "depth_b": 1,
+      "readout_multiplier_a": 1.0,
+      "calibration": "shared"
+    },
+    "readout_imbalanced": {
+      "margins": [0.02, 0.05, 0.10, 0.20],
+      "noise": ["low", "medium", "high"],
+      "base_expectation": 0.6,
+      "depth_a": 3,
+      "depth_b": 3,
+      "readout_multiplier_a": 4.0,
+      "calibration": "per_candidate"
+    }
+  },
+  "near_tie_margin_max": 0.02,
+  "threshold_selection": "no threshold is tuned; alpha, batch size, grids, and bounds are fixed in this file before any outcome is generated, so no holdout split is needed or used",
+  "information_boundary": "stopping rules see cumulative counts, calibration counts, and declared shot schedules only; exact references are used only to score rows after the decision",
+  "scope_boundary": "two-candidate Pauli-Z decisions sampled from exact channel probabilities; no hardware claim"
+}

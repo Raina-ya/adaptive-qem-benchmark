@@ -44,6 +44,16 @@ stratum failed entirely. Only 2 of 828 completed selections met the
 preregistered simultaneous-interval certification rule. Thus lower energy RMSE did
 not reliably buy a better application decision.
 
+A sequential certification study then asked when a two-candidate decision can stop
+before the maximum budget. With Wilson stopping at 16,384 shots on the symmetric task,
+raw estimation used 9,583 mean shots instead of 16,384, but left 40.7% of decisions
+unresolved instead of 27.1%. Correcting for repeated looks kept false certification at
+margin 0 below 3%, compared with 22-25% for uncorrected peeking. Near ties at margin
+0.02 used 98-100% of the budget. Certification does not detect bias: when gate noise
+differed between candidates (high noise, margin 0.05), raw certified the wrong winner
+in every repeat after about 2,000 shots. Details are in
+[the protocol](docs/sequential_decision_protocol.md).
+
 ![Operating-regime map showing raw, readout, ZNE, and failed cells](paper/figures/operating_regime_map.png)
 
 Read the full paper: **[Adaptive Quantum Error Mitigation Under Fixed Shot Budgets](paper/main.pdf)**
@@ -99,6 +109,7 @@ $env:MPLCONFIGDIR = ".matplotlib-cache"
 .\.venv\Scripts\python.exe -m src.run_with_log src.generate_readout_subspace_validation
 .\.venv\Scripts\python.exe -m src.run_with_log src.generate_readout_matrix_free_validation
 .\.venv\Scripts\python.exe -m src.run_with_log src.generate_readout_scalability_benchmark
+.\.venv\Scripts\python.exe -m src.run_with_log src.sequential_decision
 tectonic paper/main.tex --outdir paper
 ```
 
