@@ -186,11 +186,48 @@ Ranges are marginal and describe only observed grid values, so they must not be 
 or extrapolated. The 0.06 reference edge was chosen after seeing the data. Rates use the same
 evidence as earlier inspections, so holdout and noise-shift results are diagnostic.
 
+## Selector v2 and the no-safe-method output (I3)
+
+The rules in `experiments/configs/selector_v2.yaml` were designed from the inspected v1 grid,
+so that grid cannot test them. The configuration, code, and manifest must be committed before
+the fresh grid runs. The commit order is the evidence of preregistration.
+
+Each repeat spends 25% of its budget on a pilot: half on assignment calibration and half on
+target samples at folds 1 and 5. The selector sees only that repeat's pilot, never a reference,
+a noise name, or another repeat. A `readout` decision spends the remainder through the
+existing method without reusing pilot data; a no-safe output spends nothing further.
+
+| Order | Condition | Output |
+|---:|---|---|
+| 1 | `|E1|` at most 2 standard errors | `request_more_shots` |
+| 2 | Calibration singular, or condition number at least 8 | `recalibrate` |
+| 3 | Significant sign reversal, or signal growth under folding | `invalid_zne_scaling` |
+| 4 | `|E1|` at least 0.5, condition number at least 3 | `abstain` |
+| 5 | `|E1|` at least 0.5, condition number below 3 | `readout` |
+| 6 | Otherwise | `unresolved` |
+
+The selector never chooses ZNE or raw, because I2 found no supported ZNE level and raw's support
+could not be established at pilot precision.
+
+The fresh grid has 10 unseen circuits (widths 3 and 5, depths 2 and 4, two replicates per
+hardware-efficient setting, plus GHZ), 6 noise conditions, and budgets of 2,048 and 8,192 shots,
+giving 120 cells with 50 repeats per method.
+
+The verdict requires all of the following. A failed criterion is reported, and no-go is valid.
+
+- **H1:** at least 10 decided cells, reliable rate at least 80%, and Wilson low at least 50%.
+- **H2:** at least 10 no-safe cells, with the Wilson low of the avoided-failure share above 50%,
+  using full-budget raw as the fallback.
+- **H3:** on decided cells, mean regret below full-budget always-raw and always-readout, with no
+  more catastrophic cells than either.
+
 ## Reproduce
 
 ```powershell
 .\.venv\Scripts\python.exe -m src.run_with_log src.regime_labels_v2
 .\.venv\Scripts\python.exe -m src.run_with_log src.selector_audit
 .\.venv\Scripts\python.exe -m src.run_with_log src.reliability_envelopes
+.\.venv\Scripts\python.exe -m src.generate_selector_holdout_v2 --manifest-only
+.\.venv\Scripts\python.exe -m src.run_with_log src.generate_selector_holdout_v2
 .\.venv\Scripts\python.exe -m pytest tests/test_regime_labels_v2.py tests/test_selector_audit.py tests/test_reliability_envelopes.py -q
 ```

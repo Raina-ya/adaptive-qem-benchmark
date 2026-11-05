@@ -1,0 +1,49 @@
+{
+  "version": "selector_v2",
+  "evidence_label": "noisy_simulated",
+  "simulator_only": true,
+  "status": "preregistered_before_any_holdout_v2_outcome",
+  "design_evidence": "rules were designed after inspecting the v1 grid; only the fresh grid below can test them",
+  "pilot": {
+    "fraction_of_total_budget": 0.25,
+    "calibration_fraction_of_pilot": 0.5,
+    "target_factors": [1, 5]
+  },
+  "rules_in_order": [
+    {"output": "request_more_shots", "when": "|E1| <= 2 * SE1, so the pilot cannot distinguish the signal from zero"},
+    {"output": "recalibrate", "when": "the pilot assignment matrix is singular or its condition number is at least 8"},
+    {"output": "invalid_zne_scaling", "when": "E1 and E5 have significantly opposite signs, or |E5| - |E1| > 2 * sqrt(SE1^2 + SE5^2)"},
+    {"output": "abstain", "when": "|E1| >= 0.5 and the condition number is at least 3"},
+    {"output": "readout", "when": "|E1| >= 0.5 and the condition number is below 3"},
+    {"output": "unresolved", "when": "otherwise; the signal is identified but below 0.5, where no method had support"}
+  ],
+  "condition_abstain": 3.0,
+  "condition_recalibrate": 8.0,
+  "strong_signal": 0.5,
+  "significance_multiplier": 2.0,
+  "no_noise_names": true,
+  "runtime_inputs_only": "one repeat's pilot counts and calibration; never exact references, noise names, or other repeats",
+  "budget_rule": "pilot shots are spent in every repeat; a readout decision spends exactly the remainder through the existing fixed-budget readout method, with no pilot reuse; a no-safe output spends nothing further",
+  "holdout": {
+    "families": {
+      "ghz": {"widths": [3, 5]},
+      "hardware_efficient": {"widths": [3, 5], "depths": [2, 4], "replicates": [0, 1]}
+    },
+    "noise_levels": ["low", "medium", "high"],
+    "noise_shifts": ["asymmetric_readout", "coherent_shift", "correlated_shift"],
+    "total_shots": [2048, 8192],
+    "repeats": 50,
+    "seed_namespace": "selector-v2-holdout"
+  },
+  "negligible_regret_max": 0.005,
+  "catastrophic_regret_absolute": 0.05,
+  "catastrophic_regret_relative_to_absolute_reference": 1.0,
+  "decided_cell_min_share": 0.5,
+  "criteria": {
+    "H1_decided_cells_reliable": "at least 10 decided cells, reliable rate at least 0.80, and Wilson low at least 0.50",
+    "H2_no_safe_outputs_informative": "at least 10 no-safe cells and the Wilson low of the avoided-failure share above 0.50, using full-budget raw as the fallback",
+    "H3_better_than_fixed_policies": "on decided cells, mean selector regret below both full-budget always-raw and always-readout, with no more catastrophic cells than either",
+    "verdict": "supported only if H1, H2, and H3 all hold; every failed criterion is reported, and a no-go is a valid outcome"
+  },
+  "scope_boundary": "fresh simulator grid only; no threshold may change after outcomes are seen, and no hardware claim follows"
+}

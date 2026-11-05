@@ -44,6 +44,7 @@ EXPENSIVE_GENERATORS = (
     "src.generate_readout_scalability_benchmark",
     "src.generate_readout_mismatch_benchmark",
     "src.generate_qaoa_selection",
+    "src.generate_selector_holdout_v2",
 )
 PHASE_F_ARTIFACTS = {
     "experiments/manifests/qaoa_selection_v1_manifest.csv",

@@ -8,16 +8,24 @@ from qiskit import QuantumCircuit
 from src.config import derive_seed
 
 
-def hardware_efficient_circuit(width: int, depth: int) -> QuantumCircuit:
-    """Create a fixed-seed rotation-and-entanglement circuit."""
+def hardware_efficient_circuit(
+    width: int, depth: int, *, replicate: int | None = None
+) -> QuantumCircuit:
+    """Create a fixed-seed circuit; a replicate draws independent frozen angles."""
 
     if width < 2:
         raise ValueError("Circuit width must be at least two")
     if depth < 1:
         raise ValueError("Circuit depth parameter must be positive")
-    rng = np.random.default_rng(derive_seed("hardware-efficient", width, depth))
+    seed = (
+        derive_seed("hardware-efficient", width, depth)
+        if replicate is None
+        else derive_seed("hardware-efficient-replicate", width, depth, replicate)
+    )
+    rng = np.random.default_rng(seed)
     angles = rng.uniform(-np.pi, np.pi, size=(depth, width, 2))
-    circuit = QuantumCircuit(width, name=f"he_w{width}_d{depth}")
+    suffix = "" if replicate is None else f"_r{replicate}"
+    circuit = QuantumCircuit(width, name=f"he_w{width}_d{depth}{suffix}")
     for layer in range(depth):
         for qubit in range(width):
             circuit.ry(float(angles[layer, qubit, 0]), qubit)
