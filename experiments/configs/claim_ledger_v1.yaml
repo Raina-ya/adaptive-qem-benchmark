@@ -989,7 +989,7 @@
     },
     {
       "claim_id": "L04",
-      "claim_text": "No stored estimate is rebuilt from counts, and several stored classifications, intervals, references, and certification results are reused without reconstruction.",
+      "claim_text": "Selected cells are rebuilt from counts in src/cross_validation.py, but most stored estimates are not, and several stored classifications, intervals, references, and certification results are reused without reconstruction.",
       "claim_type": "limitation",
       "applicable_scope": "Every computed claim that lists a derived field as not reconstructed",
       "figure_or_table": "",

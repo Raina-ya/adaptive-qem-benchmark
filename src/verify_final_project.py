@@ -283,7 +283,8 @@ def pdf_checks(path: Path = PDF_PATH) -> list[dict]:
 
     reader = PdfReader(path)
     text = "\n".join(page.extract_text() or "" for page in reader.pages)
-    normalized = " ".join(text.split())
+    # LaTeX may hyphenate a required phrase across a line break.
+    normalized = " ".join(text.replace("-\n", "").split())
     rows = [_row("pdf", "page count", "at least 1", "parsed", len(reader.pages) >= 1)]
     for item in REQUIRED_PDF_TEXT:
         rows.append(_row("pdf", f"contains {item}", True, item in normalized, item in normalized))

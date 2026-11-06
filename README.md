@@ -150,6 +150,9 @@ python -m src.verify_final_project
 python -m src.claim_ledger
 ```
 
+[Independent cross-validation](docs/cross_validation.md) recalculates exact values, one readout cell, and
+QAOA selections with enumerated code that shares nothing with the benchmark implementation.
+
 To rebuild expensive results from a clean clone, follow [the release checklist](docs/release_checklist.md).
 `python -m src.artifact_provenance` checks the hash, generator, and row count of every generated
 artifact without running a simulation.

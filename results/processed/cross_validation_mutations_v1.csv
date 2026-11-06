@@ -1,0 +1,12 @@
+mutation,target,convention_sensitive,detected,largest_difference
+reverse bit order,hardware-efficient XZ exact expectation,True,True,>1e-3
+reverse bit order,XZ parity from fixed counts (full-support Pauli),False,False,<=1e-14
+reverse bit order,ZI parity from fixed counts,True,True,>1e-3
+reverse bit order,assignment matrix,True,True,>1e-3
+transpose assignment matrix,assignment matrix,True,True,>1e-3
+transpose assignment matrix,corrected expectation,True,True,>1e-3
+reverse bit order,medium_dense8 energies from fixed counts,True,True,>1e-3
+reverse bit order,sparse6 energies from fixed counts,False,False,<=1e-14
+reverse bit order,ring4 energies from fixed counts,False,False,<=1e-14
+flip QAOA gamma sign,medium_dense8 ideal energy,True,True,>1e-3
+reverse bit order,bell XX expectation,False,False,<=1e-14

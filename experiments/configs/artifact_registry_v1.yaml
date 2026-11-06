@@ -86,7 +86,8 @@
         "src.generate_paper_assets",
         "src.generate_audit_paper_assets",
         "src.hardware_readiness",
-        "src.final_synthesis"
+        "src.final_synthesis",
+        "src.cross_validation"
       ],
       "post_checks": [
         "src.verify_final_project",
@@ -600,6 +601,17 @@
         "results/processed/final_evidence_matrix_v1.csv",
         "results/processed/final_project_summary_v1.csv",
         "results/processed/hardware_readiness_criteria_v1.csv"
+      ]
+    },
+    {
+      "module": "src.cross_validation",
+      "args": [],
+      "tier": "routine",
+      "configs": [],
+      "manifests": [],
+      "outputs": [
+        "results/processed/cross_validation_mutations_v1.csv",
+        "results/processed/cross_validation_v1.csv"
       ]
     },
     {

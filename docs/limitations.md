@@ -72,7 +72,8 @@ without changing the seed or the sampled claim IDs, and the final audit was 5/5.
 corrected audit implementation, not the initial one.
 
 Ledger values show that printed numbers follow from committed rows, not that the simulator produced
-correct rows. No stored `estimate` has been rebuilt from counts. Eight computed claims are not
+correct rows. Selected cells are rebuilt from counts (see [cross-validation](cross_validation.md)), but
+most stored `estimate` values are not. Eight computed claims are not
 `raw_recomputed`, and some stored classifications, intervals, and certification results are reused
 without reconstruction.
 
