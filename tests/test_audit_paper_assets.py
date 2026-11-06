@@ -33,10 +33,23 @@ def test_audit_macros_match_the_committed_audit() -> None:
     assert macros["SelectorAbstentions"] == str(int((selector.selected_method == "abstain").sum()))
 
 
+def test_selector_v2_macros_match_the_preregistered_summary() -> None:
+    macros = _macros()
+    path = ROOT / "results/processed/selector_v2_summary.csv"
+    summary = pd.read_csv(path).set_index("criterion")
+    assert bool(summary.loc["verdict_all_criteria", "passed"]) is False
+    assert macros["VTwoDecidedCells"] == str(int(summary.loc["cells_decided", "value"]))
+    assert macros["VTwoNoSafeCells"] == str(int(summary.loc["cells_no_safe", "value"]))
+    assert macros["VTwoRegretSelector"] == (
+        f"{summary.loc['decided_mean_selector_regret', 'value']:.4f}"
+    )
+
+
 def test_paper_uses_corrected_results_and_defines_every_macro() -> None:
     assert r"\PracticalTies{}" not in PAPER
     assert "unseen synthetic noise" not in PAPER
-    assert "outcomes are not reported here" in PAPER
+    assert "outcomes are not reported here" not in PAPER
+    assert "Preregistered selector test" in PAPER
     assert r"\input{generated/audit_metrics.tex}" in PAPER
     macros = _macros()
     used = set(re.findall(r"\\(VTwo\w+|Selector[A-Z]\w+|Null\w+|NearTie\w+|Biased\w+)\{\}", PAPER))

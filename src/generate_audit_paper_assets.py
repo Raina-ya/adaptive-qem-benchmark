@@ -23,6 +23,7 @@ AUDIT_ROWS_PATH = GENERATED / "audit_category_rows.tex"
 ENVELOPE_ROWS_PATH = GENERATED / "envelope_rows.tex"
 SEQUENTIAL_ROWS_PATH = GENERATED / "sequential_rows.tex"
 LIFETIME_ROWS_PATH = GENERATED / "calibration_lifetime_rows.tex"
+SELECTOR_V2_ROWS_PATH = GENERATED / "selector_v2_rows.tex"
 REGIME_FIGURE = PAPER_FIGURES / "operating_regime_map_v2.png"
 COPIED_FIGURES = (
     "calibration_age_vs_decision_error.png",
@@ -142,6 +143,64 @@ def regime_macros() -> dict[str, object]:
         "StrongHarmRaw": strong_harm("always_raw"),
         "StrongHarmReadout": strong_harm("always_readout"),
     }
+
+
+def selector_v2_macros() -> dict[str, object]:
+    """Return preregistered holdout values from the scored fresh grid."""
+
+    cells = pd.read_csv(PROCESSED / "selector_v2_cells.csv")
+    summary = pd.read_csv(PROCESSED / "selector_v2_summary.csv").set_index("criterion")
+    decided = cells.loc[cells.cell_type == "decided"]
+    no_safe = cells.loc[cells.cell_type == "no_safe"]
+    decisions = pd.read_csv(
+        RAW / "selector_holdout_v2.csv", usecols=["method", "decision"], low_memory=False
+    )
+    shares = decisions.loc[decisions.method == "selector_v2", "decision"].value_counts(
+        normalize=True
+    )
+
+    def low(name: str) -> str:
+        return _percent(float(summary.loc[name, "wilson_low"]))
+
+    def value(name: str) -> str:
+        return _percent(float(summary.loc[name, "value"]))
+
+    return {
+        "VTwoCells": len(cells),
+        "VTwoDecidedCells": len(decided),
+        "VTwoNoSafeCells": len(no_safe),
+        "VTwoReliableCells": int(decided.selector_reliable.sum()),
+        "VTwoHOneRate": value("H1_decided_cells_reliable"),
+        "VTwoHOneLow": low("H1_decided_cells_reliable"),
+        "VTwoAvoidedCells": int(no_safe.no_safe_avoided_failure.sum()),
+        "VTwoHTwoRate": value("H2_no_safe_outputs_informative"),
+        "VTwoHTwoLow": low("H2_no_safe_outputs_informative"),
+        "VTwoRegretSelector": f"{decided.selector_regret.mean():.4f}",
+        "VTwoRegretRaw": f"{decided.raw_regret.mean():.4f}",
+        "VTwoRegretReadout": f"{decided.readout_regret.mean():.4f}",
+        "VTwoCatastrophicSelector": int(decided.selector_catastrophic.sum()),
+        "VTwoCatastrophicRaw": int(decided.raw_catastrophic.sum()),
+        "VTwoCatastrophicReadout": int(decided.readout_catastrophic.sum()),
+        "VTwoReadoutDecisionShare": _percent(float(shares["readout"]), 0),
+        "VTwoRequestShare": _percent(float(shares["request_more_shots"]), 0),
+        "VTwoUnresolvedShare": _percent(float(shares["unresolved"]), 0),
+    }
+
+
+def write_selector_v2_rows() -> None:
+    """Write full-budget fixed-policy results across every fresh cell."""
+
+    cells = pd.read_csv(PROCESSED / "selector_v2_cells.csv")
+    lines = []
+    for name, key, catastrophic in (
+        ("Always raw", "raw_regret", "raw_catastrophic"),
+        ("Always readout", "readout_regret", "readout_catastrophic"),
+    ):
+        lines.append(
+            f"{name} & {cells[key].mean():.4f} & {int((cells[key] <= 0.005).sum())} & "
+            f"{int(cells[catastrophic].sum())} \\\\"
+        )
+    _write_lines(SELECTOR_V2_ROWS_PATH, [*lines, r"\bottomrule"])
 
 
 def sequential_macros(raw: pd.DataFrame) -> dict[str, object]:
@@ -336,11 +395,17 @@ def plot_regime_map(path: Path = REGIME_FIGURE) -> None:
 def main() -> None:
     sequential = pd.read_csv(RAW / "sequential_decision_v1.csv", low_memory=False)
     lifetime_macros, lifetime_rows = lifetime_values()
-    macros = {**regime_macros(), **sequential_macros(sequential), **lifetime_macros}
+    macros = {
+        **regime_macros(),
+        **sequential_macros(sequential),
+        **lifetime_macros,
+        **selector_v2_macros(),
+    }
     _write_lines(
         METRICS_PATH, [f"\\newcommand{{\\{name}}}{{{value}}}" for name, value in macros.items()]
     )
     write_regime_rows()
+    write_selector_v2_rows()
     write_audit_rows()
     write_envelope_rows()
     write_sequential_rows(sequential)

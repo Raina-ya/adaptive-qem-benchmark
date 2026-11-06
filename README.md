@@ -11,13 +11,22 @@ repeats.
 
 ## Verified result
 
-Across 144 GHZ and hardware-efficient operating cells, the cost-aware oracle found
-103 practical ties, 18 readout winners, 14 ZNE winners, and 9 inconclusive cells.
-The frozen rule selector achieved 41.4% decision compatibility on a deterministic
-29-cell holdout, with mean RMSE regret 0.0207 and median regret 0.000397. Under four
-unseen noise shifts, decision compatibility was 50.0%, mean regret was 0.00771, and
-median regret was zero. These are diagnostic baseline results, not evidence of a
-generally reliable adaptive policy.
+Across 144 GHZ and hardware-efficient operating cells, the cost-aware oracle found 77 raw
+winners, 26 practical ties, 18 readout winners, 14 ZNE winners, and 9 inconclusive cells. An
+earlier version labeled all 77 raw wins as ties because of an implementation error; those
+labels are kept in `regime_labels_v1.csv`. Of the raw wins, 63 have references near zero,
+where noise moves estimates toward the reference.
+
+The frozen rule selector reached 41.4% decision compatibility on a deterministic 29-cell
+holdout and 50.0% under four synthetic noise shifts, with mean regret 0.0210 and 0.0081. These
+are diagnostic results, and always-readout had lower holdout regret (0.0077). A preregistered
+runtime selector with charged pilot shots then failed all three frozen criteria on 120 cells of
+unseen circuits, a no-go result. Details are in
+[the selector audit](docs/selector_audit_protocol.md).
+
+Under synthetic readout drift over 100 decisions, triggered recalibration used about 40% fewer
+shots than recalibrating at every decision, with similar error (0.067 versus 0.062). Never
+recalibrating had an error of 0.234, and this depended strongly on drift direction.
 
 The hardware-efficient run retained 99 explicit readout failures, concentrated in
 width-6, low-shot, medium/high-noise cells. Negative mitigation gains are also kept:
@@ -110,6 +119,12 @@ $env:MPLCONFIGDIR = ".matplotlib-cache"
 .\.venv\Scripts\python.exe -m src.run_with_log src.generate_readout_matrix_free_validation
 .\.venv\Scripts\python.exe -m src.run_with_log src.generate_readout_scalability_benchmark
 .\.venv\Scripts\python.exe -m src.run_with_log src.sequential_decision
+.\.venv\Scripts\python.exe -m src.run_with_log src.calibration_drift
+.\.venv\Scripts\python.exe -m src.run_with_log src.regime_labels_v2
+.\.venv\Scripts\python.exe -m src.run_with_log src.selector_audit
+.\.venv\Scripts\python.exe -m src.run_with_log src.reliability_envelopes
+.\.venv\Scripts\python.exe -m src.run_with_log src.generate_selector_holdout_v2
+.\.venv\Scripts\python.exe -m src.run_with_log src.generate_audit_paper_assets
 tectonic paper/main.tex --outdir paper
 ```
 

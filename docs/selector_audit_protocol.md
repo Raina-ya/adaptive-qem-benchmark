@@ -189,8 +189,8 @@ evidence as earlier inspections, so holdout and noise-shift results are diagnost
 ## Selector v2 and the no-safe-method output (I3)
 
 The rules in `experiments/configs/selector_v2.yaml` were designed from the inspected v1 grid,
-so that grid cannot test them. The configuration, code, and manifest must be committed before
-the fresh grid runs. The commit order is the evidence of preregistration.
+so that grid cannot test them. The configuration, code, and manifest were committed before the
+fresh grid ran. The commit order is the evidence of preregistration.
 
 Each repeat spends 25% of its budget on a pilot: half on assignment calibration and half on
 target samples at folds 1 and 5. The selector sees only that repeat's pilot, never a reference,
@@ -220,6 +220,37 @@ The verdict requires all of the following. A failed criterion is reported, and n
   using full-budget raw as the fallback.
 - **H3:** on decided cells, mean regret below full-budget always-raw and always-readout, with no
   more catastrophic cells than either.
+
+### Preregistered result: no-go
+
+The rules, grid, and criteria were committed in `2a4eaca` before the fresh grid ran, and the
+run log records a clean tree at `fce5807`. All 24,000 rows completed within budget. No criterion
+passed, so the verdict is no-go, and no threshold will be changed for this version.
+
+| Criterion | Required | Observed | Passed |
+|---|---|---:|---|
+| H1 | Rate at least 80%, Wilson low at least 50% | 14/26 = 53.8%, low 35.5% | No |
+| H2 | Avoided-failure Wilson low above 50% | 27/94 = 28.7%, low 20.6% | No |
+| H3 | Regret below raw and readout, catastrophic cells no higher | 0.0059 vs 0.0606 and 0.0033; 0 vs 10 and 0 | No |
+
+The selector chose readout in 22% of repeats, returned `request_more_shots` in 50%, and
+`unresolved` in 26%. On its decided cells it had no catastrophic cell, but the 25% pilot left it
+with more regret than full-budget always-readout. In 67 of 94 no-safe cells, full-budget raw
+already had negligible regret.
+
+Across all 120 fresh cells:
+
+| Policy | Mean regret | Reliable cells | Catastrophic cells |
+|---|---:|---:|---:|
+| Always raw | 0.0243 | 70 | 18 |
+| Always readout | 0.0093 | 58 | 5 |
+| Always ZNE | 0.0229 | 36 | 18 |
+
+Exploratory only: raw was reliable in 36 of 36 cells with `|reference|` below 0.06 and readout in
+6; from 0.06 to 0.5 these were 31 and 18 of 36; at 0.5 or above, 3 and 34 of 48. A runtime policy
+does not know the reference, and raw's success near zero reflects noise moving estimates toward
+zero. H2's RMSE-based fallback may also be too lenient for sign decisions near zero. Testing
+either idea needs a new preregistration.
 
 ## Reproduce
 

@@ -31,7 +31,8 @@ A frozen, non-ML rule selector reaches \HoldoutCompatibilityVTwo{} decision
 compatibility on a \HoldoutCells{}-cell deterministic holdout and
 \ShiftCompatibilityVTwo{} under four synthetic noise shifts. A consequence audit shows
 that fixed policies match or beat it on several measures even before its diagnostic
-cost is charged.
+cost is charged. A preregistered runtime selector with charged pilot shots then fails all
+three frozen criteria on \VTwoCells{} cells of unseen circuits, a no-go result.
 The benchmark retains \HardwareFailures{} explicit readout failures and
 \NegativeGains{} of \SummaryRows{} method summaries with negative RMSE gain.
 An additional preregistered ZNE validity gate accepts only \ZNECredibleCells{} of
@@ -181,6 +182,22 @@ rate of at least 80\%, and a Wilson lower bound of at least 50\%. Stability is t
 share of two-stage bootstrap resamples, over repeats and then cells, in which that level
 stays supported.
 
+\subsection{Preregistered runtime selector}
+A second selector sees only one repeat's pilot, which spends 25\% of the budget on assignment
+calibration and on target samples at folds 1 and 5. It never receives a reference, a noise name,
+or another repeat. It returns \texttt{request\_more\_shots} if the fold-1 estimate is within two
+standard errors of zero; \texttt{recalibrate} if the calibration is singular or its condition
+number is at least 8; \texttt{invalid\_zne\_scaling} if folding significantly reverses or grows
+the signal; \texttt{abstain} for $|\widehat\mu_1|\geq0.5$ with condition number at least 3;
+readout for $|\widehat\mu_1|\geq0.5$ with condition number below 3; and \texttt{unresolved}
+otherwise. A readout decision spends the remaining budget without reusing pilot data.
+
+The verdict requires three frozen criteria. H1: at least 10 decided cells, a reliable rate of at
+least 80\%, and a Wilson lower bound of at least 50\%. H2: at least 10 no-safe cells, with the
+Wilson lower bound of the share that avoided a failure above 50\%, using full-budget raw as the
+fallback. H3: on decided cells, mean regret below full-budget always-raw and always-readout, with
+no more catastrophic cells than either.
+
 \subsection{Sequential certification}
 Two candidates with exact expectations $b\pm m/2$ are sampled in batches of 256 target
 shots until an interval for their gap excludes zero or the budget ends, leaving the
@@ -262,6 +279,10 @@ checked against an Aer density-matrix simulation. Alpha, batch size, and grids w
 written before the full grid was generated, and no threshold was tuned. The calibration
 study has workloads of 1, 5, 20, and 100 decisions, four drift models, four policies, and
 30 repeats, for \LifetimeRows{} decision rows.
+
+The selector test uses a fresh grid committed before it ran: GHZ and hardware-efficient circuits
+at widths 3 and 5, depths 2 and 4 with two independent replicates, six noise conditions, budgets
+of 2,048 and 8,192 shots, four policies, and 50 repeats, for \VTwoCells{} cells and 24,000 rows.
 
 \section{Results}
 \subsection{Operating regimes}
@@ -442,6 +463,36 @@ cells below 1.5, 50\% from 1.5 to 3, 10\% from 3 to 8, and none of the 4 cells a
 ZNE fit residual does not discriminate, with rates of 24--33\% in every adequately sampled
 bin, and the selector's residual limits are never reached. Three cells flip across the
 condition-number gate of 8 under repeat resampling, with means of 7.87, 8.10, and 8.16.
+
+\subsection{Preregistered selector test}
+All three criteria fail, so the runtime selector is a no-go. For H1, \VTwoReliableCells{} of
+\VTwoDecidedCells{} decided cells are reliable (\VTwoHOneRate{}, lower bound \VTwoHOneLow{}). For
+H2, \VTwoAvoidedCells{} of \VTwoNoSafeCells{} no-safe cells avoid a failure (\VTwoHTwoRate{},
+lower bound \VTwoHTwoLow{}). For H3, mean regret on decided cells is \VTwoRegretSelector{},
+against \VTwoRegretRaw{} for always-raw and \VTwoRegretReadout{} for always-readout. The selector
+has \VTwoCatastrophicSelector{} catastrophic decided cells, as does always-readout, and always-raw
+has \VTwoCatastrophicRaw{}; the failure is that the charged pilot leaves it behind full-budget
+readout.
+
+The selector chooses readout in \VTwoReadoutDecisionShare{} of repeats, returns
+\texttt{request\_more\_shots} in \VTwoRequestShare{}, and \texttt{unresolved} in
+\VTwoUnresolvedShare{}. Table~\ref{tab:fresh} gives the fixed-policy comparison across all fresh
+cells. As an exploratory reading, raw is reliable in all 36 cells with $|\mu_{\rm ref}|<0.06$ and
+readout in 34 of 48 with $|\mu_{\rm ref}|\geq0.5$, but a runtime policy does not know the reference.
+
+\begin{table}[t]
+\centering
+\caption{On fresh circuits, always-readout has the lowest mean regret and fewest catastrophic
+cells, while always-raw is reliable in more cells.}
+\label{tab:fresh}
+\small
+\begin{tabular}{lrrr}
+\toprule
+Policy & Regret & Reliable & Catastrophic\\
+\midrule
+\input{generated/selector_v2_rows.tex}
+\end{tabular}
+\end{table}
 
 \subsection{Decision reliability}
 Expectation RMSE and decision reliability are distinct. Figure~\ref{fig:decision}
@@ -634,7 +685,8 @@ Raw wins most cells, largely where the reference is near zero, some cells favor 
 ZNE, and low-shot readout calibration can fail explicitly. The frozen rule selector is
 reproducible and explainable, but it does not clearly beat fixed policies even without being
 charged for its diagnostics, so it is a baseline for further study rather than a successful
-adaptive policy. The strongest supported
+adaptive policy. A preregistered runtime selector also fails on unseen circuits, so simple fixed
+policies remain the reference that any adaptive rule must beat. The strongest supported
 conclusion is operational: mitigation should be compared with raw estimation under
 equal resource accounting, with ties, negative gains, abstention, and failed ZNE
 validity checks preserved. In this benchmark, apparent extrapolation gains are more
@@ -665,9 +717,9 @@ ZNE diagnostics and unresolved near-tie decisions.
 \subsection{Hypotheses and limitations}
 The selector's freeze before holdout evaluation is a process claim: its rules and first results
 appeared in one commit, so version history alone cannot prove the order. We found no evidence of
-tuning, but the corrected analysis is not an independent test. A runtime selector with charged
-pilot shots, rules that exclude noise names, and a fresh grid of unseen circuits has been
-preregistered in the repository; its outcomes are not reported here.
+tuning, but the corrected analysis is not an independent test. The later runtime-selector test
+has that independence for its own rules, but it covers one design, and its H2 fallback may be too
+lenient for sign decisions near zero, a hypothesis that needs a new preregistration.
 Possible causes of selector error include insufficient features, first-order ZNE,
 and the mismatch between synthetic training and shift channels; the experiment does
 not isolate these causes. The validity gate is conditional on its frozen thresholds,
@@ -713,6 +765,7 @@ python -m src.regime_labels_v2
 python -m src.selector_audit
 python -m src.reliability_envelopes
 python -m src.generate_paper_assets
+python -m src.generate_selector_holdout_v2
 python -m src.generate_audit_paper_assets
 tectonic paper/main.tex --outdir paper
 \end{verbatim}
