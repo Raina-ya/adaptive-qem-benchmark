@@ -21,7 +21,7 @@ summary,readout_scalability_summary_v1 rmse,159 values within 1e-09,159 values w
 summary,readout_mismatch_summary_v1 rmse,192 values within 1e-09,192 values within 1e-09,True
 summary,qaoa_selection_summary_v1 resolved groups,828,828,True
 summary,selector_v2_cells raw rmse,120 values within 1e-09,120 values within 1e-09,True
-figure,figures,48 valid PNG files,48 valid PNG files,True
+figure,figures,55 valid PNG files,55 valid PNG files,True
 figure,paper/figures,29 valid PNG files,29 valid PNG files,True
 pdf,page count,at least 1,parsed,True
 pdf,contains Abstract,True,True,True

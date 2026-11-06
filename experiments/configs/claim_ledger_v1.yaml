@@ -909,15 +909,15 @@
     },
     {
       "claim_id": "H02",
-      "claim_text": "QAOA selection worsens because mitigation removes common bias while amplifying differences between candidates.",
+      "claim_text": "QAOA selection worsens under ZNE mainly because the fold fit roughly doubles the spread of the deciding gap, while most of the RMSE gain falls on other error components.",
       "claim_type": "hypothesis",
-      "applicable_scope": "QAOA case study in this simulator study",
-      "figure_or_table": "not yet in paper",
+      "applicable_scope": "Three QAOA graphs, p=1, one synthetic noise model, exploratory reanalysis",
+      "figure_or_table": "docs/qaoa_mechanism.md",
       "preregistered_before_result": "not_applicable",
       "commit_hash": "",
       "processing_script": "",
       "macros": [],
-      "known_counterexample": "Not tested yet; common-mode decomposition is pending."
+      "known_counterexample": "sparse6 at 4,096 shots shows no selection loss. Exploratory only; see docs/qaoa_mechanism.md. It needs confirmation on new graphs."
     },
     {
       "claim_id": "H03",

@@ -87,6 +87,7 @@
         "src.generate_audit_paper_assets",
         "src.hardware_readiness",
         "src.final_synthesis",
+        "src.qaoa_mechanism",
         "src.cross_validation"
       ],
       "post_checks": [
@@ -601,6 +602,30 @@
         "results/processed/final_evidence_matrix_v1.csv",
         "results/processed/final_project_summary_v1.csv",
         "results/processed/hardware_readiness_criteria_v1.csv"
+      ]
+    },
+    {
+      "module": "src.qaoa_mechanism",
+      "args": [],
+      "tier": "routine",
+      "configs": [],
+      "manifests": [],
+      "outputs": [
+        "figures/qaoa_mechanism_common_bias_vs_selection.png",
+        "figures/qaoa_mechanism_contrast_vs_selection.png",
+        "figures/qaoa_mechanism_error_correlation.png",
+        "figures/qaoa_mechanism_gap_distribution.png",
+        "figures/qaoa_mechanism_mse_by_candidate.png",
+        "figures/qaoa_mechanism_rank_transitions.png",
+        "figures/qaoa_mechanism_rmse_vs_contrast.png",
+        "results/processed/qaoa_mechanism_cells_v1.csv",
+        "results/processed/qaoa_mechanism_comparisons_v1.csv",
+        "results/processed/qaoa_mechanism_correlation_v1.csv",
+        "results/processed/qaoa_mechanism_counterfactuals_v1.csv",
+        "results/processed/qaoa_mechanism_fold_gaps_v1.csv",
+        "results/processed/qaoa_mechanism_mse_contributions_v1.csv",
+        "results/processed/qaoa_mechanism_pairs_v1.csv",
+        "results/processed/qaoa_mechanism_transitions_v1.csv"
       ]
     },
     {

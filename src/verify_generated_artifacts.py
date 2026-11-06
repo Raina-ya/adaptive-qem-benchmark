@@ -42,6 +42,7 @@ GENERATORS = (
     "src.generate_audit_paper_assets",
     "src.hardware_readiness",
     "src.final_synthesis",
+    "src.qaoa_mechanism",
     "src.cross_validation",
     "src.verify_final_project",
     "src.claim_ledger",

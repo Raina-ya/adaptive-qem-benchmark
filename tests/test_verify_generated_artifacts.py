@@ -46,6 +46,7 @@ def test_comparator_regenerates_adaptive_extension() -> None:
     assert "src.verify_final_project" in GENERATORS
     assert "src.claim_ledger" in GENERATORS
     assert "src.cross_validation" in GENERATORS
+    assert "src.qaoa_mechanism" in GENERATORS
     assert "src.generate_paper_assets" in GENERATORS
     assert "src.generate_audit_paper_assets" in GENERATORS
     assert "src.generate_combined_qem" in EXPENSIVE_GENERATORS

@@ -150,6 +150,9 @@ python -m src.verify_final_project
 python -m src.claim_ledger
 ```
 
+[The QAOA mechanism analysis](docs/qaoa_mechanism.md) is an exploratory look at why lower energy RMSE can
+come with worse candidate selection.
+
 [Independent cross-validation](docs/cross_validation.md) recalculates exact values, one readout cell, and
 QAOA selections with enumerated code that shares nothing with the benchmark implementation.
 
