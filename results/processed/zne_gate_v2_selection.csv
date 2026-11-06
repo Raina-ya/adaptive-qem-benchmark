@@ -1,0 +1,6 @@
+name,check_count,train_balanced_accuracy,train_false_accept_rate,train_false_reject_rate,validation_balanced_accuracy,validation_false_accept_rate,validation_false_reject_rate,selected
+physical_constrained+trend_slope_sign,1,0.928445229682,0.143109540636,0,0.917543859649,0.164912280702,0,True
+physical_ci+trend_slope_sign,2,0.928445229682,0.143109540636,0,0.917543859649,0.164912280702,0,False
+physical_strict+trend_slope_sign,2,0.928445229682,0.143109540636,0,0.917543859649,0.164912280702,0,False
+physical_tolerance+trend_slope_sign,2,0.928445229682,0.143109540636,0,0.917543859649,0.164912280702,0,False
+physical_constrained+trend_slope_sign+retention,2,0.839297569333,0.118374558304,0.20303030303,0.816327628888,0.140350877193,0.226993865031,False

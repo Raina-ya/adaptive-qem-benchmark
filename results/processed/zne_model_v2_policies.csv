@@ -1,0 +1,8 @@
+policy,conditions,independent_circuits,mean_rmse,mean_gain_vs_raw,gain_cluster_low,gain_cluster_high,budget_scope
+always_raw,420,30,0.0617682426463,0,0,0,per-run budget; gate repeats and garbage runs are not charged
+always_global_135_linear,420,30,0.0520596325264,0.0097086101199,0.00324188566995,0.0167438857934,per-run budget; gate repeats and garbage runs are not charged
+always_selected_local_135_exponential,420,30,0.0556291050993,0.00613913754699,-0.00451780233263,0.0186558947899,per-run budget; gate repeats and garbage runs are not charged
+v1_runtime_gate_else_raw,420,30,0.0519442063565,0.00982403628981,0.00466342515339,0.015572173567,per-run budget; gate repeats and garbage runs are not charged
+v2_gate_else_raw,420,30,0.0478330662792,0.0139351763671,0.00821204064555,0.0201252837031,per-run budget; gate repeats and garbage runs are not charged
+v2_gate_selected_model_else_raw,420,30,0.0502228232617,0.0115454193847,0.00171773701628,0.0232249587642,per-run budget; gate repeats and garbage runs are not charged
+oracle_best_of_raw_and_fits_upper_bound,420,30,0.0371305682513,0.0246376743951,0.0141635071651,0.0363676843963,per-run budget; gate repeats and garbage runs are not charged

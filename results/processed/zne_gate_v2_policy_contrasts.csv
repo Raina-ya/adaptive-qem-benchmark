@@ -1,0 +1,6 @@
+contrast_rmse_reduction,estimate,cluster_low,cluster_high,analysis_role
+v2_clipped_minus_always_linear,0.0042265662472,0.00306400990189,0.00552262284876,post_hoc_after_holdout
+v2_clipped_minus_v2_unclipped,6.76211023809e-09,0,2.02863307143e-08,post_hoc_after_holdout
+v2_unclipped_minus_always_linear,0.00422655948509,0.00306400313978,0.00552262284876,post_hoc_after_holdout
+v2_clipped_minus_v1_runtime,0.00411114007729,0.00245750395949,0.00594309772735,post_hoc_after_holdout
+v2_unclipped_minus_estimated_gain_only,0.00137275329115,0.000462205094052,0.0024004715116,post_hoc_after_holdout

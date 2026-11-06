@@ -39,7 +39,8 @@
         "src.generate_readout_scalability_benchmark",
         "src.generate_readout_mismatch_benchmark",
         "src.generate_qaoa_selection",
-        "src.generate_selector_holdout_v2"
+        "src.generate_selector_holdout_v2",
+        "src.generate_signal_v2"
       ],
       "post_checks": [
         "src.verify_final_project",
@@ -91,6 +92,10 @@
         "src.signal_strata_v1",
         "src.zne_gate_audit_v1",
         "src.signal_manifest_v2",
+        "src.generate_signal_v2",
+        "src.signal_v2_analysis",
+        "src.zne_gate_v2",
+        "src.zne_gate_v2_diagnostics",
         "src.cross_validation"
       ],
       "post_checks": [
@@ -669,6 +674,81 @@
         "experiments/manifests/signal_v2_manifest.csv",
         "experiments/manifests/signal_v2_manifest.sha256",
         "results/processed/signal_v2_coverage.csv"
+      ]
+    },
+    {
+      "module": "src.generate_signal_v2",
+      "args": [],
+      "tier": "expensive",
+      "configs": [
+        "experiments/configs/signal_v2.yaml"
+      ],
+      "manifests": [
+        "experiments/manifests/signal_v2_manifest.csv"
+      ],
+      "outputs": [
+        "results/processed/signal_v2_exact.csv",
+        "results/processed/signal_v2_truth.csv",
+        "results/raw/signal_v2_repeats.csv"
+      ],
+      "expected_runtime_seconds": 126,
+      "runtime_source": "one cloud run with two workers; the default single worker takes about twice as long",
+      "expected_rows": {
+        "results/processed/signal_v2_exact.csv": 8820,
+        "results/processed/signal_v2_truth.csv": 17640,
+        "results/raw/signal_v2_repeats.csv": 88200
+      }
+    },
+    {
+      "module": "src.signal_v2_analysis",
+      "args": [],
+      "tier": "routine",
+      "configs": [
+        "experiments/configs/signal_v2.yaml"
+      ],
+      "manifests": [
+        "experiments/manifests/signal_v2_manifest.csv"
+      ],
+      "outputs": [
+        "results/processed/signal_v2_attenuation.csv",
+        "results/processed/signal_v2_band_contrast.csv",
+        "results/processed/signal_v2_bands.csv",
+        "results/processed/signal_v2_circuits.csv",
+        "results/processed/signal_v2_folding.csv",
+        "results/processed/signal_v2_noise.csv"
+      ]
+    },
+    {
+      "module": "src.zne_gate_v2",
+      "args": [],
+      "tier": "routine",
+      "configs": [
+        "experiments/configs/signal_v2.yaml"
+      ],
+      "manifests": [
+        "experiments/manifests/signal_v2_manifest.csv"
+      ],
+      "outputs": [
+        "results/processed/zne_gate_v2_checks.csv",
+        "results/processed/zne_gate_v2_conditions.csv",
+        "results/processed/zne_gate_v2_holdout.csv",
+        "results/processed/zne_gate_v2_rejections.csv",
+        "results/processed/zne_gate_v2_selection.csv",
+        "results/processed/zne_model_v2_policies.csv",
+        "results/processed/zne_model_v2_selection.csv"
+      ]
+    },
+    {
+      "module": "src.zne_gate_v2_diagnostics",
+      "args": [],
+      "tier": "routine",
+      "configs": [],
+      "manifests": [],
+      "outputs": [
+        "results/processed/zne_gate_v2_holdout_groups.csv",
+        "results/processed/zne_gate_v2_policy_contrasts.csv",
+        "results/processed/zne_gate_v2_repeat_sensitivity.csv",
+        "results/processed/zne_gate_v2_threshold_sensitivity.csv"
       ]
     },
     {

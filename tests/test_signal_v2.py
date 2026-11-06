@@ -10,6 +10,7 @@ from src import generate_signal_v2 as generator
 from src import signal_manifest_v2 as manifest_module
 from src import signal_strata_v1, signal_v2_analysis, zne_gate_audit_v1
 from src import zne_gate_v2 as gate
+from src import zne_gate_v2_diagnostics as diagnostics
 from src.density_sim import Noise, derive_seed
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -348,3 +349,37 @@ def test_analysis_blanks_normalized_error_near_zero() -> None:
     assert np.isnan(frame.fit_normalized_rmse.iloc[0])
     assert frame.fit_normalized_rmse.iloc[1] == pytest.approx(0.1)
     assert frame.outcome.tolist() == ["raw_better", "fit_better"]
+
+
+def test_slope_check_needs_agreement_across_repeats() -> None:
+    assert diagnostics.slope_stable(noisy_rows([0.8, 0.5, 0.2])) is True
+    assert diagnostics.slope_stable(noisy_rows([0.5, 0.5, 0.5])) is False
+
+
+def test_committed_holdout_scores_match_their_conditions() -> None:
+    conditions = pd.read_csv(gate.CONDITIONS_PATH)
+    holdout = conditions.loc[conditions.split == "holdout"]
+    frozen = pd.read_csv(gate.SELECTION_PATH)
+    assert frozen.selected.sum() == 1
+    assert frozen.columns.tolist().count("validation_balanced_accuracy") == 1
+    assert not any("holdout" in column for column in frozen.columns)
+    table = pd.read_csv(gate.HOLDOUT_PATH)
+    row = table.loc[table.gate == "v1_full_reads_reference"].iloc[0]
+    assert row.conditions == len(holdout)
+    assert row.false_reject == int((~holdout.v1_full & holdout.improved).sum())
+    assert (holdout.loc[holdout.noise == "none", "improved"]).sum() == 0
+
+
+def test_committed_rejections_are_complete() -> None:
+    conditions = pd.read_csv(gate.CONDITIONS_PATH)
+    holdout = conditions.loc[conditions.split == "holdout"]
+    reasons = pd.read_csv(gate.REJECTIONS_PATH)
+    assert len(reasons) == int((~holdout.trend_slope_sign).sum())
+    assert reasons.failure_mechanisms.notna().all()
+
+
+def test_raw_rows_keep_every_repeat() -> None:
+    frame = pd.read_csv(generator.RAW_PATH, usecols=["status", "result_label"])
+    assert len(frame) == 88200
+    assert frame.status.eq("complete").all()
+    assert frame.result_label.eq("noisy_simulated").all()

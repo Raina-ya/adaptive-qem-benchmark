@@ -46,6 +46,9 @@ GENERATORS = (
     "src.signal_strata_v1",
     "src.zne_gate_audit_v1",
     "src.signal_manifest_v2",
+    "src.signal_v2_analysis",
+    "src.zne_gate_v2",
+    "src.zne_gate_v2_diagnostics",
     "src.cross_validation",
     "src.verify_final_project",
     "src.claim_ledger",
@@ -58,6 +61,7 @@ EXPENSIVE_GENERATORS = (
     "src.generate_readout_mismatch_benchmark",
     "src.generate_qaoa_selection",
     "src.generate_selector_holdout_v2",
+    "src.generate_signal_v2",
 )
 REGISTRY_PATH = (
     Path(__file__).resolve().parents[1] / "experiments/configs/artifact_registry_v1.yaml"

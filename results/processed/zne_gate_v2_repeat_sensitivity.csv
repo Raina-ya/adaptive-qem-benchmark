@@ -1,0 +1,6 @@
+repeats_read,true_accept,false_accept,true_reject,false_reject,false_accept_rate,false_reject_rate,balanced_accuracy,analysis_role
+2,140,161,118,1,0.5770609319,0.00709219858156,0.707923434759,post_hoc_after_holdout
+5,140,65,214,1,0.232974910394,0.00709219858156,0.879966445512,post_hoc_after_holdout
+10,141,66,213,0,0.236559139785,0,0.881720430108,post_hoc_after_holdout
+20,141,55,224,0,0.197132616487,0,0.901433691756,post_hoc_after_holdout
+50,141,49,230,0,0.175627240143,0,0.912186379928,post_hoc_after_holdout

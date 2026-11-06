@@ -1,0 +1,11 @@
+design,model,train_gain,validation_gain,selected,reached_validation
+local_135,exponential,0.00706489688015,0.00720732524393,True,True
+global_135,linear,0.00654731220488,0.00667975112322,False,True
+local_135,linear,0.00641850959723,0.00671459626752,False,True
+global_135,exponential,0.00597220453769,0.00725640479598,False,False
+global_1357,quadratic,0.00540286897026,0.00664788712828,False,False
+local_135,quadratic,0.00369124225683,0.00544122200548,False,False
+global_135,quadratic,0.00368728377705,0.00548746487661,False,False
+global_1357,exponential,0.00319912020001,0.0045738952993,False,False
+global_1357,linear,0.000925726640797,0.000251749519638,False,False
+global_1357,richardson,-0.0189757169722,-0.0167277074792,False,False
