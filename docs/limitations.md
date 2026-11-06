@@ -58,3 +58,13 @@ tests.
 
 Hardware predictions depend on simulator noise and are hypotheses. Their required-repeat floors
 come from simulated effect sizes and are likely optimistic for a device.
+
+## What the claim ledger does not establish
+
+`results/processed/claim_ledger_v1.csv` shows that printed numbers follow from committed rows. It
+cannot show that the simulator produced correct rows, since both paths read the same data. Five
+computed claims still depend on processed inputs, such as selector choices, shift-set labels, and
+stored classifications. Generated tables and figures are traced to scripts but not recomputed.
+
+Commit order proves preregistration only for the combined, QAOA, scalable-readout, and
+runtime-selector studies. The other studies' rules or thresholds first appear with their results.

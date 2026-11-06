@@ -41,6 +41,7 @@ GENERATORS = (
     "src.hardware_readiness",
     "src.final_synthesis",
     "src.verify_final_project",
+    "src.claim_ledger",
     "src.generate_audit_manifest",
 )
 EXPENSIVE_GENERATORS = (

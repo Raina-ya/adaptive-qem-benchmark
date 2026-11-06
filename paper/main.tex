@@ -773,7 +773,10 @@ estimator performance and mechanism validity: lower RMSE can coexist with reject
 ZNE diagnostics and unresolved near-tie decisions.
 
 \subsection{Hypotheses and limitations}
-The selector's freeze before holdout evaluation is a process claim: its rules and first results
+Commit order proves preregistration only for the combined, QAOA, scalable-readout, and runtime-selector
+studies. The ZNE gate's checks were named before its results, but its numeric thresholds first appear
+with them, and the sequential and calibration rules also first appear with their results.
+The selector's freeze before holdout evaluation is likewise a process claim: its rules and first results
 appeared in one commit, so version history alone cannot prove the order. We found no evidence of
 tuning, but the corrected analysis is not an independent test. The later runtime-selector test
 has that independence for its own rules, but it covers one design, and its H2 fallback may be too
@@ -857,6 +860,7 @@ python -m src.hardware_readiness
 python -m src.final_synthesis
 tectonic paper/main.tex --outdir paper
 python -m src.verify_final_project
+python -m src.claim_ledger
 \end{verbatim}
 }
 Repeat-level rows remain under \texttt{results/raw}; processed summaries, manifests,
@@ -865,4 +869,6 @@ Tests check analytic references, statevector agreement, folding equivalence, sho
 accounting, deterministic seeds, manifest coverage, metric recomputation, and the
 holdout boundary. \texttt{src.verify\_final\_project} recomputes the main summaries from raw rows
 at tolerance $10^{-9}$, accounts for every manifest, and checks figures and this document.
+\texttt{src.claim\_ledger} separately recomputes the printed values of computed claims, shares no
+code with the generators, and labels review judgments, manual interpretation, hypotheses, and limitations.
 \end{document}

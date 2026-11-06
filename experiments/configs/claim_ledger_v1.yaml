@@ -1,0 +1,917 @@
+{
+  "version": "claim_ledger_v1",
+  "practical_rmse_threshold": 0.005,
+  "overhead_penalty": 0.01,
+  "negligible_regret": 0.005,
+  "catastrophic_regret": 0.05,
+  "low_signal_reference": 0.06,
+  "selector_decided_share": 0.5,
+  "audit_size": 5,
+  "audit_seed": 20261106,
+  "claim_types": [
+    "computed",
+    "review_judgment",
+    "manual_interpretation",
+    "hypothesis",
+    "limitation"
+  ],
+  "claims": [
+    {
+      "claim_id": "C01",
+      "claim_text": "The main grid has 144 operating cells and 432 method summaries, with 99 explicit hardware-efficient readout failures.",
+      "claim_type": "computed",
+      "recompute": "grid",
+      "source_raw_files": [
+        "results/raw/hardware_efficient_v1_repeats-50.csv",
+        "results/raw/day12_ghz_volumetric_v1_repeats-50.csv"
+      ],
+      "source_processed_inputs": [],
+      "processing_script": "src/generate_paper_assets.py",
+      "metric_definition": "Count unique cells and cell-method pairs among applicable rows; count rows with status failed.",
+      "figure_or_table": "Experiment Setup; Results",
+      "applicable_scope": "GHZ and fixed-seed hardware-efficient simulator circuits, widths 2-6, three budgets, 50 repeats; one hardware-efficient circuit per width and depth",
+      "preregistered_before_result": "not_applicable",
+      "commit_hash": "f043f73",
+      "macros": [
+        "OperatingCells",
+        "SummaryRows",
+        "HardwareFailures"
+      ],
+      "literals": []
+    },
+    {
+      "claim_id": "C02",
+      "claim_text": "179 of 432 method summaries have worse RMSE than raw.",
+      "claim_type": "computed",
+      "recompute": "negative_gains",
+      "source_raw_files": [
+        "results/raw/hardware_efficient_v1_repeats-50.csv",
+        "results/raw/day12_ghz_volumetric_v1_repeats-50.csv"
+      ],
+      "source_processed_inputs": [],
+      "processing_script": "src/generate_paper_assets.py",
+      "metric_definition": "RMSE over complete repeats per cell and method; count raw RMSE minus method RMSE below zero.",
+      "figure_or_table": "Abstract",
+      "applicable_scope": "GHZ and fixed-seed hardware-efficient simulator circuits, widths 2-6, three budgets, 50 repeats; one hardware-efficient circuit per width and depth",
+      "preregistered_before_result": "not_applicable",
+      "commit_hash": "f043f73",
+      "macros": [
+        "NegativeGains"
+      ],
+      "literals": []
+    },
+    {
+      "claim_id": "C03",
+      "claim_text": "Corrected labels give 77 raw, 26 tied, 18 readout, 14 ZNE, and 9 inconclusive cells; 40 raw wins are on accuracy, 37 on cost, and 63 have a reference below 0.06.",
+      "claim_type": "computed",
+      "recompute": "regimes",
+      "source_raw_files": [
+        "results/raw/hardware_efficient_v1_repeats-50.csv",
+        "results/raw/day12_ghz_volumetric_v1_repeats-50.csv"
+      ],
+      "source_processed_inputs": [],
+      "processing_script": "src/generate_audit_paper_assets.py",
+      "metric_definition": "Utility is RMSE plus 0.01 times normalized executions; cells closer than 0.005 tie; an independently written paired percentile bootstrap decides inconclusive and raw-win basis.",
+      "figure_or_table": "Table regimes",
+      "applicable_scope": "GHZ and fixed-seed hardware-efficient simulator circuits, widths 2-6, three budgets, 50 repeats; one hardware-efficient circuit per width and depth",
+      "known_counterexample": "Raw wins no GHZ cell; every one of the 77 is hardware-efficient.",
+      "preregistered_before_result": "no_post_hoc_correction",
+      "commit_hash": "bc27411",
+      "macros": [
+        "VTwoPracticalTies",
+        "VTwoRawWinners",
+        "VTwoReadoutWinners",
+        "VTwoZNEWinners",
+        "VTwoInconclusive",
+        "RawWinsAccuracy",
+        "RawWinsCostOnly",
+        "RawWinsLowSignal"
+      ],
+      "literals": [
+        {
+          "name": "incomplete_inconclusive",
+          "value": "eight",
+          "context": "Nine cells are inconclusive, eight because the 50-repeat completeness contract"
+        }
+      ]
+    },
+    {
+      "claim_id": "C04",
+      "claim_text": "The frozen selector reaches 41.4% holdout and 50.0% shift compatibility, and has more harmful outcomes (59) than always-raw (42).",
+      "claim_type": "computed",
+      "recompute": "selector_v1",
+      "source_raw_files": [
+        "results/raw/hardware_efficient_v1_repeats-50.csv",
+        "results/raw/day12_ghz_volumetric_v1_repeats-50.csv",
+        "results/raw/noise_shift_holdout_v1_repeats-50.csv"
+      ],
+      "source_processed_inputs": [],
+      "processing_script": "src/generate_audit_paper_assets.py",
+      "metric_definition": "Selections are rebuilt from raw diagnostics with the published rule order and hash split; regret is selected RMSE minus lowest RMSE; harm is an incompatible choice with regret above 0.005.",
+      "figure_or_table": "Table audit",
+      "applicable_scope": "Frozen rule selector on 29 holdout, 36 shift, and 115 rule-design simulator cells; diagnostics are 50-repeat means",
+      "known_counterexample": "On strong-signal cells the selector (28) has fewer harmful outcomes than always-raw (42).",
+      "preregistered_before_result": "process_claim_only",
+      "commit_hash": "2d07ba8",
+      "macros": [
+        "HoldoutCells",
+        "HoldoutCompatibilityVTwo",
+        "HoldoutStrictVTwo",
+        "ShiftCompatibilityVTwo",
+        "ShiftStrictVTwo",
+        "HoldoutRegretMean",
+        "HoldoutRegretMedian",
+        "HoldoutRegretMax",
+        "ShiftRegretMean",
+        "HoldoutAlwaysRaw",
+        "HoldoutAlwaysReadout",
+        "ShiftAlwaysRaw",
+        "ShiftAlwaysReadout",
+        "SelectorCatastrophic",
+        "SelectorCatastrophicGHZ",
+        "SelectorCatastrophicLowSignal",
+        "SelectorAbstentions",
+        "SelectorUnnecessaryAbstentions",
+        "SelectorHarm",
+        "AlwaysRawHarm",
+        "StrongSignalCells",
+        "StrongHarmSelector",
+        "StrongHarmRaw",
+        "StrongHarmReadout"
+      ],
+      "literals": [
+        {
+          "name": "evaluated_cells",
+          "value": "180",
+          "context": "than always-raw across all 180 evaluated cells"
+        }
+      ]
+    },
+    {
+      "claim_id": "C05",
+      "claim_text": "Of 800 ZNE diagnostic repeats, 197 are extrapolation unstable and 5 signal destroyed.",
+      "claim_type": "computed",
+      "recompute": "zne_probability",
+      "source_raw_files": [
+        "results/raw/zne_probability_diagnostics_v1_repeats-50.csv"
+      ],
+      "source_processed_inputs": [
+        "zne_probability_diagnostics_v1.csv"
+      ],
+      "processing_script": "src/generate_paper_assets.py",
+      "metric_definition": "Count repeats in raw factor rows; count classifications from the processed diagnostics, whose classifier is not re-derived here.",
+      "figure_or_table": "Results ZNE validity",
+      "applicable_scope": "Bell and one hardware-efficient simulator circuit, 800 repeats",
+      "preregistered_before_result": "process_claim_only",
+      "commit_hash": "b0fcb07",
+      "macros": [
+        "ZNEProbabilityRepeats",
+        "ZNEUnstableRepeats",
+        "ZNEDestroyedRepeats"
+      ],
+      "literals": []
+    },
+    {
+      "claim_id": "C06",
+      "claim_text": "The ZNE gate accepts 5 of 16 cells, none of the 8 hardware-efficient cells; the positive control is credible at 16,384 shots and rejected at 4,096.",
+      "claim_type": "computed",
+      "recompute": "zne_gate",
+      "source_raw_files": [
+        "results/raw/zne_falsification_v1.csv"
+      ],
+      "source_processed_inputs": [],
+      "processing_script": "src/generate_paper_assets.py",
+      "metric_definition": "Six frozen checks with 95% normal intervals on paired repeats; a cell is credible only if all pass.",
+      "figure_or_table": "Figure ZNE validity; Table hardware",
+      "applicable_scope": "Linear ZNE with folds 1, 3, 5 on bell_xx and one hardware-efficient width-2 circuit whose reference is 0.036; simulator noise only",
+      "known_counterexample": "All 8 hardware-efficient cells are one weak-signal circuit, and 2 Bell rejections are zero-noise cells with no gain to validate.",
+      "preregistered_before_result": "partial_checks_named_before_thresholds",
+      "commit_hash": "e4c80b3",
+      "macros": [
+        "ZNEValidityCells",
+        "ZNECredibleCells",
+        "ZNERejectedCells",
+        "ZNEHardwareCells",
+        "ZNEHardwareCredibleCells"
+      ],
+      "literals": [
+        {
+          "name": "control_16384",
+          "value": "credible",
+          "context": "The positive control is credible at 16,384 shots"
+        },
+        {
+          "name": "control_4096",
+          "value": "rejected",
+          "context": "but rejected at 4,096"
+        }
+      ]
+    },
+    {
+      "claim_id": "C07",
+      "claim_text": "Combined QEM has the lowest RMSE in 12 of 16 conditions, all 16 validity checks fail, 12 of 24 mean interactions are negative, and its near-tie error is 0.26 to 0.48.",
+      "claim_type": "computed",
+      "recompute": "combined",
+      "source_raw_files": [
+        "results/raw/combined_qem_v1.csv"
+      ],
+      "source_processed_inputs": [],
+      "processing_script": "src/generate_paper_assets.py",
+      "metric_definition": "RMSE of signed error; interaction is combined minus readout minus ZNE plus raw absolute error; decision error rate by condition.",
+      "figure_or_table": "Figures combined; Tables",
+      "applicable_scope": "Six preregistered simulator cells, budgets 4,096 and 16,384, balanced and base-heavy allocation, 50 paired repeats; readout correction applied before extrapolation",
+      "known_counterexample": "In decision cells, raw has lower RMSE than combined at 16,384 shots.",
+      "preregistered_before_result": "yes_by_commit_order",
+      "commit_hash": "5125549",
+      "macros": [
+        "CombinedExpectationCells",
+        "CombinedExpectationWins",
+        "CombinedValidityCells",
+        "CombinedValidityRejected",
+        "CombinedNegativeInteractions",
+        "CombinedInteractionCells",
+        "CombinedNearTieMinimum",
+        "CombinedNearTieMaximum"
+      ],
+      "literals": [
+        {
+          "name": "executions_combined",
+          "value": "7",
+          "context": "combined mitigation uses 7 circuit executions"
+        },
+        {
+          "name": "executions_raw",
+          "value": "1",
+          "context": "compared with 1 for raw"
+        },
+        {
+          "name": "executions_zne",
+          "value": "3",
+          "context": "3 for ZNE"
+        },
+        {
+          "name": "executions_readout",
+          "value": "5",
+          "context": "and 5 for readout"
+        }
+      ]
+    },
+    {
+      "claim_id": "C08",
+      "claim_text": "The mismatch study has 9,600 rows, and deliberate calibration mismatch raises 0.05-margin decision error to 0.88 to 0.94.",
+      "claim_type": "computed",
+      "recompute": "mismatch",
+      "source_raw_files": [
+        "results/raw/readout_mismatch_v1.csv"
+      ],
+      "source_processed_inputs": [],
+      "processing_script": "src/generate_paper_assets.py",
+      "metric_definition": "Decision error rate per correction method in the stated cell.",
+      "figure_or_table": "Figure mismatch",
+      "applicable_scope": "One representative cell: width 6, broad output, 16,384 shots, a deliberately wrong synthetic calibration model",
+      "known_counterexample": "The value is one worst-case cell and does not describe typical hardware.",
+      "preregistered_before_result": "yes_by_commit_order",
+      "commit_hash": "6ec15fb",
+      "macros": [
+        "MismatchRows",
+        "MismatchDecisionMinimum",
+        "MismatchDecisionMaximum"
+      ],
+      "literals": []
+    },
+    {
+      "claim_id": "C09",
+      "claim_text": "The scalable-readout manifest planned 960 correlated repeats at widths 8-12 that were not run.",
+      "claim_type": "computed",
+      "recompute": "readout_deviation",
+      "source_raw_files": [
+        "results/raw/readout_mismatch_v1.csv",
+        "results/raw/readout_scalability_v1.csv"
+      ],
+      "source_processed_inputs": [
+        "experiments/manifests/readout_scalability_v1_manifest.csv"
+      ],
+      "processing_script": "src/verify_final_project.py",
+      "metric_definition": "Planned repeats in the manifest minus matching raw rows.",
+      "figure_or_table": "Discussion manifest deviation",
+      "applicable_scope": "pair_correlated and calibration_mismatch models at widths 8, 10, and 12",
+      "preregistered_before_result": "not_applicable",
+      "commit_hash": "6ec15fb",
+      "macros": [],
+      "literals": [
+        {
+          "name": "planned_not_run",
+          "value": "960",
+          "context": "planned 960 repeats of correlated readout"
+        }
+      ]
+    },
+    {
+      "claim_id": "C10",
+      "claim_text": "Lower energy RMSE does not imply better QAOA selection; 2 of 828 completed selections certify and 72 fail.",
+      "claim_type": "computed",
+      "recompute": "qaoa",
+      "source_raw_files": [
+        "results/raw/qaoa_selection_v1.csv"
+      ],
+      "source_processed_inputs": [],
+      "processing_script": "src/generate_qaoa_selection.py",
+      "metric_definition": "Select the highest estimate per repeat; error if it is not an exact winner; near-tie uses incumbent and near-tie challenger only.",
+      "figure_or_table": "QAOA figures",
+      "applicable_scope": "Three MaxCut graphs (widths 4, 6, 8), five frozen p=1 candidates, three methods, two budgets, 50 repeats, one synthetic noise model",
+      "known_counterexample": "The readout failures are width 8 with about 1.6 calibration shots per basis state at 4,096 shots.",
+      "preregistered_before_result": "yes_by_commit_order",
+      "commit_hash": "aa8141a",
+      "macros": [],
+      "literals": [
+        {
+          "name": "near_4096_raw",
+          "value": "0.28",
+          "context": "near-tie error is 0.28 for raw"
+        },
+        {
+          "name": "near_4096_readout",
+          "value": "0.32",
+          "context": "0.32 for readout among completed selections"
+        },
+        {
+          "name": "near_4096_zne",
+          "value": "0.36",
+          "context": "and 0.36 for ZNE"
+        },
+        {
+          "name": "near_16384_raw",
+          "value": "0.17",
+          "context": "at 16,384 shots it is 0.17"
+        },
+        {
+          "name": "near_16384_readout",
+          "value": "0.179",
+          "context": "0.17, 0.179, and 0.42"
+        },
+        {
+          "name": "near_16384_zne",
+          "value": "0.42",
+          "context": "0.17, 0.179, and 0.42"
+        },
+        {
+          "name": "ring_raw_rmse",
+          "value": "0.183",
+          "context": "0.183 to 0.148"
+        },
+        {
+          "name": "ring_readout_rmse",
+          "value": "0.148",
+          "context": "0.183 to 0.148"
+        },
+        {
+          "name": "sparse_raw_rmse",
+          "value": "0.228",
+          "context": "0.228 to 0.191"
+        },
+        {
+          "name": "sparse_readout_rmse",
+          "value": "0.191",
+          "context": "0.228 to 0.191"
+        },
+        {
+          "name": "correlation",
+          "value": "0.153",
+          "context": "RMSE--selection-error correlation is only 0.153"
+        },
+        {
+          "name": "regret_raw",
+          "value": "0.0130",
+          "context": "mean regret is 0.0130 for raw"
+        },
+        {
+          "name": "regret_readout",
+          "value": "0.0125",
+          "context": "0.0125 for completed readout selections"
+        },
+        {
+          "name": "regret_zne",
+          "value": "0.0378",
+          "context": "and 0.0378 for ZNE"
+        },
+        {
+          "name": "failed_4096",
+          "value": "50",
+          "context": "fails all 50 medium/dense selections"
+        },
+        {
+          "name": "failed_16384",
+          "value": "22",
+          "context": "22 of 50 at 16,384 shots"
+        },
+        {
+          "name": "failed_total",
+          "value": "72",
+          "context": "these 72 failed groups"
+        },
+        {
+          "name": "zne_ring",
+          "value": "0.08",
+          "context": "top-1 error is 0.08 on the ring"
+        },
+        {
+          "name": "zne_sparse",
+          "value": "0.34",
+          "context": "0.34 on the sparse graph"
+        },
+        {
+          "name": "zne_dense",
+          "value": "0.50",
+          "context": "0.50 on the medium/dense graph"
+        },
+        {
+          "name": "completed",
+          "value": "828",
+          "context": "2 of 828 completed selections"
+        },
+        {
+          "name": "certified",
+          "value": "2",
+          "context": "only 2 of 828"
+        },
+        {
+          "name": "unresolved",
+          "value": "826",
+          "context": "The remaining 826 completed groups"
+        },
+        {
+          "name": "candidate_rows",
+          "value": "4,500",
+          "context": "4,500 candidate-level rows"
+        },
+        {
+          "name": "groups",
+          "value": "900",
+          "context": "900 selection groups"
+        }
+      ]
+    },
+    {
+      "claim_id": "C11",
+      "claim_text": "Corrected looks keep false certification at 1.7-2.7% versus 22.4-24.9% for peeking; near ties use 98.1-99.8% of the budget; biased raw certifies wrongly in 100% of repeats.",
+      "claim_type": "computed",
+      "recompute": "sequential",
+      "source_raw_files": [
+        "results/raw/sequential_decision_v1.csv"
+      ],
+      "source_processed_inputs": [],
+      "processing_script": "src/generate_audit_paper_assets.py",
+      "metric_definition": "Wrong-certification rate by method and policy at margin 0; mean shots share and unresolved rate at margin 0.02.",
+      "figure_or_table": "Sequential table and figures",
+      "applicable_scope": "Two-candidate, two-qubit simulator decisions with one observable, 13 task-margin pairs, 100 repeats",
+      "known_counterexample": "Certification cannot detect bias: the corrected rule certifies the wrong candidate under gate imbalance.",
+      "preregistered_before_result": "process_claim_only",
+      "commit_hash": "3b1c2da",
+      "macros": [
+        "SequentialRows",
+        "NullWilsonMin",
+        "NullWilsonMax",
+        "NullNaiveMin",
+        "NullNaiveMax",
+        "NearTieShareMin",
+        "NearTieShareMax",
+        "NearTieUnresolvedMin",
+        "NearTieUnresolvedMax",
+        "BiasedRawWrong",
+        "BiasedRawShots",
+        "BiasedZNEWrong"
+      ],
+      "literals": [
+        {
+          "name": "null_bound",
+          "value": "3%",
+          "context": "keeping false certification below 3\\% at zero margin"
+        },
+        {
+          "name": "naive_range",
+          "value": "22--25",
+          "context": "compared with 22--25\\% for"
+        },
+        {
+          "name": "biased_rounded",
+          "value": "2,000",
+          "context": "after about 2,000 shots"
+        }
+      ]
+    },
+    {
+      "claim_id": "C12",
+      "claim_text": "Over 100 decisions, triggered recalibration uses 40% fewer shots than every-decision recalibration; never recalibrating has error from 0.047 to 0.386 depending on drift.",
+      "claim_type": "computed",
+      "recompute": "lifetime",
+      "source_raw_files": [
+        "results/raw/calibration_lifetime_v1.csv"
+      ],
+      "source_processed_inputs": [],
+      "processing_script": "src/generate_audit_paper_assets.py",
+      "metric_definition": "Mean decision error and amortized shots by policy and drift model.",
+      "figure_or_table": "Table lifetime",
+      "applicable_scope": "One-qubit threshold decision under four synthetic drift models, 100-decision workload, 30 repeats",
+      "known_counterexample": "The 0.047 bidirectional control shows reuse can look safe when drift averages out.",
+      "preregistered_before_result": "process_claim_only",
+      "commit_hash": "1f2c572",
+      "macros": [
+        "LifetimeRows",
+        "NeverAbrupt",
+        "NeverAsymmetric",
+        "NeverSlow",
+        "NeverRandom",
+        "TriggerShotSaving"
+      ],
+      "literals": []
+    },
+    {
+      "claim_id": "C13",
+      "claim_text": "The preregistered runtime selector fails all three criteria: 14 of 26 decided cells reliable, 27 of 94 no-safe cells informative, regret 0.0059 versus 0.0033 for always-readout.",
+      "claim_type": "computed",
+      "recompute": "selector_v2",
+      "source_raw_files": [
+        "results/raw/selector_holdout_v2.csv"
+      ],
+      "source_processed_inputs": [
+        "selector_v2_cells.csv"
+      ],
+      "processing_script": "src/generate_selector_holdout_v2.py",
+      "metric_definition": "Cell RMSE from repeat rows; decided cells meet the frozen share; Wilson lower bounds; regret against the best full-budget method.",
+      "figure_or_table": "Table fresh",
+      "applicable_scope": "120 fresh simulator cells: widths 3 and 5, depths 2 and 4, two replicates, six noise conditions, budgets 2,048 and 8,192",
+      "known_counterexample": "The selector beats always-raw on decided-cell regret (0.0059 versus 0.0606).",
+      "preregistered_before_result": "yes_by_commit_order",
+      "commit_hash": "993d948",
+      "macros": [
+        "VTwoCells",
+        "VTwoDecidedCells",
+        "VTwoNoSafeCells",
+        "VTwoReliableCells",
+        "VTwoHOneRate",
+        "VTwoHOneLow",
+        "VTwoAvoidedCells",
+        "VTwoHTwoRate",
+        "VTwoHTwoLow",
+        "VTwoRegretSelector",
+        "VTwoRegretRaw",
+        "VTwoRegretReadout",
+        "VTwoCatastrophicSelector",
+        "VTwoCatastrophicRaw",
+        "VTwoCatastrophicReadout",
+        "VTwoReadoutDecisionShare",
+        "VTwoRequestShare",
+        "VTwoUnresolvedShare"
+      ],
+      "literals": [
+        {
+          "name": "raw_rows",
+          "value": "24,000",
+          "context": "cells and 24,000 rows"
+        },
+        {
+          "name": "weak_reliable",
+          "value": "36",
+          "context": "raw is reliable in all 36 cells"
+        },
+        {
+          "name": "strong_reliable",
+          "value": "34",
+          "context": "readout in 34 of 48"
+        },
+        {
+          "name": "strong_total",
+          "value": "48",
+          "context": "readout in 34 of 48"
+        }
+      ]
+    },
+    {
+      "claim_id": "C14",
+      "claim_text": "Readout reliability falls with condition number (75%, 50%, 10%), and three cells flip across the gate of 8 with means 7.87, 8.10, and 8.16.",
+      "claim_type": "computed",
+      "recompute": "envelope",
+      "source_raw_files": [],
+      "source_processed_inputs": [
+        "method_envelope_cells_v1.csv",
+        "selector_gate_stability_v1.csv"
+      ],
+      "processing_script": "src/reliability_envelopes.py",
+      "metric_definition": "Reliable rate by condition-number bin; bootstrap gate stability.",
+      "figure_or_table": "Results reliability ranges",
+      "applicable_scope": "Rule-design simulator cells, full-matrix readout",
+      "preregistered_before_result": "no_post_hoc_analysis",
+      "commit_hash": "9bbcce4",
+      "macros": [],
+      "literals": [
+        {
+          "name": "rate_low",
+          "value": "75%",
+          "context": "readout is reliable in 75\\% of"
+        },
+        {
+          "name": "rate_mid",
+          "value": "50%",
+          "context": "50\\% from 1.5 to 3"
+        },
+        {
+          "name": "rate_high",
+          "value": "10%",
+          "context": "10\\% from 3 to 8"
+        },
+        {
+          "name": "count_top",
+          "value": "4",
+          "context": "none of the 4 cells at 8 or above"
+        },
+        {
+          "name": "flip_means",
+          "value": "7.87, 8.10, and 8.16",
+          "context": "with means of 7.87, 8.10, and 8.16"
+        },
+        {
+          "name": "residual_rates",
+          "value": "24--33",
+          "context": "with rates of 24--33\\% in every adequately sampled"
+        }
+      ]
+    },
+    {
+      "claim_id": "C15",
+      "claim_text": "The hardware plan needs about 72.1 million shots, and the near-tie cell needs 205,218 shots per repeat.",
+      "claim_type": "computed",
+      "recompute": "hardware_shots",
+      "source_raw_files": [
+        "results/raw/combined_qem_v1.csv"
+      ],
+      "source_processed_inputs": [
+        "experiments/hardware/hardware_manifest_v1.csv"
+      ],
+      "processing_script": "src/hardware_readiness.py",
+      "metric_definition": "Two-sided alpha 0.05 and 80% power on the raw noisy gap; total is the manifest sum.",
+      "figure_or_table": "Results hardware readiness",
+      "applicable_scope": "Normal-approximation planning estimate from simulated effect sizes; not a device measurement",
+      "known_counterexample": "Simulated effect sizes probably understate device requirements.",
+      "preregistered_before_result": "not_applicable",
+      "commit_hash": "9ea10de",
+      "macros": [
+        "HardwareTotalShots",
+        "HardwareNearTieShots"
+      ],
+      "literals": []
+    },
+    {
+      "claim_id": "R01",
+      "claim_text": "The hardware readiness decision is no-go, with 1 of 7 go requirements met and 6 of 6 no-go triggers applying.",
+      "claim_type": "review_judgment",
+      "applicable_scope": "Readiness of this repository on the review date; says nothing about any device",
+      "figure_or_table": "docs/hardware_readiness_review.md",
+      "preregistered_before_result": "not_applicable",
+      "commit_hash": "9ea10de",
+      "processing_script": "",
+      "macros": [
+        "HardwareGoMet",
+        "HardwareGoTotal",
+        "HardwareTriggers",
+        "HardwareTriggerTotal"
+      ]
+    },
+    {
+      "claim_id": "R02",
+      "claim_text": "A device run would mainly be a demonstration today.",
+      "claim_type": "review_judgment",
+      "applicable_scope": "Readiness of this repository on the review date; says nothing about any device",
+      "figure_or_table": "Discussion why no-go",
+      "preregistered_before_result": "not_applicable",
+      "commit_hash": "9ea10de",
+      "processing_script": "",
+      "macros": []
+    },
+    {
+      "claim_id": "R03",
+      "claim_text": "One backend could support only a time-bound claim about that backend.",
+      "claim_type": "review_judgment",
+      "applicable_scope": "Readiness of this repository on the review date; says nothing about any device",
+      "figure_or_table": "Discussion why no-go",
+      "preregistered_before_result": "not_applicable",
+      "commit_hash": "9ea10de",
+      "processing_script": "",
+      "macros": []
+    },
+    {
+      "claim_id": "M01",
+      "claim_text": "The supported-finding, unresolved-question, and limitation text for Expectation accuracy is a hand-written reading of computed values.",
+      "claim_type": "manual_interpretation",
+      "applicable_scope": "Expectation accuracy row of the evidence matrix",
+      "figure_or_table": "Table evidence",
+      "preregistered_before_result": "not_applicable",
+      "commit_hash": "9ea10de",
+      "processing_script": "",
+      "macros": []
+    },
+    {
+      "claim_id": "M02",
+      "claim_text": "The supported-finding, unresolved-question, and limitation text for Decision reliability is a hand-written reading of computed values.",
+      "claim_type": "manual_interpretation",
+      "applicable_scope": "Decision reliability row of the evidence matrix",
+      "figure_or_table": "Table evidence",
+      "preregistered_before_result": "not_applicable",
+      "commit_hash": "9ea10de",
+      "processing_script": "",
+      "macros": []
+    },
+    {
+      "claim_id": "M03",
+      "claim_text": "The supported-finding, unresolved-question, and limitation text for ZNE validity is a hand-written reading of computed values.",
+      "claim_type": "manual_interpretation",
+      "applicable_scope": "ZNE validity row of the evidence matrix",
+      "figure_or_table": "Table evidence",
+      "preregistered_before_result": "not_applicable",
+      "commit_hash": "9ea10de",
+      "processing_script": "",
+      "macros": []
+    },
+    {
+      "claim_id": "M04",
+      "claim_text": "The supported-finding, unresolved-question, and limitation text for Combined mitigation is a hand-written reading of computed values.",
+      "claim_type": "manual_interpretation",
+      "applicable_scope": "Combined mitigation row of the evidence matrix",
+      "figure_or_table": "Table evidence",
+      "preregistered_before_result": "not_applicable",
+      "commit_hash": "9ea10de",
+      "processing_script": "",
+      "macros": []
+    },
+    {
+      "claim_id": "M05",
+      "claim_text": "The supported-finding, unresolved-question, and limitation text for Readout scalability is a hand-written reading of computed values.",
+      "claim_type": "manual_interpretation",
+      "applicable_scope": "Readout scalability row of the evidence matrix",
+      "figure_or_table": "Table evidence",
+      "preregistered_before_result": "not_applicable",
+      "commit_hash": "9ea10de",
+      "processing_script": "",
+      "macros": []
+    },
+    {
+      "claim_id": "M06",
+      "claim_text": "The supported-finding, unresolved-question, and limitation text for Application case study is a hand-written reading of computed values.",
+      "claim_type": "manual_interpretation",
+      "applicable_scope": "Application case study row of the evidence matrix",
+      "figure_or_table": "Table evidence",
+      "preregistered_before_result": "not_applicable",
+      "commit_hash": "9ea10de",
+      "processing_script": "",
+      "macros": []
+    },
+    {
+      "claim_id": "M07",
+      "claim_text": "The supported-finding, unresolved-question, and limitation text for Calibration drift is a hand-written reading of computed values.",
+      "claim_type": "manual_interpretation",
+      "applicable_scope": "Calibration drift row of the evidence matrix",
+      "figure_or_table": "Table evidence",
+      "preregistered_before_result": "not_applicable",
+      "commit_hash": "9ea10de",
+      "processing_script": "",
+      "macros": []
+    },
+    {
+      "claim_id": "M08",
+      "claim_text": "The supported-finding, unresolved-question, and limitation text for Sequential certification is a hand-written reading of computed values.",
+      "claim_type": "manual_interpretation",
+      "applicable_scope": "Sequential certification row of the evidence matrix",
+      "figure_or_table": "Table evidence",
+      "preregistered_before_result": "not_applicable",
+      "commit_hash": "9ea10de",
+      "processing_script": "",
+      "macros": []
+    },
+    {
+      "claim_id": "M09",
+      "claim_text": "The supported-finding, unresolved-question, and limitation text for Hardware readiness is a hand-written reading of computed values.",
+      "claim_type": "manual_interpretation",
+      "applicable_scope": "Hardware readiness row of the evidence matrix",
+      "figure_or_table": "Table evidence",
+      "preregistered_before_result": "not_applicable",
+      "commit_hash": "9ea10de",
+      "processing_script": "",
+      "macros": []
+    },
+    {
+      "claim_id": "H01",
+      "claim_text": "Raw wins near zero because noise moves estimates toward a reference already near zero.",
+      "claim_type": "hypothesis",
+      "applicable_scope": "Near-zero hardware-efficient observables",
+      "figure_or_table": "Results operating regimes",
+      "preregistered_before_result": "not_applicable",
+      "commit_hash": "",
+      "processing_script": "",
+      "macros": [],
+      "known_counterexample": "Not isolated by any experiment; signal-stratified analysis is pending."
+    },
+    {
+      "claim_id": "H02",
+      "claim_text": "QAOA selection worsens because mitigation removes common bias while amplifying differences between candidates.",
+      "claim_type": "hypothesis",
+      "applicable_scope": "QAOA case study in this simulator study",
+      "figure_or_table": "not yet in paper",
+      "preregistered_before_result": "not_applicable",
+      "commit_hash": "",
+      "processing_script": "",
+      "macros": [],
+      "known_counterexample": "Not tested yet; common-mode decomposition is pending."
+    },
+    {
+      "claim_id": "H03",
+      "claim_text": "Selector errors stem from insufficient features, first-order ZNE, or mismatch between training and shift channels.",
+      "claim_type": "hypothesis",
+      "applicable_scope": "Frozen rule selector",
+      "figure_or_table": "Discussion hypotheses",
+      "preregistered_before_result": "not_applicable",
+      "commit_hash": "",
+      "processing_script": "",
+      "macros": [],
+      "known_counterexample": "The experiment does not isolate these causes."
+    },
+    {
+      "claim_id": "H04",
+      "claim_text": "The runtime selector fallback H2 may be too lenient for sign decisions near zero.",
+      "claim_type": "hypothesis",
+      "applicable_scope": "Runtime selector",
+      "figure_or_table": "Discussion hypotheses",
+      "preregistered_before_result": "not_applicable",
+      "commit_hash": "",
+      "processing_script": "",
+      "macros": []
+    },
+    {
+      "claim_id": "H05",
+      "claim_text": "Frozen device predictions would hold on hardware.",
+      "claim_type": "hypothesis",
+      "applicable_scope": "Six proposed cells",
+      "figure_or_table": "Table hardware",
+      "preregistered_before_result": "not_applicable",
+      "commit_hash": "",
+      "processing_script": "",
+      "macros": [],
+      "known_counterexample": "No device data exists."
+    },
+    {
+      "claim_id": "L01",
+      "claim_text": "All evidence is analytic or simulated; there is no hardware evidence.",
+      "claim_type": "limitation",
+      "applicable_scope": "All studies in this repository",
+      "figure_or_table": "Evidence matrix",
+      "preregistered_before_result": "not_applicable",
+      "commit_hash": "",
+      "processing_script": "",
+      "macros": []
+    },
+    {
+      "claim_id": "L02",
+      "claim_text": "Commit order proves preregistration only for the combined, QAOA, scalable-readout, and runtime-selector studies. The ZNE gate thresholds, sequential rules, calibration rules, and first selector first appear with their results.",
+      "claim_type": "limitation",
+      "applicable_scope": "All studies in this repository",
+      "figure_or_table": "Discussion hypotheses",
+      "preregistered_before_result": "not_applicable",
+      "commit_hash": "e4c80b3",
+      "processing_script": "",
+      "macros": []
+    },
+    {
+      "claim_id": "L03",
+      "claim_text": "All 8 hardware-efficient ZNE cells share one circuit with reference 0.036, so they do not represent the circuit family.",
+      "claim_type": "limitation",
+      "applicable_scope": "ZNE validity gate",
+      "figure_or_table": "Results ZNE validity",
+      "preregistered_before_result": "not_applicable",
+      "commit_hash": "",
+      "processing_script": "",
+      "macros": []
+    },
+    {
+      "claim_id": "L04",
+      "claim_text": "Selector v2 references, stored ZNE classifications, envelope bins, and the hardware manifest are inputs to the ledger, not re-derived from raw rows.",
+      "claim_type": "limitation",
+      "applicable_scope": "Claims marked with processed inputs",
+      "figure_or_table": "",
+      "preregistered_before_result": "not_applicable",
+      "commit_hash": "",
+      "processing_script": "",
+      "macros": []
+    },
+    {
+      "claim_id": "L05",
+      "claim_text": "The generated tables and figures are traced to scripts and data but not recomputed by this ledger.",
+      "claim_type": "limitation",
+      "applicable_scope": "Paper tables and figures",
+      "figure_or_table": "",
+      "preregistered_before_result": "not_applicable",
+      "commit_hash": "",
+      "processing_script": "",
+      "macros": []
+    }
+  ],
+  "bootstrap_seed": 20261106,
+  "bootstrap_resamples": 2000
+}

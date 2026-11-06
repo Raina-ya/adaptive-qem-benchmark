@@ -30,6 +30,14 @@ CELL_NAMES = {
 }
 
 
+# Only these statuses follow directly from committed data; a person assigned the others.
+COMPUTED_CRITERIA = {
+    "no unresolved ZNE validity issue in positive controls",
+    "selected cells already inconclusive in simulation",
+    "ZNE validity controls incomplete",
+}
+
+
 def paper_macros() -> dict[str, str]:
     """Read every generated paper value so the synthesis cannot drift from the paper."""
 
@@ -148,6 +156,10 @@ def readiness_criteria(manifest: pd.DataFrame) -> pd.DataFrame:
         ),
     ]
     frame = pd.DataFrame(rows, columns=["criterion_type", "criterion", "status", "evidence"])
+    frame["status_basis"] = frame.criterion.map(
+        lambda name: "computed_from_artifacts" if name in COMPUTED_CRITERIA else "review_judgment"
+    )
+    frame["decision_basis"] = "review_judgment"
     blocked = frame.loc[frame.criterion_type == "go", "status"].ne("met").any()
     triggered = frame.loc[frame.criterion_type == "no_go", "status"].eq("triggered").any()
     frame["decision"] = "no_go" if blocked or triggered else "go"
@@ -310,6 +322,8 @@ def project_summary(manifest: pd.DataFrame, criteria: pd.DataFrame) -> pd.DataFr
     ]
     frame = pd.DataFrame(rows, columns=["track", "metric", "value", "source"])
     frame["evidence_label"] = "noisy_simulated"
+    frame["claim_type"] = "computed"
+    frame.loc[frame.metric == "decision", "claim_type"] = "review_judgment"
     review = frame.track == "hardware_readiness"
     frame.loc[review, "evidence_label"] = "review_of_simulated_evidence"
     return frame
@@ -425,6 +439,9 @@ def evidence_matrix(criteria: pd.DataFrame) -> pd.DataFrame:
         ],
     )
     frame.insert(4, "hardware_evidence", "none")
+    frame["text_source"] = "manual_interpretation"
+    frame["numbers_source"] = "paper_macros"
+    frame.loc[frame.track == "Hardware readiness", "numbers_source"] = "review_judgment"
     return frame
 
 

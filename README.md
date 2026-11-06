@@ -137,6 +137,7 @@ $env:MPLCONFIGDIR = ".matplotlib-cache"
 .\.venv\Scripts\python.exe -m src.run_with_log src.final_synthesis
 tectonic paper/main.tex --outdir paper
 .\.venv\Scripts\python.exe -m src.run_with_log src.verify_final_project
+.\.venv\Scripts\python.exe -m src.run_with_log src.claim_ledger
 ```
 
 Verify committed deterministic outputs:
@@ -146,10 +147,14 @@ python -m src.verify_generated_artifacts --current
 python -m src.verify_generated_artifacts --phase-f
 python -m src.verify_generated_artifacts --include-expensive
 python -m src.verify_final_project
+python -m src.claim_ledger
 ```
 
 `src.verify_final_project` accounts for every manifest, recomputes the main summaries from raw rows,
 checks figures and the PDF, and writes `results/processed/final_verification_v1.csv`.
+`src.claim_ledger` recomputes the paper's printed values without importing project code. It writes
+[the claim ledger](results/processed/claim_ledger_v1.csv), which separates computed results from
+review judgments, manual interpretation, hypotheses, and limitations.
 
 The second command includes the approximately 35-minute width-scalability benchmark.
 Routine CI validates its committed schema and coverage through the test suite without

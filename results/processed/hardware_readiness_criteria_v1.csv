@@ -1,14 +1,14 @@
-criterion_type,criterion,status,evidence,decision
-go,stable local tests and CI,met,"CI is green from the QAOA ranking fix onward, and local tests pass",no_go
-go,frozen simulator predictions,partial,"values are frozen, but only for named simulator noise rather than a backend",no_go
-go,falsifiable hardware hypothesis,partial,five cells have falsifiers; calibration reuse depends on unknown drift direction,no_go
-go,declared execution budget,not_met,"none declared; plan needs 72,101,520 shots",no_go
-go,complete metadata capture,not_met,"fields are specified, but no provider dependency or capture code exists",no_go
-go,no unresolved ZNE validity issue in positive controls,not_met,"the positive control is credible at 16,384 shots but rejected at 4,096",no_go
-go,hardware can discriminate between explanations,not_met,"device noise cannot be set to the predicted conditions, and one backend confounds method, device, and drift",no_go
-no_go,hardware would only decorate the project,triggered,"without a budget and controls, results could not change a stated conclusion",no_go
-no_go,simulator prediction is not falsifiable,triggered,the calibration-reuse prediction assumes a drift direction hardware may not have,no_go
-no_go,required shot budget unavailable,triggered,no budget or access is declared,no_go
-no_go,calibration or drift cannot be documented,triggered,"no code records backend properties, calibration time, or queue time",no_go
-no_go,selected cells already inconclusive in simulation,triggered,decision_near_tie,no_go
-no_go,ZNE validity controls incomplete,triggered,3 of 5 proposed cells lack single-method ZNE assessment,no_go
+criterion_type,criterion,status,evidence,status_basis,decision_basis,decision
+go,stable local tests and CI,met,"CI is green from the QAOA ranking fix onward, and local tests pass",review_judgment,review_judgment,no_go
+go,frozen simulator predictions,partial,"values are frozen, but only for named simulator noise rather than a backend",review_judgment,review_judgment,no_go
+go,falsifiable hardware hypothesis,partial,five cells have falsifiers; calibration reuse depends on unknown drift direction,review_judgment,review_judgment,no_go
+go,declared execution budget,not_met,"none declared; plan needs 72,101,520 shots",review_judgment,review_judgment,no_go
+go,complete metadata capture,not_met,"fields are specified, but no provider dependency or capture code exists",review_judgment,review_judgment,no_go
+go,no unresolved ZNE validity issue in positive controls,not_met,"the positive control is credible at 16,384 shots but rejected at 4,096",computed_from_artifacts,review_judgment,no_go
+go,hardware can discriminate between explanations,not_met,"device noise cannot be set to the predicted conditions, and one backend confounds method, device, and drift",review_judgment,review_judgment,no_go
+no_go,hardware would only decorate the project,triggered,"without a budget and controls, results could not change a stated conclusion",review_judgment,review_judgment,no_go
+no_go,simulator prediction is not falsifiable,triggered,the calibration-reuse prediction assumes a drift direction hardware may not have,review_judgment,review_judgment,no_go
+no_go,required shot budget unavailable,triggered,no budget or access is declared,review_judgment,review_judgment,no_go
+no_go,calibration or drift cannot be documented,triggered,"no code records backend properties, calibration time, or queue time",review_judgment,review_judgment,no_go
+no_go,selected cells already inconclusive in simulation,triggered,decision_near_tie,computed_from_artifacts,review_judgment,no_go
+no_go,ZNE validity controls incomplete,triggered,3 of 5 proposed cells lack single-method ZNE assessment,computed_from_artifacts,review_judgment,no_go

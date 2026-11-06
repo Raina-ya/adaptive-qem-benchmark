@@ -69,6 +69,10 @@ submitted. See [the protocol](hardware_protocol.md) and [the review](hardware_re
 `src/verify_final_project.py` accounts for every manifest, recomputes the main summaries from raw
 rows at tolerance 1e-9, and checks figures and the PDF. `src/verify_generated_artifacts.py` compares
 regenerated artifacts with committed files at relative tolerance 1e-9 and absolute tolerance 1e-12.
+`src/claim_ledger.py` recomputes the printed values of computed claims without importing project
+code and labels each claim by type, source, scope, and verification tier. Definitions are in
+`experiments/configs/claim_ledger_v1.yaml`; results are in `results/processed/claim_ledger_v1.csv`,
+and `paper_number_provenance_v1.csv` traces every macro, generated table, and figure.
 
 ## Limitations
 

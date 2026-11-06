@@ -44,7 +44,10 @@ def test_evidence_matrix_has_the_required_shape_and_no_hardware_evidence() -> No
         "supported_finding",
         "unresolved_question",
         "limitation",
+        "text_source",
+        "numbers_source",
     ]
+    assert set(matrix.text_source) == {"manual_interpretation"}
     assert set(matrix.hardware_evidence) == {"none"}
     assert (matrix != "").all(axis=None)
 
@@ -58,6 +61,9 @@ def test_review_is_no_go_because_triggers_are_evaluated() -> None:
     assert len(criteria) - len(triggers) == 7
     committed = pd.read_csv(CRITERIA_PATH)
     assert list(committed.status) == list(criteria.status)
+    assert set(committed.decision_basis) == {"review_judgment"}
+    assert set(committed.status_basis) == {"computed_from_artifacts", "review_judgment"}
+    assert (committed.status_basis == "review_judgment").sum() == 10
 
 
 def test_final_summary_counts_selections_once_and_reports_no_jobs() -> None:
@@ -67,6 +73,7 @@ def test_final_summary_counts_selections_once_and_reports_no_jobs() -> None:
     assert summary.loc[("hardware_readiness", "jobs_submitted"), "value"] == "0"
     assert summary.loc[("hardware_readiness", "decision"), "value"] == "no_go"
     assert "hardware_derived" not in set(summary.evidence_label)
+    assert summary.loc[("hardware_readiness", "decision"), "claim_type"] == "review_judgment"
 
 
 def test_manifests_summaries_and_figures_account_for_all_rows() -> None:
