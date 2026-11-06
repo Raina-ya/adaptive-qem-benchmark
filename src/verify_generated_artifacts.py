@@ -38,6 +38,8 @@ GENERATORS = (
     "src.regime_labels_v2",
     "src.selector_audit",
     "src.reliability_envelopes",
+    "src.generate_paper_assets",
+    "src.generate_audit_paper_assets",
     "src.hardware_readiness",
     "src.final_synthesis",
     "src.verify_final_project",
@@ -45,11 +47,20 @@ GENERATORS = (
     "src.generate_audit_manifest",
 )
 EXPENSIVE_GENERATORS = (
+    "src.generate_decision_benchmark",
+    "src.generate_combined_qem",
     "src.generate_readout_scalability_benchmark",
     "src.generate_readout_mismatch_benchmark",
     "src.generate_qaoa_selection",
     "src.generate_selector_holdout_v2",
 )
+REGISTRY_PATH = (
+    Path(__file__).resolve().parents[1] / "experiments/configs/artifact_registry_v1.yaml"
+)
+# This generator treats an existing raw file as a checkpoint, so it must start without one.
+RESUMES_FROM_OUTPUT = {
+    "src.generate_decision_benchmark": "results/raw/decision_margin_benchmark_v1.csv",
+}
 PHASE_F_ARTIFACTS = {
     "experiments/manifests/qaoa_selection_v1_manifest.csv",
     "experiments/manifests/qaoa_selection_v1_manifest.sha256",
@@ -225,6 +236,12 @@ def _validate_pdf(path: Path, relative: str) -> list[str]:
     return failures
 
 
+def _canonical_text(path: Path) -> bytes:
+    """Ignore line endings only, since Git may check text out with CRLF on Windows."""
+
+    return path.read_bytes().replace(b"\r\n", b"\n")
+
+
 def compare_artifact_trees(
     reference_root: Path,
     candidate_root: Path,
@@ -273,7 +290,7 @@ def compare_artifact_trees(
                 ComparisonFailure(relative, f"regenerated {detail}")
                 for detail in _validate_pdf(candidate, relative)
             )
-        elif reference.read_bytes() != candidate.read_bytes():
+        elif _canonical_text(reference) != _canonical_text(candidate):
             failures.append(ComparisonFailure(relative, "binary or text content differs"))
     return failures
 
@@ -298,6 +315,66 @@ def _copy_run_logs(generated_root: Path, output: Path) -> None:
         shutil.copy2(path, output / path.name)
 
 
+def load_registry() -> dict[str, Any]:
+    return json.loads(REGISTRY_PATH.read_text(encoding="utf-8"))
+
+
+@dataclass(frozen=True)
+class ScopePlan:
+    """What one audit scope runs, removes first, and compares afterward."""
+
+    commands: tuple[tuple[str, ...], ...]
+    remove: frozenset[str]
+    compare: frozenset[str]
+
+
+def plan_scope(name: str, registry: dict[str, Any] | None = None) -> ScopePlan:
+    """Resolve a scope, keeping frozen inputs so they are never deleted or rebuilt."""
+
+    registry = load_registry() if registry is None else registry
+    scope = registry["scopes"][name]
+    generators = {item["module"]: item for item in registry["generators"]}
+    frozen = set(registry["frozen_inputs"])
+    fresh = [module for module in generators if module in scope["fresh"]]
+    missing = set(scope["fresh"]) - set(fresh)
+    if missing:
+        raise ValueError(f"Scope {name} names unregistered generators: {sorted(missing)}")
+    remove = {path for module in fresh for path in generators[module]["outputs"]} - frozen
+    post = list(scope["post_checks"])
+    compare = set(remove)
+    for module in post:
+        compare.update(generators[module]["outputs"])
+    commands = tuple(
+        (module, *generators[module]["args"]) for module in (*fresh, *post)
+    )
+    return ScopePlan(commands, frozenset(remove), frozenset(compare))
+
+
+def remove_outputs(root: Path, paths: frozenset[str]) -> None:
+    """Delete declared outputs so no generator can reuse a committed result."""
+
+    for relative in sorted(paths):
+        (root / relative).unlink(missing_ok=True)
+
+
+def _run_commands(
+    destination: Path, commands: tuple[tuple[str, ...], ...], run_log_output: Path | None
+) -> None:
+    environment = os.environ.copy()
+    environment.update({"MPLBACKEND": "Agg", "MPLCONFIGDIR": str(destination / ".mpl")})
+    try:
+        for command in commands:
+            subprocess.run(
+                [sys.executable, "-m", "src.run_with_log", *command],
+                cwd=destination,
+                env=environment,
+                check=True,
+            )
+    finally:
+        if run_log_output is not None:
+            _copy_run_logs(destination, run_log_output)
+
+
 def _regenerate(
     root: Path,
     destination: Path,
@@ -309,20 +386,45 @@ def _regenerate(
         ["git", "clone", "--quiet", "--no-hardlinks", str(root), str(destination)],
         check=True,
     )
-    environment = os.environ.copy()
-    environment.update({"MPLBACKEND": "Agg", "MPLCONFIGDIR": str(destination / ".mpl")})
-    try:
-        modules = (*GENERATORS, *EXPENSIVE_GENERATORS) if include_expensive else GENERATORS
-        for module in modules:
-            subprocess.run(
-                [sys.executable, "-m", "src.run_with_log", module],
-                cwd=destination,
-                env=environment,
-                check=True,
-            )
-    finally:
-        if run_log_output is not None:
-            _copy_run_logs(destination, run_log_output)
+    modules = (*GENERATORS, *EXPENSIVE_GENERATORS) if include_expensive else GENERATORS
+    for module in modules:
+        if module in RESUMES_FROM_OUTPUT:
+            (destination / RESUMES_FROM_OUTPUT[module]).unlink(missing_ok=True)
+    _run_commands(destination, tuple((module,) for module in modules), run_log_output)
+
+
+def _report(failures: list[ComparisonFailure]) -> int:
+    if failures:
+        for failure in failures:
+            print(f"FAIL {failure.path}: {failure.detail}")
+        print(f"Artifact verification failed with {len(failures)} difference(s).")
+        return 1
+    print(f"Artifact verification passed (rtol={RTOL:g}, atol={ATOL:g}).")
+    return 0
+
+
+def _run_scope(name: str, workdir: Path | None, logs: Path | None, dry_run: bool) -> int:
+    """Rebuild one scope from a clean clone, without any committed outputs to reuse."""
+
+    plan = plan_scope(name)
+    if dry_run:
+        for command in plan.commands:
+            print(" ".join(command))
+        print(f"remove={len(plan.remove)} compare={len(plan.compare)}")
+        return 0
+    root = Path(__file__).resolve().parents[1]
+    with tempfile.TemporaryDirectory(prefix="qem-artifact-scope-") as temporary:
+        temporary_root = Path(temporary)
+        reference = temporary_root / "reference"
+        reference.mkdir()
+        _extract_head(root, reference)
+        candidate = workdir if workdir is not None else temporary_root / "generated"
+        subprocess.run(
+            ["git", "clone", "--quiet", "--no-hardlinks", str(root), str(candidate)], check=True
+        )
+        remove_outputs(candidate, plan.remove)
+        _run_commands(candidate, plan.commands, logs)
+        return _report(compare_artifact_trees(reference, candidate, set(plan.compare)))
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -354,7 +456,27 @@ def main(argv: list[str] | None = None) -> int:
         action="store_true",
         help="Compare committed and current Phase F artifacts without regeneration",
     )
+    parser.add_argument(
+        "--scope",
+        help="Clone, delete this registry scope's outputs, regenerate them, and compare only them",
+    )
+    parser.add_argument(
+        "--workdir",
+        type=Path,
+        help="With --scope, keep the regenerated clone here for tests and the paper build",
+    )
+    parser.add_argument(
+        "--dry-run",
+        action="store_true",
+        help="With --scope, print the commands and file counts without running anything",
+    )
     parsed = parser.parse_args(argv)
+    if parsed.scope:
+        if parsed.current or parsed.phase_f or parsed.only_artifact or parsed.include_expensive:
+            parser.error("--scope cannot be combined with other comparison modes")
+        return _run_scope(parsed.scope, parsed.workdir, parsed.run_log_output, parsed.dry_run)
+    if parsed.workdir or parsed.dry_run:
+        parser.error("--workdir and --dry-run require --scope")
     if parsed.only_artifact and not parsed.current:
         parser.error("--only-artifact requires --current")
     if parsed.phase_f and (parsed.only_artifact or parsed.include_expensive):
@@ -385,13 +507,7 @@ def main(argv: list[str] | None = None) -> int:
             else None,
         )
 
-    if failures:
-        for failure in failures:
-            print(f"FAIL {failure.path}: {failure.detail}")
-        print(f"Artifact verification failed with {len(failures)} difference(s).")
-        return 1
-    print(f"Artifact verification passed (rtol={RTOL:g}, atol={ATOL:g}).")
-    return 0
+    return _report(failures)
 
 
 if __name__ == "__main__":

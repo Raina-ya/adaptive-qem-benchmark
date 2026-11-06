@@ -45,6 +45,10 @@ def test_comparator_regenerates_adaptive_extension() -> None:
     assert "src.final_synthesis" in GENERATORS
     assert "src.verify_final_project" in GENERATORS
     assert "src.claim_ledger" in GENERATORS
+    assert "src.generate_paper_assets" in GENERATORS
+    assert "src.generate_audit_paper_assets" in GENERATORS
+    assert "src.generate_combined_qem" in EXPENSIVE_GENERATORS
+    assert "src.generate_decision_benchmark" in EXPENSIVE_GENERATORS
     assert "src.generate_readout_scalability_benchmark" in EXPENSIVE_GENERATORS
     assert "src.generate_readout_mismatch_benchmark" in EXPENSIVE_GENERATORS
     assert "src.generate_qaoa_selection" in EXPENSIVE_GENERATORS

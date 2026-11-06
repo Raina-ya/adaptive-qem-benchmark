@@ -1,0 +1,643 @@
+{
+  "version": "artifact_registry_v1",
+  "runtime_machine": "development Windows desktop; other machines will differ",
+  "frozen_inputs": {
+    "experiments/manifests/qaoa_candidate_pool_v1.csv": "QAOA tied-energy ordering is platform dependent, so the committed pool is an input.",
+    "experiments/manifests/qaoa_selection_v1_manifest.csv": "Frozen with the candidate pool and checked by its SHA-256 file.",
+    "experiments/manifests/qaoa_selection_v1_manifest.sha256": "Frozen hash of the QAOA manifest.",
+    "experiments/manifests/selector_v2_holdout_manifest.csv": "Repository-precommitted manifest; the generator asserts that it is unchanged.",
+    "results/processed/day08_12_runtime.csv": "Measured wall-clock timings, which cannot be regenerated."
+  },
+  "auxiliary_not_regenerated": {
+    "results/raw/qaoa_selection_pilot_v1.csv": "Written only by --pilot, which the release audit does not run.",
+    "results/raw/qaoa_selection_smoke_v1.csv": "Written only by --smoke, which the release audit does not run."
+  },
+  "legacy_unreferenced": {
+    "paper/figures/rmse_by_noise.png": "No generator writes this file and the paper does not reference it.",
+    "paper/generated/failure_rows.tex": "No generator writes this file and the paper does not reference it.",
+    "paper/generated/noise_method_rows.tex": "No generator writes this file and the paper does not reference it.",
+    "paper/figures/bias_variance_tradeoff.png": "A hand copy that no generator writes and the paper does not reference.",
+    "paper/figures/day08_depth_vs_noise_factor.png": "A hand copy that no generator writes and the paper does not reference.",
+    "paper/figures/day09_zne_extrapolation_lambda-1-3-5.png": "A hand copy that no generator writes and the paper does not reference.",
+    "paper/figures/operating_regime_map.png": "A hand copy that no generator writes and the paper does not reference.",
+    "paper/figures/rmse_heatmap.png": "A hand copy that no generator writes and the paper does not reference.",
+    "paper/figures/selector_confusion_matrix.png": "A hand copy that no generator writes and the paper does not reference."
+  },
+  "scopes": {
+    "combined_decision": {
+      "fresh": [
+        "src.generate_decision_benchmark",
+        "src.generate_combined_qem"
+      ],
+      "post_checks": [
+        "src.verify_final_project",
+        "src.claim_ledger"
+      ]
+    },
+    "expensive": {
+      "fresh": [
+        "src.generate_readout_scalability_benchmark",
+        "src.generate_readout_mismatch_benchmark",
+        "src.generate_qaoa_selection",
+        "src.generate_selector_holdout_v2"
+      ],
+      "post_checks": [
+        "src.verify_final_project",
+        "src.claim_ledger"
+      ]
+    },
+    "paper": {
+      "fresh": [
+        "src.generate_paper_assets",
+        "src.generate_audit_paper_assets",
+        "src.hardware_readiness",
+        "src.final_synthesis"
+      ],
+      "post_checks": [
+        "src.verify_final_project",
+        "src.claim_ledger"
+      ]
+    },
+    "release": {
+      "fresh": [
+        "src.generate_artifacts",
+        "src.generate_days08_12",
+        "src.generate_nontrivial_benchmark",
+        "src.generate_adaptive_analysis",
+        "src.generate_decision_benchmark",
+        "src.generate_zne_probability_diagnostics",
+        "src.generate_zne_falsification",
+        "src.generate_zne_validity_gate",
+        "src.generate_combined_qem",
+        "src.readout_scalability_metrics",
+        "src.generate_readout_tensor_validation",
+        "src.generate_readout_subspace_validation",
+        "src.generate_readout_matrix_free_validation",
+        "src.generate_readout_scalability_benchmark",
+        "src.generate_readout_mismatch_benchmark",
+        "src.generate_qaoa_selection",
+        "src.calibration_drift",
+        "src.sequential_decision",
+        "src.regime_labels_v2",
+        "src.selector_audit",
+        "src.reliability_envelopes",
+        "src.generate_selector_holdout_v2",
+        "src.generate_runtime_report",
+        "src.generate_paper_assets",
+        "src.generate_audit_paper_assets",
+        "src.hardware_readiness",
+        "src.final_synthesis"
+      ],
+      "post_checks": [
+        "src.verify_final_project",
+        "src.claim_ledger",
+        "src.generate_audit_manifest"
+      ]
+    }
+  },
+  "generators": [
+    {
+      "module": "src.generate_artifacts",
+      "args": [],
+      "tier": "routine",
+      "configs": [],
+      "manifests": [],
+      "outputs": [
+        "figures/day02_bell_xx_estimate_distribution.png",
+        "figures/day05_error_vs_noise_by_family.png",
+        "figures/day07_readout_raw_vs_corrected.png",
+        "results/day02_bell_xx_shots-1024_seed-20261102.csv",
+        "results/day03_ghz_references_widths-2-4-6.csv",
+        "results/day04_he_references_w-2-4-6_d-1-3-6_seed-20261102.csv",
+        "results/day05_noise_response_bell_xx_shots-4096.csv",
+        "results/day06_unmitigated_shots-1024-4096-16384_repeats-30.csv",
+        "results/day07_readout_calibration_budget-4096_repeats-30.csv",
+        "results/day07_readout_mitigation_budget-4096_repeats-30.csv"
+      ]
+    },
+    {
+      "module": "src.generate_days08_12",
+      "args": [],
+      "tier": "release",
+      "configs": [
+        "experiments/configs/volumetric_v1.yaml"
+      ],
+      "manifests": [
+        "experiments/manifests/volumetric_v1_manifest.csv"
+      ],
+      "outputs": [
+        "experiments/manifests/volumetric_v1_manifest.csv",
+        "figures/day08_depth_vs_noise_factor.png",
+        "figures/day09_zne_extrapolation_lambda-1-3-5.png",
+        "figures/day11_pilot_rmse_heatmap.png",
+        "figures/day12_ghz_error_vs_noise.png",
+        "figures/rmse_heatmap.png",
+        "results/day08_fold_validation_lambda-1-3-5.csv",
+        "results/day09_method_validation_budget-4096_repeats-20.csv",
+        "results/processed/day11_pilot_audit.csv",
+        "results/processed/day12_ghz_coverage.csv",
+        "results/raw/day11_pilot_repeats-20.csv",
+        "results/raw/day12_ghz_volumetric_v1_repeats-50.csv"
+      ]
+    },
+    {
+      "module": "src.regenerate_readout_affected",
+      "args": [],
+      "tier": "routine",
+      "configs": [],
+      "manifests": [],
+      "outputs": []
+    },
+    {
+      "module": "src.generate_nontrivial_benchmark",
+      "args": [],
+      "tier": "routine",
+      "configs": [
+        "experiments/configs/hardware_efficient_v1.yaml",
+        "experiments/configs/holdout_v1.yaml"
+      ],
+      "manifests": [
+        "experiments/manifests/hardware_efficient_v1_manifest.csv",
+        "experiments/manifests/noise_shift_holdout_v1_manifest.csv"
+      ],
+      "outputs": [
+        "experiments/manifests/hardware_efficient_v1_manifest.csv",
+        "experiments/manifests/noise_shift_holdout_v1_manifest.csv",
+        "figures/hardware_efficient_error_vs_depth.png",
+        "results/processed/hardware_efficient_v1_coverage.csv",
+        "results/processed/noise_shift_holdout_v1_coverage.csv",
+        "results/raw/hardware_efficient_v1_repeats-50.csv",
+        "results/raw/noise_shift_holdout_v1_repeats-50.csv"
+      ],
+      "expected_runtime_seconds": 2550,
+      "runtime_source": "one complete run"
+    },
+    {
+      "module": "src.generate_adaptive_analysis",
+      "args": [],
+      "tier": "routine",
+      "configs": [],
+      "manifests": [],
+      "outputs": [
+        "figures/bias_variance_tradeoff.png",
+        "figures/core_v1_regime_map.png",
+        "figures/decision_error_probability.png",
+        "figures/operating_regime_map_v1.png",
+        "figures/overhead_vs_rmse_gain.png",
+        "figures/regret_under_noise_shift.png",
+        "figures/selector_confusion_matrix.png",
+        "figures/selector_rmse_regret.png",
+        "paper/generated/metrics.tex",
+        "results/processed/benchmark_summary_v1.csv",
+        "results/processed/core_v1_summary.csv",
+        "results/processed/decision_error_summary.csv",
+        "results/processed/noise_shift_regret.csv",
+        "results/processed/regime_labels_v1.csv",
+        "results/processed/selector_holdout_evaluation.csv",
+        "results/processed/selector_rule_design_predictions.csv"
+      ]
+    },
+    {
+      "module": "src.generate_decision_benchmark",
+      "args": [],
+      "tier": "expensive",
+      "configs": [
+        "experiments/configs/decision_benchmark_v1.yaml",
+        "experiments/configs/extended_benchmark_v1.yaml"
+      ],
+      "manifests": [
+        "experiments/manifests/decision_benchmark_v1_manifest.csv"
+      ],
+      "outputs": [
+        "experiments/manifests/decision_benchmark_v1_manifest.csv",
+        "figures/decision_margin_vs_error.png",
+        "figures/gap_variance_vs_margin.png",
+        "figures/rmse_vs_decision_error.png",
+        "figures/shared_vs_independent_decisions.png",
+        "results/processed/decision_margin_summary_v1.csv",
+        "results/processed/decision_unresolved_cells_v1.csv",
+        "results/raw/decision_margin_benchmark_v1.csv"
+      ],
+      "expected_runtime_seconds": 3498,
+      "runtime_source": "sum of the two longest checkpointed runs; the first stopped in plotting",
+      "expected_rows": {
+        "experiments/manifests/decision_benchmark_v1_manifest.csv": 28800,
+        "results/processed/decision_margin_summary_v1.csv": 288,
+        "results/processed/decision_unresolved_cells_v1.csv": 109,
+        "results/raw/decision_margin_benchmark_v1.csv": 28800
+      }
+    },
+    {
+      "module": "src.generate_zne_probability_diagnostics",
+      "args": [],
+      "tier": "routine",
+      "configs": [
+        "experiments/configs/zne_probability_diagnostics_v1.yaml"
+      ],
+      "manifests": [],
+      "outputs": [
+        "figures/zne_negative_mass_vs_gain.png",
+        "results/processed/zne_probability_diagnostics_v1.csv",
+        "results/raw/zne_probability_diagnostics_v1_repeats-50.csv"
+      ]
+    },
+    {
+      "module": "src.generate_zne_falsification",
+      "args": [],
+      "tier": "routine",
+      "configs": [
+        "experiments/configs/zne_falsification_v1.yaml"
+      ],
+      "manifests": [],
+      "outputs": [
+        "figures/zne_genuine_vs_garbage_folding.png",
+        "results/raw/zne_falsification_v1.csv"
+      ]
+    },
+    {
+      "module": "src.generate_zne_validity_gate",
+      "args": [],
+      "tier": "routine",
+      "configs": [],
+      "manifests": [],
+      "outputs": [
+        "figures/zne_signal_retention_map.png",
+        "results/processed/zne_validity_v1.csv"
+      ]
+    },
+    {
+      "module": "src.generate_combined_qem",
+      "args": [],
+      "tier": "expensive",
+      "configs": [
+        "experiments/configs/combined_qem_v1.yaml"
+      ],
+      "manifests": [
+        "experiments/manifests/combined_qem_v1_manifest.csv"
+      ],
+      "outputs": [
+        "experiments/manifests/combined_qem_v1_manifest.csv",
+        "figures/combined_decision_error.png",
+        "figures/combined_interaction_effect.png",
+        "figures/combined_overhead_vs_gain.png",
+        "results/processed/combined_qem_interactions_v1.csv",
+        "results/processed/combined_qem_summary_v1.csv",
+        "results/processed/combined_qem_validity_v1.csv",
+        "results/raw/combined_qem_v1.csv"
+      ],
+      "expected_runtime_seconds": 3845,
+      "runtime_source": "one run that wrote its data and then stopped in plotting",
+      "expected_rows": {
+        "experiments/manifests/combined_qem_v1_manifest.csv": 4800,
+        "results/processed/combined_qem_interactions_v1.csv": 24,
+        "results/processed/combined_qem_summary_v1.csv": 96,
+        "results/processed/combined_qem_validity_v1.csv": 16,
+        "results/raw/combined_qem_v1.csv": 5600
+      }
+    },
+    {
+      "module": "src.readout_scalability_metrics",
+      "args": [],
+      "tier": "routine",
+      "configs": [],
+      "manifests": [],
+      "outputs": [
+        "experiments/manifests/readout_scalability_v1_manifest.csv",
+        "results/processed/readout_scalability_reference_v1.csv"
+      ]
+    },
+    {
+      "module": "src.generate_readout_tensor_validation",
+      "args": [],
+      "tier": "routine",
+      "configs": [],
+      "manifests": [],
+      "outputs": [
+        "figures/readout_tensor_vs_full.png",
+        "results/processed/readout_tensor_validation_summary_v1.csv",
+        "results/raw/readout_tensor_validation_v1.csv"
+      ]
+    },
+    {
+      "module": "src.generate_readout_subspace_validation",
+      "args": [],
+      "tier": "routine",
+      "configs": [],
+      "manifests": [],
+      "outputs": [
+        "figures/readout_support_bias_tradeoff.png",
+        "results/processed/readout_subspace_validation_summary_v1.csv",
+        "results/raw/readout_subspace_validation_v1.csv"
+      ]
+    },
+    {
+      "module": "src.generate_readout_matrix_free_validation",
+      "args": [],
+      "tier": "routine",
+      "configs": [],
+      "manifests": [],
+      "outputs": [
+        "figures/readout_matrix_free_convergence.png",
+        "results/processed/readout_matrix_free_validation_summary_v1.csv",
+        "results/raw/readout_matrix_free_validation_v1.csv"
+      ]
+    },
+    {
+      "module": "src.generate_readout_scalability_benchmark",
+      "args": [],
+      "tier": "expensive",
+      "configs": [
+        "experiments/configs/readout_scalability_v1.yaml"
+      ],
+      "manifests": [
+        "experiments/manifests/readout_scalability_v1_manifest.csv"
+      ],
+      "outputs": [
+        "figures/readout_accuracy_vs_width.png",
+        "figures/readout_memory_vs_width.png",
+        "figures/readout_runtime_vs_support.png",
+        "figures/readout_uncertainty_amplification.png",
+        "results/processed/readout_scalability_summary_v1.csv",
+        "results/raw/readout_scalability_v1.csv"
+      ],
+      "expected_runtime_seconds": 2079,
+      "runtime_source": "one complete run",
+      "expected_rows": {
+        "results/processed/readout_scalability_summary_v1.csv": 192,
+        "results/raw/readout_scalability_v1.csv": 5760
+      }
+    },
+    {
+      "module": "src.generate_readout_mismatch_benchmark",
+      "args": [],
+      "tier": "expensive",
+      "configs": [
+        "experiments/configs/readout_scalability_v1.yaml"
+      ],
+      "manifests": [],
+      "outputs": [
+        "figures/readout_mismatch_accuracy.png",
+        "figures/readout_mismatch_bias_vs_sampling.png",
+        "figures/readout_mismatch_decision_error.png",
+        "results/processed/readout_mismatch_summary_v1.csv",
+        "results/raw/readout_mismatch_v1.csv"
+      ],
+      "expected_runtime_seconds": 190,
+      "runtime_source": "one complete run",
+      "expected_rows": {
+        "results/processed/readout_mismatch_summary_v1.csv": 192,
+        "results/raw/readout_mismatch_v1.csv": 9600
+      }
+    },
+    {
+      "module": "src.generate_qaoa_selection",
+      "args": [
+        "--full"
+      ],
+      "tier": "expensive",
+      "configs": [
+        "experiments/configs/qaoa_selection_v1.yaml"
+      ],
+      "manifests": [
+        "experiments/manifests/qaoa_candidate_pool_v1.csv",
+        "experiments/manifests/qaoa_selection_v1_manifest.csv"
+      ],
+      "outputs": [
+        "figures/qaoa_selection_error.png",
+        "figures/qaoa_shots_to_decision.png",
+        "figures/qaoa_simple_regret.png",
+        "results/processed/qaoa_selection_summary_v1.csv",
+        "results/raw/qaoa_selection_v1.csv"
+      ],
+      "expected_runtime_seconds": 1242,
+      "runtime_source": "one run that wrote its data and then stopped in plotting",
+      "expected_rows": {
+        "results/processed/qaoa_selection_summary_v1.csv": 48,
+        "results/raw/qaoa_selection_v1.csv": 4500
+      }
+    },
+    {
+      "module": "src.calibration_drift",
+      "args": [],
+      "tier": "routine",
+      "configs": [
+        "experiments/configs/calibration_lifetime_v1.yaml"
+      ],
+      "manifests": [],
+      "outputs": [
+        "figures/amortized_cost_vs_reliability.png",
+        "figures/calibration_age_vs_decision_error.png",
+        "results/raw/calibration_lifetime_v1.csv"
+      ]
+    },
+    {
+      "module": "src.sequential_decision",
+      "args": [],
+      "tier": "routine",
+      "configs": [
+        "experiments/configs/sequential_decision_v1.yaml"
+      ],
+      "manifests": [],
+      "outputs": [
+        "figures/certification_error_tradeoff.png",
+        "figures/shots_to_certification.png",
+        "results/processed/sequential_decision_summary_v1.csv",
+        "results/raw/sequential_decision_v1.csv"
+      ]
+    },
+    {
+      "module": "src.regime_labels_v2",
+      "args": [],
+      "tier": "routine",
+      "configs": [
+        "experiments/configs/selector_audit_v1.yaml"
+      ],
+      "manifests": [],
+      "outputs": [
+        "results/processed/regime_labels_v2.csv",
+        "results/processed/regime_v1_v2_comparison.csv",
+        "results/processed/selector_evaluation_v2.csv"
+      ]
+    },
+    {
+      "module": "src.selector_audit",
+      "args": [],
+      "tier": "routine",
+      "configs": [
+        "experiments/configs/selector_audit_v1.yaml"
+      ],
+      "manifests": [],
+      "outputs": [
+        "figures/selector_regret_categories.png",
+        "results/processed/selector_audit_summary_v1.csv",
+        "results/processed/selector_audit_v1.csv"
+      ]
+    },
+    {
+      "module": "src.reliability_envelopes",
+      "args": [],
+      "tier": "routine",
+      "configs": [
+        "experiments/configs/method_envelopes_v1.yaml"
+      ],
+      "manifests": [],
+      "outputs": [
+        "figures/method_reliability_envelopes.png",
+        "results/processed/method_envelope_cells_v1.csv",
+        "results/processed/method_envelope_level_validation_v1.csv",
+        "results/processed/method_envelope_validation_v1.csv",
+        "results/processed/method_reliability_envelopes_v1.csv",
+        "results/processed/selector_gate_stability_v1.csv"
+      ]
+    },
+    {
+      "module": "src.generate_selector_holdout_v2",
+      "args": [],
+      "tier": "expensive",
+      "configs": [
+        "experiments/configs/selector_v2.yaml"
+      ],
+      "manifests": [
+        "experiments/manifests/selector_v2_holdout_manifest.csv"
+      ],
+      "outputs": [
+        "results/processed/selector_v2_cells.csv",
+        "results/processed/selector_v2_summary.csv",
+        "results/raw/selector_holdout_v2.csv"
+      ],
+      "expected_runtime_seconds": 3059,
+      "runtime_source": "one complete run from a clean tree",
+      "expected_rows": {
+        "results/processed/selector_v2_cells.csv": 120,
+        "results/processed/selector_v2_summary.csv": 10,
+        "results/raw/selector_holdout_v2.csv": 24000
+      }
+    },
+    {
+      "module": "src.generate_runtime_report",
+      "args": [],
+      "tier": "release",
+      "configs": [],
+      "manifests": [],
+      "outputs": [
+        "docs/day08_12_runtime_report.pdf",
+        "figures/day08_12_runtime_breakdown.png",
+        "figures/day08_12_simulations_vs_time.png",
+        "results/processed/day08_12_runtime_summary.md"
+      ]
+    },
+    {
+      "module": "src.generate_paper_assets",
+      "args": [],
+      "tier": "routine",
+      "configs": [],
+      "manifests": [],
+      "outputs": [
+        "paper/figures/circuit_families.png",
+        "paper/figures/combined_decision_error.png",
+        "paper/figures/combined_interaction_effect.png",
+        "paper/figures/combined_overhead_vs_gain.png",
+        "paper/figures/decision_error_probability.png",
+        "paper/figures/operating_regime_map_v1.png",
+        "paper/figures/overhead_vs_rmse_gain.png",
+        "paper/figures/qaoa_selection_error.png",
+        "paper/figures/qaoa_shots_to_decision.png",
+        "paper/figures/qaoa_simple_regret.png",
+        "paper/figures/readout_mismatch_accuracy.png",
+        "paper/figures/readout_mismatch_bias_vs_sampling.png",
+        "paper/figures/readout_mismatch_decision_error.png",
+        "paper/figures/regret_under_noise_shift.png",
+        "paper/figures/selector_rmse_regret.png",
+        "paper/figures/zne_genuine_vs_garbage_folding.png",
+        "paper/figures/zne_signal_retention_map.png",
+        "paper/generated/adaptive_metrics.tex",
+        "paper/generated/adaptive_regime_rows.tex"
+      ]
+    },
+    {
+      "module": "src.generate_audit_paper_assets",
+      "args": [],
+      "tier": "routine",
+      "configs": [],
+      "manifests": [],
+      "outputs": [
+        "paper/figures/calibration_age_vs_decision_error.png",
+        "paper/figures/certification_error_tradeoff.png",
+        "paper/figures/operating_regime_map_v2.png",
+        "paper/figures/selector_regret_categories.png",
+        "paper/figures/shots_to_certification.png",
+        "paper/generated/audit_category_rows.tex",
+        "paper/generated/audit_metrics.tex",
+        "paper/generated/calibration_lifetime_rows.tex",
+        "paper/generated/envelope_rows.tex",
+        "paper/generated/regime_rows_v2.tex",
+        "paper/generated/selector_v2_rows.tex",
+        "paper/generated/sequential_rows.tex"
+      ]
+    },
+    {
+      "module": "src.hardware_readiness",
+      "args": [],
+      "tier": "routine",
+      "configs": [
+        "experiments/configs/hardware_readiness_v1.yaml"
+      ],
+      "manifests": [],
+      "outputs": [
+        "experiments/hardware/hardware_manifest_v1.csv"
+      ]
+    },
+    {
+      "module": "src.final_synthesis",
+      "args": [],
+      "tier": "routine",
+      "configs": [],
+      "manifests": [],
+      "outputs": [
+        "paper/generated/evidence_matrix_rows.tex",
+        "paper/generated/final_metrics.tex",
+        "paper/generated/hardware_cell_rows.tex",
+        "results/processed/final_evidence_matrix_v1.csv",
+        "results/processed/final_project_summary_v1.csv",
+        "results/processed/hardware_readiness_criteria_v1.csv"
+      ]
+    },
+    {
+      "module": "src.verify_final_project",
+      "args": [],
+      "tier": "routine",
+      "configs": [],
+      "manifests": [],
+      "outputs": [
+        "results/processed/final_verification_v1.csv"
+      ]
+    },
+    {
+      "module": "src.claim_ledger",
+      "args": [],
+      "tier": "routine",
+      "configs": [
+        "experiments/configs/claim_ledger_v1.yaml"
+      ],
+      "manifests": [],
+      "outputs": [
+        "results/processed/claim_audit_sample_v1.csv",
+        "results/processed/claim_coverage_summary_v1.csv",
+        "results/processed/claim_ledger_v1.csv",
+        "results/processed/derived_field_reconstruction_v1.csv",
+        "results/processed/label_bootstrap_sensitivity_v1.csv",
+        "results/processed/paper_number_provenance_v1.csv"
+      ]
+    },
+    {
+      "module": "src.generate_audit_manifest",
+      "args": [],
+      "tier": "routine",
+      "configs": [],
+      "manifests": [],
+      "outputs": [
+        "results/processed/day08_12_audit_manifest.csv"
+      ]
+    }
+  ]
+}

@@ -81,3 +81,17 @@ without reconstruction.
 The extended contract requires validity gates to be committed before outcomes are inspected, but the
 ZNE gate's numerical thresholds first appear with its results, so Git cannot show that this
 requirement was met. The validity checks were named in advance, but the numerical thresholds and the reported results first appeared together in the same repository state; therefore this is not an independently timestamped preregistration. Commit order proves repository publication order only.
+
+## Artifact provenance
+
+`results/processed/artifact_provenance_v1.csv` compares each registered output with its run logs.
+Most run logs came from trees with uncommitted changes. The committed combined-QEM and QAOA raw files
+match runs that wrote their data and later stopped in plotting. The decision raw file was assembled
+from checkpointed runs. The three combined-QEM summaries match no run log. These gaps are why a clean
+rebuild is required; see [the release checklist](release_checklist.md). Until it passes, these results
+are not shown to be reproducible from a clean clone.
+
+The tiers in that table describe how often an artifact is rebuilt, and many cheap artifacts have no
+run log. PNG files are only checked to be nonempty, so a rebuild does not verify plotted values. Six
+paper figure copies and three older tables and images have no generator and are not referenced by the
+paper; they are listed as legacy files.

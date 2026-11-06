@@ -71,7 +71,7 @@ near-tie cell is already inconclusive in simulation. See
 [the protocol](docs/hardware_protocol.md), and the
 [evidence matrix](results/processed/final_evidence_matrix_v1.csv).
 
-![Operating-regime map showing raw, readout, ZNE, and failed cells](paper/figures/operating_regime_map.png)
+![Operating-regime map with the corrected raw, tie, readout, ZNE, and inconclusive labels](paper/figures/operating_regime_map_v2.png)
 
 Read the full paper: **[Adaptive Quantum Error Mitigation Under Fixed Shot Budgets](paper/main.pdf)**
 
@@ -149,6 +149,10 @@ python -m src.verify_generated_artifacts --include-expensive
 python -m src.verify_final_project
 python -m src.claim_ledger
 ```
+
+To rebuild expensive results from a clean clone, follow [the release checklist](docs/release_checklist.md).
+`python -m src.artifact_provenance` checks the hash, generator, and row count of every generated
+artifact without running a simulation.
 
 `src.verify_final_project` accounts for every manifest, recomputes the main summaries from raw rows,
 checks figures and the PDF, and writes `results/processed/final_verification_v1.csv`.

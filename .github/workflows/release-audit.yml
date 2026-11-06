@@ -1,0 +1,73 @@
+name: Release audit
+
+on:
+  workflow_dispatch:
+    inputs:
+      scope:
+        description: "Registry scope to rebuild from a clean clone"
+        required: true
+        default: combined_decision
+        type: choice
+        options:
+          - combined_decision
+          - expensive
+          - release
+
+permissions:
+  contents: read
+
+env:
+  OPENBLAS_NUM_THREADS: "1"
+  OMP_NUM_THREADS: "1"
+  MKL_NUM_THREADS: "1"
+  PYTHONHASHSEED: "0"
+  MPLBACKEND: Agg
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 350
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install locked dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install --only-binary=:all: -r requirements-ci.txt
+      - name: Install LaTeX
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y texlive-latex-base texlive-latex-recommended texlive-latex-extra texlive-fonts-recommended
+      - name: Regenerate and compare from a clean clone
+        run: >
+          python -m src.verify_generated_artifacts
+          --scope "${{ inputs.scope }}"
+          --workdir "$RUNNER_TEMP/regenerated"
+          --run-log-output audit-logs
+      - name: Run tests in the regenerated tree
+        working-directory: ${{ runner.temp }}/regenerated
+        # Regenerated files legitimately differ in bytes, so the committed-hash check does not apply.
+        run: python -m pytest --deselect tests/test_artifact_provenance.py::test_committed_hashes_match_the_tree
+      - name: Build the paper from the regenerated tree
+        working-directory: ${{ runner.temp }}/regenerated/paper
+        run: |
+          pdflatex -interaction=nonstopmode -halt-on-error main.tex
+          bibtex main
+          pdflatex -interaction=nonstopmode -halt-on-error main.tex
+          pdflatex -interaction=nonstopmode -halt-on-error main.tex
+      - name: Validate the rebuilt paper
+        working-directory: ${{ runner.temp }}/regenerated
+        run: python -m src.verify_final_project
+      - name: Upload run logs and the rebuilt paper
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: release-audit-${{ inputs.scope }}
+          path: |
+            audit-logs/
+            ${{ runner.temp }}/regenerated/paper/main.pdf
+          retention-days: 90

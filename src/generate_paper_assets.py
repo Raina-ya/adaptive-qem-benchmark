@@ -212,6 +212,9 @@ def copy_repository_figures() -> None:
         "readout_mismatch_accuracy.png",
         "readout_mismatch_decision_error.png",
         "readout_mismatch_bias_vs_sampling.png",
+        "qaoa_selection_error.png",
+        "qaoa_shots_to_decision.png",
+        "qaoa_simple_regret.png",
     ):
         shutil.copyfile(ROOT / "figures" / name, FIGURES / name)
 
