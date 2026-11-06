@@ -146,7 +146,7 @@ def regime_macros() -> dict[str, object]:
 
 
 def selector_v2_macros() -> dict[str, object]:
-    """Return preregistered holdout values from the scored fresh grid."""
+    """Return repository-precommitted holdout values from the scored fresh grid."""
 
     cells = pd.read_csv(PROCESSED / "selector_v2_cells.csv")
     summary = pd.read_csv(PROCESSED / "selector_v2_summary.csv").set_index("criterion")

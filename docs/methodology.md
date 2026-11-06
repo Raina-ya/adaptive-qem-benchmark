@@ -3,7 +3,7 @@
 ## Scope
 
 This simulator-only benchmark compares raw estimation, full assignment-matrix readout
-mitigation, and preregistered linear ZNE under the same total shot budget. Evidence is
+mitigation, and repository-precommitted linear ZNE under the same total shot budget. Evidence is
 analytic or simulated; no result is hardware-derived.
 
 ## Circuit families and references
@@ -21,7 +21,7 @@ repeat rows. Mitigation gains use matched repeat IDs and 1,000 paired BCa bootst
 resamples. Decision-error probabilities use Wilson intervals. Negative gains remain
 visible.
 
-The cost-aware oracle minimizes RMSE plus a preregistered normalized execution penalty.
+The cost-aware oracle minimizes RMSE plus a documented normalized execution penalty.
 Cells may be practical ties or inconclusive. The selector may abstain and cannot inspect
 exact-reference error at inference time.
 
@@ -46,7 +46,7 @@ intermediate mixed channel, asymmetric readout, coherent over-rotation, and corr
 - **Sequential certification:** Bonferroni-corrected looks with Wilson, Hoeffding, and empirical
   Bernstein bounds. See [the protocol](sequential_decision_protocol.md).
 - **Calibration reuse:** recalibration policies under synthetic drift.
-- **Selector audit:** consequences of selector choices, then a preregistered runtime selector on a
+- **Selector audit:** consequences of selector choices, then a repository-precommitted runtime selector on a
   fresh grid. See [the protocol](selector_audit_protocol.md).
 
 ## Hardware readiness
@@ -64,6 +64,48 @@ submitted. See [the protocol](hardware_protocol.md) and [the review](hardware_re
 - Measured results are reported separately from hypotheses.
 - Simulator evidence is labeled separately from hardware evidence, of which there is none.
 
+## Claim types
+
+- `computed`: obtained deterministically from identified data and a documented calculation.
+- `manual_interpretation`: a human-written interpretation of computed evidence.
+- `hypothesis`: a possible explanation not established by the current evidence.
+- `limitation`: a documented boundary of the evidence.
+- `review_judgment`: a go/no-go, readiness, or scientific-review decision requiring human judgment.
+
+A manual interpretation explains results, whereas a review judgment makes a decision from evidence
+and stated criteria.
+
+## Evidence origin
+
+- `raw_recomputed`: the ledger calculates the metric from repeat rows. Any stored upstream field it
+  consumes is listed, and the claimed metric does not merely reuse a derived column.
+- `processed_recomputed`: the calculation reuses a processed artifact or a derived column it did not
+  reconstruct, even if that column is stored under `results/raw/`.
+- `manifest_derived`: the value depends on a manifest. This is valid for design, coverage, seed, and
+  planned-grid claims, but not for empirical performance.
+- `processed_only`: every input is a processed artifact.
+- `source_only_not_recomputed`: the source is located, but the value is not recomputed.
+
+A file under `results/raw/` is not necessarily a primitive observation. Fields such as `true_gain`,
+`decision_error`, `wrong_certified`, and `estimate` are derived. The ledger lists each one and states
+whether it was reconstructed, in `results/processed/derived_field_reconstruction_v1.csv`. Historical
+schemas stay as they are; future generators should separate primitive observations from derived
+metrics.
+
+## Terms for commitments
+
+- **Preregistered in the repository (repository-precommitted):** the protocol's commit precedes the
+  result artifacts. This covers the combined, QAOA, scalable-readout, runtime-selector, and volumetric
+  protocols and the decision margins. The 0.05 mismatch threshold first appears with its results.
+- **ZNE validity gate:** The validity checks were named in advance, but the numerical thresholds and the reported results first appeared together in the same repository state; therefore this is not an independently timestamped preregistration.
+- **Frozen repository rule:** a rule stored with its results and not changed afterward, without evidence
+  that it came first. This covers sequential analysis, calibration policy, and the first selector.
+- **Documented evaluation rule:** a rule written down without a claim about timing, such as the 0.005
+  practical threshold and cost penalty.
+
+"Frozen" alone means fixed in the repository, not timestamped before results. Commit order proves
+repository publication order only. It does not prove the wall-clock order of design or execution.
+
 ## Verification
 
 `src/verify_final_project.py` accounts for every manifest, recomputes the main summaries from raw
@@ -73,6 +115,12 @@ regenerated artifacts with committed files at relative tolerance 1e-9 and absolu
 code and labels each claim by type, source, scope, and verification tier. Definitions are in
 `experiments/configs/claim_ledger_v1.yaml`; results are in `results/processed/claim_ledger_v1.csv`,
 and `paper_number_provenance_v1.csv` traces every macro, generated table, and figure.
+
+Replacing the original BCa interval with a deterministic percentile-bootstrap sensitivity calculation
+did not change the 144 cell labels. The BCa result remains authoritative, no threshold or claim changed
+after this comparison, and it does not show independence from all statistical choices. The interval
+choice does change the raw-win basis (accuracy or cost only) in the two cells listed there, although
+the 40 and 37 totals stay the same. The comparison is in `results/processed/label_bootstrap_sensitivity_v1.csv`.
 
 ## Limitations
 

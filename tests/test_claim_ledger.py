@@ -46,7 +46,9 @@ def ledger() -> pd.DataFrame:
 def test_every_computed_claim_matches_the_printed_paper(ledger: pd.DataFrame) -> None:
     computed = ledger.loc[ledger.claim_type == "computed"]
     assert len(computed) >= 15
-    assert not computed.verification_status.eq("mismatch").any(), computed.mismatches.tolist()
+    matched = computed.verification_status.eq("matches_printed_value")
+    assert matched.all(), computed.mismatches.tolist()
+    assert computed.evidence_origin.isin(CONFIG["evidence_origins"]).all()
     assert computed.recomputed_values.str.len().gt(0).all()
 
 
@@ -69,6 +71,7 @@ def test_judgments_are_never_reported_as_computed(ledger: pd.DataFrame) -> None:
     judged = ledger.loc[ledger.claim_type != "computed"]
     assert judged.verification_status.str.startswith("not_computable_").all()
     assert judged.recomputed_values.eq("").all()
+    assert judged.evidence_origin.eq("not_applicable").all()
     assert len(ledger.loc[ledger.claim_type == "manual_interpretation"]) == 9
     decision = ledger.loc[ledger.claim_id == "R01"].iloc[0]
     assert decision.claim_type == "review_judgment"
@@ -111,16 +114,23 @@ def test_a_changed_raw_row_changes_the_recomputation(monkeypatch) -> None:
 
     def corrupted(name: str, columns: list[str]) -> pd.DataFrame:
         frame = original(name, columns)
-        return frame.assign(decision_error=True) if name.startswith("calibration") else frame
+        if name.startswith("calibration"):
+            return frame.assign(corrected_probability_one=0.0)
+        return frame
 
     monkeypatch.setattr(claim_ledger, "_raw", corrupted)
     assert RECOMPUTE["lifetime"]() != baseline
 
 
-def test_declared_audit_sample_is_repeatable_and_clean(ledger: pd.DataFrame) -> None:
+def test_declared_audit_keeps_its_seed_and_records_the_first_result(ledger: pd.DataFrame) -> None:
+    assert CONFIG["audit_seed"] == 20261106
     sample = audit_sample(ledger, int(CONFIG["audit_size"]), int(CONFIG["audit_seed"]))
-    assert len(sample) == 5
+    assert set(sample.claim_id) == {"C01", "C02", "C03", "C04", "C11"}
     assert sample.mismatches.eq("").all()
+    assert (sample.initial_audit_result == "raw").sum() == 3
+    assert (sample.initial_audit_result == "processed_artifacts").sum() == 2
+    assert sample.final_audit_result.eq("raw").all()
+    assert sample.audit_note.str.contains("not the initial one").all()
     committed = pd.read_csv(AUDIT_PATH, keep_default_na=False)
     assert list(committed.claim_id) == list(sample.claim_id)
 
@@ -145,3 +155,89 @@ def test_commit_hashes_exist_when_history_is_available() -> None:
                 check=False,
             )
             assert result.returncode == 0, commit
+
+
+def test_claims_named_in_the_review_have_the_required_origin(ledger: pd.DataFrame) -> None:
+    origin = ledger.set_index("claim_id").evidence_origin
+    assert origin["C14"] == "processed_only"
+    assert origin["C09"] == "manifest_derived"
+    assert origin["C15"] == "manifest_derived"
+    for claim_id in ("C05", "C13"):
+        assert origin[claim_id] == "processed_recomputed"
+    trace = ledger.set_index("claim_id").processed_input_trace
+    for claim_id in ("C05", "C09", "C13", "C14", "C15"):
+        assert trace[claim_id]
+
+
+def test_reused_derived_fields_cannot_be_called_raw_recomputed(ledger: pd.DataFrame) -> None:
+    """A claim whose named metric is a stored column must rebuild it to count as raw."""
+
+    primary_metrics = {
+        "C06": "validity_classification",
+        "C07": "validity_classification",
+        "C10": "certification_status",
+        "C05": "validity_classification",
+    }
+    rows = ledger.set_index("claim_id")
+    for claim_id, field in primary_metrics.items():
+        assert f"{field}:not_reconstructed" in rows.derived_fields[claim_id]
+        assert rows.evidence_origin[claim_id] != "raw_recomputed"
+    raw = ledger.loc[ledger.evidence_origin == "raw_recomputed"]
+    for name in ("decision_error", "wrong_certified", "true_gain"):
+        assert not raw.derived_fields.str.contains(f"{name}:not_reconstructed").any()
+
+
+def test_rebuilt_derived_fields_match_their_stored_columns() -> None:
+    table = claim_ledger.derived_field_table()
+    rebuilt = table.loc[table.status == "reconstructed"]
+    assert len(rebuilt) == 8
+    assert (rebuilt.rows_compared > 0).all()
+    assert rebuilt.rows_different.eq(0).all(), rebuilt.to_string()
+
+
+def test_bootstrap_comparison_is_labeled_as_sensitivity() -> None:
+    table = claim_ledger.label_sensitivity()
+    assert len(table) == 144
+    assert not table.label_changed.any()
+    assert set(table.analysis_role) == {"sensitivity_only_bca_is_authoritative"}
+    committed = pd.read_csv(claim_ledger.SENSITIVITY_PATH)
+    assert list(committed.percentile_label) == list(table.percentile_label)
+
+
+def test_coverage_summary_states_what_is_not_verified(ledger: pd.DataFrame) -> None:
+    summary = claim_ledger.coverage_summary(ledger, provenance_table(ledger))
+    values = dict(zip(summary.metric, summary.value, strict=True))
+    assert values["computed_claims_checked"] == 15
+    assert values["printed_numbers_checked"] == 140
+    assert values["generated_tables"] == 8
+    assert values["figures"] == 17
+    assert values["generated_tables_values_recomputed"] == 0
+    assert values["figures_values_recomputed"] == 0
+    assert values["paper_independently_verified_as_a_whole"] == "no"
+
+
+def test_tables_and_figures_are_not_marked_recomputed(ledger: pd.DataFrame) -> None:
+    table = provenance_table(ledger)
+    visual = table.loc[table.item_kind.isin(("generated_table", "figure"))]
+    assert visual.evidence_origin.eq("source_only_not_recomputed").all()
+    assert visual.source_located.all()
+    assert not visual.values_recomputed.any()
+
+
+ALLOWED_PREREGISTRATION = (
+    "preregistered in the repository",
+    "preregistration in the repository",
+    "not an independently timestamped preregistration",
+    "new preregistration",
+    "backend-specific preregistration",
+)
+
+
+def test_preregistration_language_is_qualified() -> None:
+    paths = [ROOT / "README.md", ROOT / "paper/main.tex"]
+    paths += sorted((ROOT / "docs").glob("*.md")) + sorted((ROOT / "paper/generated").glob("*.tex"))
+    for path in paths:
+        text = " ".join(path.read_text(encoding="utf-8").split()).lower()
+        for phrase in ALLOWED_PREREGISTRATION:
+            text = text.replace(phrase, "")
+        assert "preregist" not in text and "pre-regist" not in text, path.name

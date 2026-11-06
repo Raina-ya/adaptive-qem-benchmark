@@ -9,7 +9,7 @@
   simulation before finite-shot sampling.
 - **Estimated decision margin:** `estimate_A - estimate_B` for one repeat and method.
 - **Sign decision:** A choice determined by the sign of one reference or estimated
-  scalar. A zero estimate follows the preregistered tie rule rather than being
+  scalar. A zero estimate follows the documented tie rule rather than being
   silently counted as correct.
 - **Argmax decision:** Selection of the candidate with the largest estimated value.
   Candidate ordering and tie breaking are fixed before sampling.
@@ -38,14 +38,14 @@
 
 ## Operating regimes
 
-- **Practical tie:** Two or more methods differ by less than the preregistered
+- **Practical tie:** Two or more methods differ by less than the documented
   practical-effect threshold after cost accounting. A tie is not a unique winner.
 - **Abstention:** A selector output that declines to recommend a mitigation method
   because no method lies inside the frozen reliability conditions.
 - **Decision compatibility:** A selected method is compatible with an oracle outcome
-  when it is the unique oracle choice or belongs to the preregistered equivalent set
+  when it is the unique oracle choice or belongs to the documented equivalent set
   for a practical tie.
-- **Cost-aware utility:** A preregistered objective combining scientific error or
+- **Cost-aware utility:** A documented objective combining scientific error or
   decision loss with explicitly normalized execution overhead. Its formula and
   penalty cannot change after holdout inspection.
 

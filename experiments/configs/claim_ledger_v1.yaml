@@ -10,10 +10,10 @@
   "audit_seed": 20261106,
   "claim_types": [
     "computed",
-    "review_judgment",
     "manual_interpretation",
     "hypothesis",
-    "limitation"
+    "limitation",
+    "review_judgment"
   ],
   "claims": [
     {
@@ -37,7 +37,12 @@
         "SummaryRows",
         "HardwareFailures"
       ],
-      "literals": []
+      "literals": [],
+      "evidence_origin": "raw_recomputed",
+      "derived_fields": [
+        "status:stored_outcome"
+      ],
+      "processed_input_trace": ""
     },
     {
       "claim_id": "C02",
@@ -58,7 +63,13 @@
       "macros": [
         "NegativeGains"
       ],
-      "literals": []
+      "literals": [],
+      "evidence_origin": "raw_recomputed",
+      "derived_fields": [
+        "estimate:not_reconstructed",
+        "status:stored_outcome"
+      ],
+      "processed_input_trace": ""
     },
     {
       "claim_id": "C03",
@@ -75,7 +86,7 @@
       "figure_or_table": "Table regimes",
       "applicable_scope": "GHZ and fixed-seed hardware-efficient simulator circuits, widths 2-6, three budgets, 50 repeats; one hardware-efficient circuit per width and depth",
       "known_counterexample": "Raw wins no GHZ cell; every one of the 77 is hardware-efficient.",
-      "preregistered_before_result": "no_post_hoc_correction",
+      "preregistered_before_result": "post_hoc_correction_of_documented_rule",
       "commit_hash": "bc27411",
       "macros": [
         "VTwoPracticalTies",
@@ -93,7 +104,13 @@
           "value": "eight",
           "context": "Nine cells are inconclusive, eight because the 50-repeat completeness contract"
         }
-      ]
+      ],
+      "evidence_origin": "raw_recomputed",
+      "derived_fields": [
+        "estimate:not_reconstructed",
+        "total_circuit_executions:not_reconstructed"
+      ],
+      "processed_input_trace": ""
     },
     {
       "claim_id": "C04",
@@ -111,7 +128,7 @@
       "figure_or_table": "Table audit",
       "applicable_scope": "Frozen rule selector on 29 holdout, 36 shift, and 115 rule-design simulator cells; diagnostics are 50-repeat means",
       "known_counterexample": "On strong-signal cells the selector (28) has fewer harmful outcomes than always-raw (42).",
-      "preregistered_before_result": "process_claim_only",
+      "preregistered_before_result": "frozen_repository_rule",
       "commit_hash": "2d07ba8",
       "macros": [
         "HoldoutCells",
@@ -145,7 +162,15 @@
           "value": "180",
           "context": "than always-raw across all 180 evaluated cells"
         }
-      ]
+      ],
+      "evidence_origin": "raw_recomputed",
+      "derived_fields": [
+        "estimate:not_reconstructed",
+        "condition_number:not_reconstructed",
+        "fit_residual_sum_squares:not_reconstructed",
+        "folded_two_qubit_gate_count:not_reconstructed"
+      ],
+      "processed_input_trace": ""
     },
     {
       "claim_id": "C05",
@@ -162,14 +187,19 @@
       "metric_definition": "Count repeats in raw factor rows; count classifications from the processed diagnostics, whose classifier is not re-derived here.",
       "figure_or_table": "Results ZNE validity",
       "applicable_scope": "Bell and one hardware-efficient simulator circuit, 800 repeats",
-      "preregistered_before_result": "process_claim_only",
+      "preregistered_before_result": "frozen_repository_rule",
       "commit_hash": "b0fcb07",
       "macros": [
         "ZNEProbabilityRepeats",
         "ZNEUnstableRepeats",
         "ZNEDestroyedRepeats"
       ],
-      "literals": []
+      "literals": [],
+      "evidence_origin": "processed_recomputed",
+      "derived_fields": [
+        "validity_classification:not_reconstructed"
+      ],
+      "processed_input_trace": "zne_probability_diagnostics_v1.csv is generated from the raw factor rows by src/generate_zne_probability_diagnostics.py."
     },
     {
       "claim_id": "C06",
@@ -185,7 +215,7 @@
       "figure_or_table": "Figure ZNE validity; Table hardware",
       "applicable_scope": "Linear ZNE with folds 1, 3, 5 on bell_xx and one hardware-efficient width-2 circuit whose reference is 0.036; simulator noise only",
       "known_counterexample": "All 8 hardware-efficient cells are one weak-signal circuit, and 2 Bell rejections are zero-noise cells with no gain to validate.",
-      "preregistered_before_result": "partial_checks_named_before_thresholds",
+      "preregistered_before_result": "named_in_advance_thresholds_with_results",
       "commit_hash": "e4c80b3",
       "macros": [
         "ZNEValidityCells",
@@ -205,7 +235,17 @@
           "value": "rejected",
           "context": "but rejected at 4,096"
         }
-      ]
+      ],
+      "evidence_origin": "processed_recomputed",
+      "derived_fields": [
+        "true_gain:reconstructed",
+        "estimate:not_reconstructed",
+        "factor_estimates_json:not_reconstructed",
+        "validity_classification:not_reconstructed",
+        "signal_retention_json:not_reconstructed",
+        "negative_mass:not_reconstructed"
+      ],
+      "processed_input_trace": ""
     },
     {
       "claim_id": "C07",
@@ -221,7 +261,7 @@
       "figure_or_table": "Figures combined; Tables",
       "applicable_scope": "Six preregistered simulator cells, budgets 4,096 and 16,384, balanced and base-heavy allocation, 50 paired repeats; readout correction applied before extrapolation",
       "known_counterexample": "In decision cells, raw has lower RMSE than combined at 16,384 shots.",
-      "preregistered_before_result": "yes_by_commit_order",
+      "preregistered_before_result": "repository_precommitted",
       "commit_hash": "5125549",
       "macros": [
         "CombinedExpectationCells",
@@ -254,7 +294,20 @@
           "value": "5",
           "context": "and 5 for readout"
         }
-      ]
+      ],
+      "evidence_origin": "processed_recomputed",
+      "derived_fields": [
+        "signed_error:reconstructed",
+        "absolute_error:reconstructed",
+        "decision_error:reconstructed",
+        "estimate_a:not_reconstructed",
+        "true_gain:not_reconstructed",
+        "validity_classification:not_reconstructed",
+        "final_signal_retention:not_reconstructed",
+        "negative_mass:not_reconstructed",
+        "physical_overshoot:not_reconstructed"
+      ],
+      "processed_input_trace": ""
     },
     {
       "claim_id": "C08",
@@ -270,14 +323,20 @@
       "figure_or_table": "Figure mismatch",
       "applicable_scope": "One representative cell: width 6, broad output, 16,384 shots, a deliberately wrong synthetic calibration model",
       "known_counterexample": "The value is one worst-case cell and does not describe typical hardware.",
-      "preregistered_before_result": "yes_by_commit_order",
+      "preregistered_before_result": "protocol_precommitted_threshold_with_results",
       "commit_hash": "6ec15fb",
       "macros": [
         "MismatchRows",
         "MismatchDecisionMinimum",
         "MismatchDecisionMaximum"
       ],
-      "literals": []
+      "literals": [],
+      "evidence_origin": "raw_recomputed",
+      "derived_fields": [
+        "decision_error:reconstructed",
+        "corrected_estimate:not_reconstructed"
+      ],
+      "processed_input_trace": ""
     },
     {
       "claim_id": "C09",
@@ -304,7 +363,10 @@
           "value": "960",
           "context": "planned 960 repeats of correlated readout"
         }
-      ]
+      ],
+      "evidence_origin": "manifest_derived",
+      "derived_fields": [],
+      "processed_input_trace": "The manifest is a plan, not observations; raw rows only confirm that nothing was run."
     },
     {
       "claim_id": "C10",
@@ -320,7 +382,7 @@
       "figure_or_table": "QAOA figures",
       "applicable_scope": "Three MaxCut graphs (widths 4, 6, 8), five frozen p=1 candidates, three methods, two budgets, 50 repeats, one synthetic noise model",
       "known_counterexample": "The readout failures are width 8 with about 1.6 calibration shots per basis state at 4,096 shots.",
-      "preregistered_before_result": "yes_by_commit_order",
+      "preregistered_before_result": "repository_precommitted",
       "commit_hash": "aa8141a",
       "macros": [],
       "literals": [
@@ -449,7 +511,13 @@
           "value": "900",
           "context": "900 selection groups"
         }
-      ]
+      ],
+      "evidence_origin": "processed_recomputed",
+      "derived_fields": [
+        "corrected_or_extrapolated_estimate:not_reconstructed",
+        "certification_status:not_reconstructed"
+      ],
+      "processed_input_trace": ""
     },
     {
       "claim_id": "C11",
@@ -465,7 +533,7 @@
       "figure_or_table": "Sequential table and figures",
       "applicable_scope": "Two-candidate, two-qubit simulator decisions with one observable, 13 task-margin pairs, 100 repeats",
       "known_counterexample": "Certification cannot detect bias: the corrected rule certifies the wrong candidate under gate imbalance.",
-      "preregistered_before_result": "process_claim_only",
+      "preregistered_before_result": "frozen_repository_rule",
       "commit_hash": "3b1c2da",
       "macros": [
         "SequentialRows",
@@ -497,7 +565,15 @@
           "value": "2,000",
           "context": "after about 2,000 shots"
         }
-      ]
+      ],
+      "evidence_origin": "raw_recomputed",
+      "derived_fields": [
+        "wrong_certified:reconstructed",
+        "certified_choice:not_reconstructed",
+        "total_shots_used:not_reconstructed",
+        "status:stored_outcome"
+      ],
+      "processed_input_trace": ""
     },
     {
       "claim_id": "C12",
@@ -513,7 +589,7 @@
       "figure_or_table": "Table lifetime",
       "applicable_scope": "One-qubit threshold decision under four synthetic drift models, 100-decision workload, 30 repeats",
       "known_counterexample": "The 0.047 bidirectional control shows reuse can look safe when drift averages out.",
-      "preregistered_before_result": "process_claim_only",
+      "preregistered_before_result": "frozen_repository_rule",
       "commit_hash": "1f2c572",
       "macros": [
         "LifetimeRows",
@@ -523,7 +599,15 @@
         "NeverRandom",
         "TriggerShotSaving"
       ],
-      "literals": []
+      "literals": [],
+      "evidence_origin": "raw_recomputed",
+      "derived_fields": [
+        "decision_error:reconstructed",
+        "amortized_shots_per_decision:reconstructed",
+        "corrected_probability_one:not_reconstructed",
+        "workflow_total_shots:not_reconstructed"
+      ],
+      "processed_input_trace": ""
     },
     {
       "claim_id": "C13",
@@ -541,7 +625,7 @@
       "figure_or_table": "Table fresh",
       "applicable_scope": "120 fresh simulator cells: widths 3 and 5, depths 2 and 4, two replicates, six noise conditions, budgets 2,048 and 8,192",
       "known_counterexample": "The selector beats always-raw on decided-cell regret (0.0059 versus 0.0606).",
-      "preregistered_before_result": "yes_by_commit_order",
+      "preregistered_before_result": "repository_precommitted",
       "commit_hash": "993d948",
       "macros": [
         "VTwoCells",
@@ -584,7 +668,13 @@
           "value": "48",
           "context": "readout in 34 of 48"
         }
-      ]
+      ],
+      "evidence_origin": "processed_recomputed",
+      "derived_fields": [
+        "estimate:not_reconstructed",
+        "decision:not_reconstructed"
+      ],
+      "processed_input_trace": "References in selector_v2_cells.csv come from noiseless statevector simulation of the frozen circuits, not from raw rows."
     },
     {
       "claim_id": "C14",
@@ -634,7 +724,10 @@
           "value": "24--33",
           "context": "with rates of 24--33\\% in every adequately sampled"
         }
-      ]
+      ],
+      "evidence_origin": "processed_only",
+      "derived_fields": [],
+      "processed_input_trace": "method_envelope_cells_v1.csv and selector_gate_stability_v1.csv are generated from raw repeat rows by src/reliability_envelopes.py; this ledger does not repeat that step."
     },
     {
       "claim_id": "C15",
@@ -658,7 +751,12 @@
         "HardwareTotalShots",
         "HardwareNearTieShots"
       ],
-      "literals": []
+      "literals": [],
+      "evidence_origin": "manifest_derived",
+      "derived_fields": [
+        "signed_error:not_reconstructed"
+      ],
+      "processed_input_trace": "The total sums hardware_manifest_v1.csv, a planning estimate; the near-tie value reuses raw signed errors from the combined study."
     },
     {
       "claim_id": "R01",
@@ -869,7 +967,7 @@
     },
     {
       "claim_id": "L02",
-      "claim_text": "Commit order proves preregistration only for the combined, QAOA, scalable-readout, and runtime-selector studies. The ZNE gate thresholds, sequential rules, calibration rules, and first selector first appear with their results.",
+      "claim_text": "Commit order shows the combined, QAOA, scalable-readout, and runtime-selector protocols preceded their result artifacts. ZNE gate checks were named in advance, but its thresholds first appear with results; sequential, calibration, and first-selector rules are frozen repository rules. Commit order proves publication order only.",
       "claim_type": "limitation",
       "applicable_scope": "All studies in this repository",
       "figure_or_table": "Discussion hypotheses",
@@ -891,9 +989,9 @@
     },
     {
       "claim_id": "L04",
-      "claim_text": "Selector v2 references, stored ZNE classifications, envelope bins, and the hardware manifest are inputs to the ledger, not re-derived from raw rows.",
+      "claim_text": "No stored estimate is rebuilt from counts, and several stored classifications, intervals, references, and certification results are reused without reconstruction.",
       "claim_type": "limitation",
-      "applicable_scope": "Claims marked with processed inputs",
+      "applicable_scope": "Every computed claim that lists a derived field as not reconstructed",
       "figure_or_table": "",
       "preregistered_before_result": "not_applicable",
       "commit_hash": "",
@@ -913,5 +1011,20 @@
     }
   ],
   "bootstrap_seed": 20261106,
-  "bootstrap_resamples": 2000
+  "bootstrap_resamples": 2000,
+  "evidence_origins": [
+    "raw_recomputed",
+    "processed_recomputed",
+    "manifest_derived",
+    "processed_only",
+    "source_only_not_recomputed"
+  ],
+  "audit_initial_results": {
+    "C01": "raw",
+    "C02": "raw",
+    "C11": "raw",
+    "C03": "processed_artifacts",
+    "C04": "processed_artifacts"
+  },
+  "audit_note": "Original deterministic sample: 3/5 directly from raw data, 2/5 relied on processed artifacts. C03 and C04 were corrected without changing the seed or sampled claim IDs. Final audit 5/5 validates the corrected implementation, not the initial one."
 }

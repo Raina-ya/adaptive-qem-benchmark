@@ -24,7 +24,7 @@ it pairs the random streams at each folding factor. `independent_records` derive
 candidate-specific seeds. This is a common-random-number simulator design, not a
 claim that two incompatible hardware observables can always share physical shots.
 
-Regenerate the complete preregistered benchmark with:
+Regenerate the complete benchmark, whose margins were precommitted in the repository, with:
 
 ```powershell
 python -m src.run_with_log src.generate_decision_benchmark

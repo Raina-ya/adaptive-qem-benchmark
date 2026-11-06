@@ -14,14 +14,14 @@ analytic or simulator-derived.
 **Question:** Can a QEM method lower expectation RMSE while increasing downstream
 sign, argmax, or ranking error?
 
-**Falsifier:** Across preregistered margins, circuits, noise conditions, budgets, and
+**Falsifier:** Across repository-precommitted margins, circuits, noise conditions, budgets, and
 paired repeats, no method exhibits lower expectation RMSE and higher decision-error
 probability with uncertainty intervals that resolve the ordering.
 
 **Question:** Which exact decision margins remain unresolved under a fixed total shot
 budget?
 
-**Falsifier:** Every preregistered margin is resolved under every applicable method and
+**Falsifier:** Every repository-precommitted margin is resolved under every applicable method and
 budget according to the frozen uncertainty rule.
 
 **Status:** Not falsified in simulation. Lower RMSE does not ensure a better decision, and near-tie decision error for combined QEM is 0.26-0.48.
@@ -42,7 +42,7 @@ negative control.
 **Question:** Do readout mitigation and ZNE correct distinguishable error sources, or
 does their combination merely compound variance and execution overhead?
 
-**Falsifier:** The preregistered combined method never produces a resolved interaction
+**Falsifier:** The repository-precommitted combined method never produces a resolved interaction
 or practical gain beyond the better single method after charging all calibration and
 folded-circuit shots.
 

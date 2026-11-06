@@ -49,7 +49,7 @@ def test_paper_uses_corrected_results_and_defines_every_macro() -> None:
     assert r"\PracticalTies{}" not in PAPER
     assert "unseen synthetic noise" not in PAPER
     assert "outcomes are not reported here" not in PAPER
-    assert "Preregistered selector test" in PAPER
+    assert "Repository-precommitted selector test" in PAPER
     assert r"\input{generated/audit_metrics.tex}" in PAPER
     macros = _macros()
     used = set(re.findall(r"\\(VTwo\w+|Selector[A-Z]\w+|Null\w+|NearTie\w+|Biased\w+)\{\}", PAPER))

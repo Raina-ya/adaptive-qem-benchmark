@@ -190,7 +190,7 @@ evidence as earlier inspections, so holdout and noise-shift results are diagnost
 
 The rules in `experiments/configs/selector_v2.yaml` were designed from the inspected v1 grid,
 so that grid cannot test them. The configuration, code, and manifest were committed before the
-fresh grid ran. The commit order is the evidence of preregistration.
+fresh grid ran. The commit order is the evidence of preregistration in the repository.
 
 Each repeat spends 25% of its budget on a pilot: half on assignment calibration and half on
 target samples at folds 1 and 5. The selector sees only that repeat's pilot, never a reference,
@@ -221,7 +221,7 @@ The verdict requires all of the following. A failed criterion is reported, and n
 - **H3:** on decided cells, mean regret below full-budget always-raw and always-readout, with no
   more catastrophic cells than either.
 
-### Preregistered result: no-go
+### Result of the repository-precommitted test: no-go
 
 The rules, grid, and criteria were committed in `2a4eaca` before the fresh grid ran, and the
 run log records a clean tree at `fce5807`. All 24,000 rows completed within budget. No criterion

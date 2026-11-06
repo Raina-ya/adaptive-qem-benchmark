@@ -3,7 +3,7 @@
 ## Purpose
 
 This protocol separates an apparent numerical correction from ZNE evidence that
-survives preregistered falsification checks. It applies only to the declared
+survives the declared falsification checks. It applies only to the declared
 simulator cells. Passing it does not establish hardware validity.
 
 ## Evidence flow
@@ -30,7 +30,9 @@ For each condition, `credible` requires all of the following:
    `extrapolation_unstable`.
 
 The normal interval is `mean +/- 1.959963984540054 * sample_standard_error` over
-the 50 preregistered repeats. Thresholds are not adjusted after inspection.
+the 50 declared repeats. The thresholds have not changed since they were first committed.
+
+The validity checks were named in advance, but the numerical thresholds and the reported results first appeared together in the same repository state; therefore this is not an independently timestamped preregistration.
 
 ## Outputs and interpretation
 

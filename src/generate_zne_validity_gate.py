@@ -108,7 +108,7 @@ def _plot(frame: pd.DataFrame) -> None:
     axis.set_xticks(range(len(budgets)), budgets)
     axis.set_yticks(range(len(row_labels)), row_labels)
     axis.set(xlabel="Total shot budget", ylabel="Circuit and noise")
-    axis.set_title("ZNE credibility requires every preregistered validity check")
+    axis.set_title("ZNE credibility requires every declared validity check")
     for row_index, row_annotations in enumerate(annotations):
         for column_index, text in enumerate(row_annotations):
             axis.text(column_index, row_index, text, ha="center", va="center", fontsize=8)

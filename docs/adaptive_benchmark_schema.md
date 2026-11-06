@@ -18,7 +18,7 @@ sample variance, RMSE, execution overhead, mitigation diagnostics, and paired BC
 RMSE-gain intervals. Negative gains are retained.
 
 `regime_labels_v1.csv` stores cost-aware oracle labels. `practical_tie` means method
-differences are below the preregistered practical threshold; `inconclusive` means the
+differences are below the documented practical threshold; `inconclusive` means the
 50-repeat completeness requirement was not met.
 
 Selector evaluation rows distinguish strict label agreement from decision

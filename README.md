@@ -19,7 +19,7 @@ where noise moves estimates toward the reference.
 
 The frozen rule selector reached 41.4% decision compatibility on a deterministic 29-cell
 holdout and 50.0% under four synthetic noise shifts, with mean regret 0.0210 and 0.0081. These
-are diagnostic results, and always-readout had lower holdout regret (0.0077). A preregistered
+are diagnostic results, and always-readout had lower holdout regret (0.0077). A repository-precommitted
 runtime selector with charged pilot shots then failed all three frozen criteria on 120 cells of
 unseen circuits, a no-go result. Details are in
 [the selector audit](docs/selector_audit_protocol.md).
@@ -32,7 +32,7 @@ The hardware-efficient run retained 99 explicit readout failures, concentrated i
 width-6, low-shot, medium/high-noise cells. Negative mitigation gains are also kept:
 179 of 432 method summaries had worse RMSE than the raw estimator.
 
-A preregistered combined-QEM study compares raw, readout, ZNE, and readout-plus-ZNE
+A repository-precommitted combined-QEM study compares raw, readout, ZNE, and readout-plus-ZNE
 under the same 4,096- and 16,384-shot budgets. Combined QEM had the lowest expectation
 RMSE in 12 of 16 circuit/budget/allocation cells, but all 16 combined-ZNE validity
 assessments were rejected by at least one frozen negative-control criterion. On the
@@ -41,7 +41,7 @@ and did not consistently improve on readout mitigation. These simulated results 
 estimation gains, not credible universal ZNE behavior or improved decisions.
 
 The application case study asks whether those estimator changes improve a complete
-fixed-budget decision: selecting one of five preregistered $p=1$ QAOA candidates for
+fixed-budget decision: selecting one of five repository-precommitted $p=1$ QAOA candidates for
 each of three exact MaxCut instances. Exhaustive classical search fixes each graph's
 MaxCut optimum, while noiseless statevector simulation fixes candidate energies and
 ranks before noisy sampling. Clear rankings were always selected correctly, but
@@ -50,7 +50,7 @@ for readout among completed selections, and 0.36 for ZNE; at 16,384 shots it was
 0.17, 0.179, and 0.42. On the completed 4,096-shot ring and sparse strata, readout
 reduced energy RMSE but worsened top-1 selection relative to raw; its medium/dense
 stratum failed entirely. Only 2 of 828 completed selections met the
-preregistered simultaneous-interval certification rule. Thus lower energy RMSE did
+repository-precommitted simultaneous-interval certification rule. Thus lower energy RMSE did
 not reliably buy a better application decision.
 
 A sequential certification study then asked when a two-candidate decision can stop
@@ -226,7 +226,7 @@ It compares full, tensor-product, observed-subspace, and matrix-free correction 
 matched independent, asymmetric, pair-correlated, and deliberately mismatched
 calibration channels. All methods use the same 20/80 calibration/target budget split.
 For the representative width-6 broad-output, 16,384-shot cell, calibration mismatch
-raises expectation RMSE to 0.074--0.078 and the error probability of a preregistered
+raises expectation RMSE to 0.074--0.078 and the error probability of a documented
 0.05-margin threshold decision to 0.88--0.94. This is simulated evidence that reduced
 classical storage cannot compensate for a wrong calibration model; it is not a
 hardware-robustness claim.

@@ -104,7 +104,7 @@ half of `B`, raw sampling divides all shots across the five candidates. Readout
 mitigation spends 20% of the selection half on one assignment-matrix calibration
 shared by the five candidates, then divides the remainder across their target
 circuits. Linear ZNE divides the selection half first across candidates and then
-across preregistered fold factors 1, 3, and 5. The untouched final-evaluation half
+across repository-precommitted fold factors 1, 3, and 5. The untouched final-evaluation half
 remains reserved; it is not silently reused during selection.
 
 Raw and readout target circuits use a common-random-number seed derived without the
@@ -175,14 +175,14 @@ runtime, not calibration data, shot allocation, or the correction objective.
 Checkpoint standard errors use the empirical complete-cut variance for raw sampling.
 Readout checkpoint errors multiply that raw standard error by the assignment-matrix
 condition estimate, a deliberately conservative amplification bound. ZNE propagates
-the three independent factor-level empirical variances through the preregistered
+the three independent factor-level empirical variances through the repository-precommitted
 linear-intercept weights. These approximations are used only for stopping/certification;
 they do not alter the reported point estimates.
 
 ## Sampled-cut verification
 
 Every sampled computational-basis bitstring has a cut value that can be evaluated
-exactly by classical computation. For these small graphs, the preregistered exact
+exactly by classical computation. For these small graphs, the repository-precommitted exact
 success indicator is `best sampled cut == exact MaxCut optimum`. Complementary
 bitstrings represent the same cut and require no special quantum-side treatment.
 The additional approximate metric is the fraction of samples whose cut is at least

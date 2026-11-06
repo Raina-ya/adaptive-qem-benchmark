@@ -20,4 +20,5 @@ Rules are evaluated in this fixed order:
 8. Otherwise use raw estimation because no mitigation rule has sufficient evidence.
 
 `abstain` and `inconclusive` are first-class outcomes. Rule traces are stored with every
-prediction. The policy is frozen before holdout outcomes are generated.
+prediction. The policy is a frozen repository rule. Its rules and first holdout results appear in the same
+commit, so Git history cannot show that the rules came first.

@@ -20,7 +20,17 @@ CORRELATED_MODELS = ("pair_correlated", "calibration_mismatch")
 MISMATCH_MAX_WIDTH = 6
 PLANNED_NOT_EXECUTED = 960
 QAOA_CANDIDATES = 5
-REQUIRED_PDF_TEXT = ("Abstract", "Hardware readiness", "no-go", "References", "Reproducibility")
+REQUIRED_PDF_TEXT = (
+    "Abstract",
+    "Hardware readiness",
+    "no-go",
+    "References",
+    "Reproducibility",
+    "not an independently timestamped preregistration",
+    "publication order only",
+    "not independently verified",
+    "src.claim_ledger",
+)
 
 
 def _row(group: str, check: str, expected: object, observed: object, passed: bool) -> dict:

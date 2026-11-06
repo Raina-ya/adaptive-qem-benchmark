@@ -76,7 +76,7 @@ Every planned cell must finish as `complete`, `failed`, `not_applicable`, or
 
 The observed-subspace validation selects computational-basis states from noisy
 target counts using the frozen rule `count >= 2`. The selector never receives the
-exact expectation or reference distribution. A preregistered protected-state input
+exact expectation or reference distribution. A repository-precommitted protected-state input
 exists for decision-critical states and is covered by a regression test, but the v1
 validation does not add protected states. One calibration circuit is allocated per
 retained state within the same 20% calibration fraction used by full correction.

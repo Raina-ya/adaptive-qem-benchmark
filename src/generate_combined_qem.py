@@ -1,4 +1,4 @@
-"""Generate the preregistered combined readout-mitigation and ZNE study."""
+"""Generate the repository-precommitted combined readout-mitigation and ZNE study."""
 
 from __future__ import annotations
 

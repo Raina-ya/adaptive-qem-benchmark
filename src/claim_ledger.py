@@ -28,6 +28,10 @@ CONFIG_PATH = ROOT / "experiments/configs/claim_ledger_v1.yaml"
 LEDGER_PATH = PROCESSED / "claim_ledger_v1.csv"
 PROVENANCE_PATH = PROCESSED / "paper_number_provenance_v1.csv"
 AUDIT_PATH = PROCESSED / "claim_audit_sample_v1.csv"
+COVERAGE_PATH = PROCESSED / "claim_coverage_summary_v1.csv"
+DERIVED_PATH = PROCESSED / "derived_field_reconstruction_v1.csv"
+SENSITIVITY_PATH = PROCESSED / "label_bootstrap_sensitivity_v1.csv"
+REGENERATED_FIGURES = {"zne_signal_retention_map.png"}
 MACRO_FILES = {
     "adaptive_metrics.tex": "src/generate_paper_assets.py",
     "audit_metrics.tex": "src/generate_audit_paper_assets.py",
@@ -74,6 +78,7 @@ ADEQUATE_BIN = 10
 Z_95 = 1.959963984540054
 METHODS = ("raw", "readout", "zne")
 ROOT_SEED = 20261102
+SOURCE_ONLY = "source_only_not_recomputed"
 
 
 def _raw(name: str, columns: list[str]) -> pd.DataFrame:
@@ -524,6 +529,13 @@ def _gate_failures(
     return [name for name, passed in checks.items() if not passed]
 
 
+def rebuilt_true_gain(frame: pd.DataFrame) -> pd.Series:
+    """Rebuild true gain as baseline error minus extrapolated error."""
+
+    baseline = frame.factor_estimates_json.map(lambda item: float(json.loads(item)[0]))
+    return (baseline - frame.reference).abs() - (frame.estimate - frame.reference).abs()
+
+
 def zne_gate_table() -> pd.DataFrame:
     frame = _raw(
         "zne_falsification_v1",
@@ -534,12 +546,15 @@ def zne_gate_table() -> pd.DataFrame:
             "repeat",
             "method",
             "estimate",
+            "reference",
+            "factor_estimates_json",
             "true_gain",
             "negative_mass",
             "signal_retention_json",
             "validity_classification",
         ],
     )
+    frame = frame.assign(true_gain=rebuilt_true_gain(frame))
     rows = []
     keys = ["circuit_id", "noise", "total_shot_budget"]
     for values, group in frame.groupby(keys, sort=True):
@@ -598,6 +613,10 @@ def combined_rows() -> pd.DataFrame:
             "repeat",
             "status",
             "record_kind",
+            "estimate_a",
+            "reference_a",
+            "estimated_gap",
+            "exact_gap",
             "signed_error",
             "absolute_error",
             "decision_error",
@@ -612,16 +631,31 @@ def combined_rows() -> pd.DataFrame:
     ).rename(columns={"zne_validity_classification": "validity_classification"})
 
 
+def combined_errors(frame: pd.DataFrame) -> pd.DataFrame:
+    """Rebuild signed errors and decision errors from stored estimates and exact values."""
+
+    decision = frame.kind == "decision"
+    signed = (frame.estimated_gap - frame.exact_gap).where(
+        decision, frame.estimate_a - frame.reference_a
+    )
+    wrong = np.sign(frame.estimated_gap) != np.sign(frame.exact_gap)
+    return frame.assign(
+        rebuilt_signed=signed,
+        rebuilt_absolute=signed.abs(),
+        rebuilt_decision=wrong.where(decision, False).astype(bool),
+    )
+
+
 def claim_combined() -> dict[str, str]:
-    frame = combined_rows()
+    frame = combined_errors(combined_rows())
     primary = frame.loc[(frame.record_kind == "primary") & (frame.status == "complete")]
     keys = ["cell_id", "total_shot_budget", "allocation_policy"]
     expectation = primary.loc[primary.kind == "expectation"]
-    rmse = expectation.groupby([*keys, "method"]).signed_error.apply(_rmse).unstack("method")
+    rmse = expectation.groupby([*keys, "method"]).rebuilt_signed.apply(_rmse).unstack("method")
     near = primary.loc[(primary.cell_id == "decision_near_tie") & (primary.method == "combined")]
-    near_rates = near.groupby(keys).decision_error.apply(lambda item: item.astype(bool).mean())
+    near_rates = near.groupby(keys).rebuilt_decision.mean()
     pivot = primary.pivot_table(
-        index=[*keys, "repeat"], columns="method", values="absolute_error"
+        index=[*keys, "repeat"], columns="method", values="rebuilt_absolute"
     )
     interaction = pivot.combined - pivot.readout - pivot.zne + pivot.raw
     means = interaction.groupby(level=keys).mean()
@@ -663,6 +697,12 @@ def claim_combined() -> dict[str, str]:
     }
 
 
+def rebuilt_mismatch_decision(frame: pd.DataFrame) -> pd.Series:
+    estimated = np.sign(frame.corrected_estimate - frame.decision_threshold)
+    exact = np.sign(frame.reference - frame.decision_threshold)
+    return pd.Series(estimated != exact, index=frame.index)
+
+
 def claim_mismatch() -> dict[str, str]:
     frame = _raw(
         "readout_mismatch_v1",
@@ -673,9 +713,13 @@ def claim_mismatch() -> dict[str, str]:
             "total_shot_budget",
             "method",
             "status",
+            "corrected_estimate",
+            "reference",
+            "decision_threshold",
             "decision_error",
         ],
     )
+    frame = frame.assign(rebuilt_decision=rebuilt_mismatch_decision(frame))
     selected = frame.loc[
         (frame.width == 6)
         & (frame.distribution == "broad")
@@ -683,7 +727,7 @@ def claim_mismatch() -> dict[str, str]:
         & (frame.target_model == "calibration_mismatch")
         & (frame.status == "complete")
     ]
-    rates = selected.groupby("method").decision_error.apply(lambda item: item.astype(bool).mean())
+    rates = selected.groupby("method").rebuilt_decision.mean()
     return {
         "MismatchRows": _count(len(frame)),
         "MismatchDecisionMinimum": f"{rates.min():.2f}",
@@ -818,6 +862,7 @@ def sequential_rows() -> pd.DataFrame:
             "max_total_shots",
             "method",
             "policy",
+            "certified_choice",
             "wrong_certified",
             "total_shots_used",
             "status",
@@ -825,8 +870,16 @@ def sequential_rows() -> pd.DataFrame:
     )
 
 
+def rebuilt_wrong_certified(frame: pd.DataFrame) -> pd.Series:
+    """A certified choice is wrong if no winner exists or it is not candidate a."""
+
+    certified = frame.certified_choice.fillna("").isin(("a", "b"))
+    return certified & ((frame.certified_choice != "a") | (frame.margin == 0.0))
+
+
 def claim_sequential() -> dict[str, str]:
     raw = sequential_rows()
+    raw = raw.assign(wrong_certified=rebuilt_wrong_certified(raw))
     null = raw.loc[raw.margin == 0.0]
     rates = null.groupby(["method", "policy"]).wrong_certified.mean()
     wilson = rates.xs("wilson_stopping", level="policy")
@@ -868,6 +921,11 @@ def claim_sequential() -> dict[str, str]:
     }
 
 
+def rebuilt_lifetime_decision(frame: pd.DataFrame) -> pd.Series:
+    corrected = frame.corrected_probability_one > frame.decision_threshold
+    return corrected != (frame.true_probability_one > frame.decision_threshold)
+
+
 def claim_lifetime() -> dict[str, str]:
     raw = _raw(
         "calibration_lifetime_v1",
@@ -875,9 +933,17 @@ def claim_lifetime() -> dict[str, str]:
             "workload_length",
             "drift_model",
             "policy",
+            "true_probability_one",
+            "corrected_probability_one",
+            "decision_threshold",
             "decision_error",
+            "workflow_total_shots",
             "amortized_shots_per_decision",
         ],
+    )
+    raw = raw.assign(
+        decision_error=rebuilt_lifetime_decision(raw),
+        amortized_shots_per_decision=raw.workflow_total_shots / raw.workload_length,
     )
     workload = raw.loc[raw.workload_length == 100]
     never = workload.loc[workload.policy == "never"].groupby("drift_model").decision_error.mean()
@@ -1116,6 +1182,9 @@ def build_ledger() -> pd.DataFrame:
             "claim_type": claim["claim_type"],
             "source_raw_files": ";".join(claim.get("source_raw_files", [])),
             "source_processed_inputs": ";".join(claim.get("source_processed_inputs", [])),
+            "evidence_origin": claim.get("evidence_origin", "not_applicable"),
+            "derived_fields": ";".join(claim.get("derived_fields", [])),
+            "processed_input_trace": claim.get("processed_input_trace", ""),
             "processing_script": claim.get("processing_script", ""),
             "metric_definition": claim.get("metric_definition", ""),
             "figure_or_table": claim.get("figure_or_table", ""),
@@ -1126,14 +1195,7 @@ def build_ledger() -> pd.DataFrame:
         }
         if claim["claim_type"] == "computed":
             compared, mismatches = compare_claim(claim, macros, text, computed)
-            tier = (
-                "verified_from_raw"
-                if not claim.get("source_processed_inputs")
-                else "verified_with_processed_inputs"
-            )
-            if not claim.get("source_raw_files"):
-                tier = "verified_from_processed_only"
-            row["verification_status"] = "mismatch" if mismatches else tier
+            row["verification_status"] = "mismatch" if mismatches else "matches_printed_value"
             row["recomputed_values"] = "; ".join(compared)
             row["mismatches"] = "; ".join(mismatches)
         else:
@@ -1161,66 +1223,244 @@ def provenance_table(ledger: pd.DataFrame) -> pd.DataFrame:
         for macro in claim.get("macros", []):
             owner[macro] = claim["claim_id"]
     status = ledger.set_index("claim_id").verification_status
+    origin = ledger.set_index("claim_id").evidence_origin
     rows = []
     for file_name, script in MACRO_FILES.items():
         text = (GENERATED / file_name).read_text(encoding="utf-8")
         for name in re.findall(r"\\newcommand\{\\(\w+)\}", text):
             claim_id = owner.get(name, "")
+            computed = bool(claim_id) and origin[claim_id] != "not_applicable"
             rows.append(
-                {
-                    "item_kind": "macro",
-                    "item": name,
-                    "printed_value": macros[name],
-                    "used_in_paper": name in used,
-                    "generating_script": script,
-                    "generated_file": f"paper/generated/{file_name}",
-                    "source_data": "",
-                    "claim_id": claim_id,
-                    "verification_status": status[claim_id] if claim_id else "not_in_ledger",
-                }
+                _provenance_row(
+                    "macro",
+                    name,
+                    name in used,
+                    script,
+                    f"paper/generated/{file_name}",
+                    claim_id=claim_id,
+                    printed=macros[name],
+                    status=status[claim_id] if claim_id else "not_in_ledger",
+                    origin=origin[claim_id] if computed else SOURCE_ONLY,
+                    recomputed=computed,
+                )
             )
     source = PAPER_PATH.read_text(encoding="utf-8")
     for file_name, (script, data) in TABLE_SOURCES.items():
         rows.append(
-            {
-                "item_kind": "generated_table",
-                "item": file_name,
-                "printed_value": "",
-                "used_in_paper": f"generated/{file_name}" in source,
-                "generating_script": script,
-                "generated_file": f"paper/generated/{file_name}",
-                "source_data": data,
-                "claim_id": "",
-                "verification_status": "traced_not_recomputed",
-            }
+            _provenance_row(
+                "generated_table",
+                file_name,
+                f"generated/{file_name}" in source,
+                script,
+                f"paper/generated/{file_name}",
+                data=data,
+            )
         )
     scripts = {
         path.relative_to(ROOT).as_posix(): path.read_text(encoding="utf-8")
         for path in sorted((ROOT / "src").rglob("*.py"))
-        if path.name not in {"verify_generated_artifacts.py", "generate_paper_assets.py"}
-        and path.name != "generate_audit_paper_assets.py"
+        if path.name not in {"verify_generated_artifacts.py", "claim_ledger.py"}
     }
-    for figure in sorted(set(re.findall(r"\\includegraphics(?:\[[^\]]*\])?\{([^}]+)\}", source))):
+    figures = re.findall(r"\\includegraphics(?:\[[^\]]*\])?\{([^}]+)\}", source)
+    for figure in sorted(set(figures)):
         stem = Path(figure).stem
-        makers = [path for path, body in scripts.items() if stem in body]
-        if not makers:
-            for path in ("src/generate_paper_assets.py", "src/generate_audit_paper_assets.py"):
-                if stem in (ROOT / path).read_text(encoding="utf-8"):
-                    makers.append(path)
+        direct = [
+            path
+            for path, body in scripts.items()
+            if stem in body and not path.endswith("generate_paper_assets.py")
+        ]
+        makers = direct or [path for path, body in scripts.items() if stem in body]
+        rows.append(
+            _provenance_row(
+                "figure",
+                figure,
+                True,
+                ";".join(makers),
+                f"paper/figures/{figure}",
+                regenerated=figure in REGENERATED_FIGURES,
+                inspected=figure in REGENERATED_FIGURES,
+            )
+        )
+    return pd.DataFrame(rows)
+
+
+def _provenance_row(
+    kind: str,
+    item: str,
+    used: bool,
+    script: str,
+    generated: str,
+    *,
+    claim_id: str = "",
+    printed: str = "",
+    data: str = "",
+    status: str = "traced_not_recomputed",
+    origin: str = SOURCE_ONLY,
+    recomputed: bool = False,
+    regenerated: bool = False,
+    inspected: bool = False,
+) -> dict[str, object]:
+    visual = kind == "figure"
+    return {
+        "item_kind": kind,
+        "item": item,
+        "printed_value": printed,
+        "used_in_paper": used,
+        "generating_script": script,
+        "generated_file": generated,
+        "source_data": data,
+        "claim_id": claim_id,
+        "verification_status": status,
+        "evidence_origin": origin,
+        "source_located": bool(script),
+        "values_recomputed": recomputed,
+        "visual_artifact_regenerated": regenerated if visual else "not_applicable",
+        "visual_artifact_inspected": inspected if visual else "not_applicable",
+    }
+
+
+def derived_field_table() -> pd.DataFrame:
+    """Compare every rebuilt derived field with its stored column, and list the others."""
+
+    combined = combined_errors(combined_rows())
+    primary = combined.loc[(combined.record_kind == "primary") & (combined.status == "complete")]
+    decision = primary.loc[primary.kind == "decision"]
+    zne = _raw(
+        "zne_falsification_v1",
+        ["estimate", "reference", "factor_estimates_json", "true_gain"],
+    )
+    mismatch = _raw(
+        "readout_mismatch_v1",
+        ["status", "corrected_estimate", "reference", "decision_threshold", "decision_error"],
+    )
+    mismatch = mismatch.loc[mismatch.status == "complete"]
+    lifetime = _raw(
+        "calibration_lifetime_v1",
+        [
+            "workload_length",
+            "true_probability_one",
+            "corrected_probability_one",
+            "decision_threshold",
+            "decision_error",
+            "workflow_total_shots",
+            "amortized_shots_per_decision",
+        ],
+    )
+    sequential = sequential_rows()
+    checks = [
+        ("combined_qem_v1", "signed_error", primary.rebuilt_signed, primary.signed_error),
+        ("combined_qem_v1", "absolute_error", primary.rebuilt_absolute, primary.absolute_error),
+        ("combined_qem_v1", "decision_error", decision.rebuilt_decision, decision.decision_error),
+        ("zne_falsification_v1", "true_gain", rebuilt_true_gain(zne), zne.true_gain),
+        (
+            "readout_mismatch_v1",
+            "decision_error",
+            rebuilt_mismatch_decision(mismatch),
+            mismatch.decision_error,
+        ),
+        (
+            "calibration_lifetime_v1",
+            "decision_error",
+            rebuilt_lifetime_decision(lifetime),
+            lifetime.decision_error,
+        ),
+        (
+            "calibration_lifetime_v1",
+            "amortized_shots_per_decision",
+            lifetime.workflow_total_shots / lifetime.workload_length,
+            lifetime.amortized_shots_per_decision,
+        ),
+        (
+            "sequential_decision_v1",
+            "wrong_certified",
+            rebuilt_wrong_certified(sequential),
+            sequential.wrong_certified,
+        ),
+    ]
+    rows = []
+    for file_name, field, rebuilt, stored in checks:
+        left = pd.to_numeric(rebuilt.astype(float))
+        right = pd.to_numeric(stored.astype(float))
+        different = ~(np.isclose(left, right, rtol=1e-9, atol=1e-12) | (left.isna() & right.isna()))
         rows.append(
             {
-                "item_kind": "figure",
-                "item": figure,
-                "printed_value": "",
-                "used_in_paper": True,
-                "generating_script": ";".join(makers),
-                "generated_file": f"paper/figures/{figure}",
-                "source_data": "",
-                "claim_id": "",
-                "verification_status": "traced_not_recomputed",
+                "raw_file": file_name,
+                "field": field,
+                "status": "reconstructed",
+                "rows_compared": len(left),
+                "rows_different": int(different.sum()),
+            }
+        )
+    consumers: dict[str, list[str]] = {}
+    for claim in CONFIG["claims"]:
+        for item in claim.get("derived_fields", []):
+            if item.endswith(":not_reconstructed"):
+                consumers.setdefault(item.split(":")[0], []).append(claim["claim_id"])
+    for field, claim_ids in sorted(consumers.items()):
+        rows.append(
+            {
+                "raw_file": "used by " + ";".join(claim_ids),
+                "field": field,
+                "status": "not_reconstructed",
+                "rows_compared": 0,
+                "rows_different": 0,
             }
         )
     return pd.DataFrame(rows)
+
+
+def label_sensitivity() -> pd.DataFrame:
+    """Compare authoritative BCa labels with the percentile-bootstrap sensitivity labels."""
+
+    authority = pd.read_csv(PROCESSED / "regime_labels_v2.csv")
+    columns = [*CELL, "oracle_label", "raw_win_basis"]
+    merged = authority[columns].merge(benchmark_labels()[[*CELL, "label", "basis"]], on=CELL)
+    merged = merged.rename(columns={"oracle_label": "bca_label", "label": "percentile_label"})
+    merged["bca_raw_win_basis"] = merged.raw_win_basis.fillna("")
+    merged["percentile_raw_win_basis"] = merged.basis.where(merged.percentile_label == "raw", "")
+    merged["label_changed"] = merged.bca_label != merged.percentile_label
+    merged["analysis_role"] = "sensitivity_only_bca_is_authoritative"
+    return merged[
+        [
+            *CELL,
+            "bca_label",
+            "percentile_label",
+            "bca_raw_win_basis",
+            "percentile_raw_win_basis",
+            "label_changed",
+            "analysis_role",
+        ]
+    ]
+
+
+def coverage_summary(ledger: pd.DataFrame, provenance: pd.DataFrame) -> pd.DataFrame:
+    """State what has and has not been checked, with counts taken from the outputs."""
+
+    computed = ledger.loc[ledger.claim_type == "computed"]
+    printed = sum(
+        len(claim.get("macros", [])) + len(claim.get("literals", []))
+        for claim in CONFIG["claims"]
+        if claim["claim_type"] == "computed"
+    )
+    tables = provenance.loc[provenance.item_kind == "generated_table"]
+    figures = provenance.loc[provenance.item_kind == "figure"]
+    rows = [
+        ("computed_claims_checked", len(computed)),
+        ("printed_numbers_checked", printed),
+        ("printed_number_mismatches", int((computed.verification_status == "mismatch").sum())),
+        ("sampled_claims_final_raw_recomputed", int(CONFIG["audit_size"])),
+        ("sampled_claims_initial_raw_recomputed", 3),
+        ("generated_tables", len(tables)),
+        ("generated_tables_values_recomputed", int(tables.values_recomputed.sum())),
+        ("figures", len(figures)),
+        ("figures_values_recomputed", int(figures.values_recomputed.sum())),
+        ("figures_regenerated_in_this_audit", int(figures.visual_artifact_regenerated.sum())),
+        ("figures_inspected_in_this_audit", int(figures.visual_artifact_inspected.sum())),
+        ("paper_independently_verified_as_a_whole", "no"),
+    ]
+    for name in CONFIG["evidence_origins"]:
+        rows.append((f"computed_claims_{name}", int((computed.evidence_origin == name).sum())))
+    return pd.DataFrame(rows, columns=["metric", "value"])
 
 
 def audit_sample(ledger: pd.DataFrame, size: int, seed: int) -> pd.DataFrame:
@@ -1230,13 +1470,26 @@ def audit_sample(ledger: pd.DataFrame, size: int, seed: int) -> pd.DataFrame:
     chosen = random.Random(seed).sample(computed, size)
     columns = [
         "claim_id",
+        "initial_audit_result",
+        "final_audit_result",
+        "seed",
+        "evidence_origin",
         "verification_status",
         "source_raw_files",
         "source_processed_inputs",
+        "derived_fields",
         "recomputed_values",
         "mismatches",
+        "audit_note",
     ]
-    return ledger.set_index("claim_id").loc[chosen].reset_index()[columns]
+    sample = ledger.set_index("claim_id").loc[chosen].reset_index()
+    sample["initial_audit_result"] = sample.claim_id.map(CONFIG["audit_initial_results"])
+    sample["final_audit_result"] = sample.evidence_origin.map(
+        lambda origin: "raw" if origin == "raw_recomputed" else "not_raw"
+    )
+    sample["seed"] = seed
+    sample["audit_note"] = CONFIG["audit_note"]
+    return sample[columns]
 
 
 def main(argv: list[str] | None = None) -> None:
@@ -1246,7 +1499,11 @@ def main(argv: list[str] | None = None) -> None:
     arguments = parser.parse_args(argv)
     ledger = build_ledger()
     ledger.to_csv(LEDGER_PATH, index=False, lineterminator="\n")
-    provenance_table(ledger).to_csv(PROVENANCE_PATH, index=False, lineterminator="\n")
+    provenance = provenance_table(ledger)
+    provenance.to_csv(PROVENANCE_PATH, index=False, lineterminator="\n")
+    coverage_summary(ledger, provenance).to_csv(COVERAGE_PATH, index=False, lineterminator="\n")
+    derived_field_table().to_csv(DERIVED_PATH, index=False, lineterminator="\n")
+    label_sensitivity().to_csv(SENSITIVITY_PATH, index=False, lineterminator="\n")
     audit_sample(ledger, arguments.audit_size, arguments.audit_seed).to_csv(
         AUDIT_PATH, index=False, lineterminator="\n"
     )

@@ -32,16 +32,16 @@ A frozen, non-ML rule selector reaches \HoldoutCompatibilityVTwo{} decision
 compatibility on a \HoldoutCells{}-cell deterministic holdout and
 \ShiftCompatibilityVTwo{} under four synthetic noise shifts. A consequence audit shows
 that fixed policies match or beat it on several measures even before its diagnostic
-cost is charged. A preregistered runtime selector with charged pilot shots then fails all
+cost is charged. A repository-precommitted runtime selector with charged pilot shots then fails all
 three frozen criteria on \VTwoCells{} cells of unseen circuits, a no-go result.
 The benchmark retains \HardwareFailures{} explicit readout failures and
 \NegativeGains{} of \SummaryRows{} method summaries with negative RMSE gain.
-An additional preregistered ZNE validity gate accepts only \ZNECredibleCells{} of
+An additional ZNE validity gate accepts only \ZNECredibleCells{} of
 \ZNEValidityCells{} simulated circuit--noise--budget cells; none of the
 \ZNEHardwareCells{} tested hardware-efficient cells passes every check.
 In a separate factorial study, combined readout mitigation and ZNE has the lowest
 expectation RMSE in \CombinedExpectationWins{} of \CombinedExpectationCells{}
-preregistered conditions, yet all \CombinedValidityCells{} combined-ZNE conditions
+repository-precommitted conditions, yet all \CombinedValidityCells{} combined-ZNE conditions
 fail at least one frozen validity criterion. Its near-tie decision-error probability
 remains between \CombinedNearTieMinimum{} and \CombinedNearTieMaximum{}.
 In a fixed-budget MaxCut application, lower energy RMSE does not reliably improve
@@ -117,7 +117,7 @@ Raw estimation spends the full budget on the target. Readout mitigation allocate
 20\% to all $2^w$ calibration states and 80\% to the target. It solves a constrained
 assignment-matrix correction and reports ill-conditioning explicitly rather than
 silently inverting an unstable matrix \cite{bravyi2021}. Linear ZNE splits the same
-budget over global folds $\lambda\in\{1,3,5\}$ and uses the preregistered fit
+budget over global folds $\lambda\in\{1,3,5\}$ and uses the repository-precommitted fit
 \begin{equation}
 \widehat\mu(\lambda)=\beta_0+\beta_1\lambda,
 \qquad \widehat\mu_{\rm ZNE}=\beta_0,
@@ -141,7 +141,7 @@ contrast; it does not by itself establish a credible extrapolation mechanism.
 
 \subsection{ZNE validity and falsification}
 An extrapolate is not treated as credible merely because it moves toward the exact
-reference. A preregistered gate additionally requires retained signal at the largest
+reference. A documented gate additionally requires retained signal at the largest
 fold, physical expectation and signed-probability diagnostics, positive paired gain
 with uncertainty, a positive advantage over matched-cost garbage folding, and no
 excess of destroyed or unstable repeats. Garbage folding increases execution cost
@@ -151,7 +151,7 @@ rejected cells retain every failed criterion and are never converted into ZNE wi
 
 \subsection{Cost-aware labels and frozen selector}
 For each fully completed cell, the oracle combines RMSE with an execution-overhead
-penalty. Differences below the preregistered RMSE threshold 0.005 are labeled
+penalty. Differences below the documented RMSE threshold 0.005 are labeled
 \texttt{practical\_tie}; incomplete three-method comparisons are
 \texttt{inconclusive}. A deterministic hash split reserves at least 20\% of cells.
 The selector uses width, depth, declared noise regime, shots, calibration
@@ -186,7 +186,7 @@ rate of at least 80\%, and a Wilson lower bound of at least 50\%. Stability is t
 share of two-stage bootstrap resamples, over repeats and then cells, in which that level
 stays supported.
 
-\subsection{Preregistered runtime selector}
+\subsection{Repository-precommitted runtime selector}
 A second selector sees only one repeat's pilot, which spends 25\% of the budget on assignment
 calibration and on target samples at folds 1 and 5. It never receives a reference, a noise name,
 or another repeat. It returns \texttt{request\_more\_shots} if the fold-1 estimate is within two
@@ -269,7 +269,7 @@ stress tests, not calibrated device models. Every manifest row has a raw row wit
 status \texttt{complete}, \texttt{failed}, or \texttt{not\_applicable}; no failed
 cell is silently dropped.
 
-The combined study preregisters six diagnostic cells: readout-dominated,
+The combined study precommits six diagnostic cells in the repository: readout-dominated,
 gate-noise-dominated, practical-tie, ZNE-invalid, 0.02-margin decision, and
 0.20-margin decision conditions. It crosses budgets 4,096 and 16,384, both frozen
 allocation policies, four factorial methods, and 50 paired repeats. Matched-cost
@@ -287,8 +287,8 @@ The sequential study uses 13 task--margin pairs, up to four noise levels, budget
 \SequentialRows{} rows. A symmetric task has equal circuit depth; the imbalanced tasks
 give candidates depths 6 and 1, or four times the readout error on one candidate, so
 bias can reverse the noisy ordering. Shots are sampled from exact channel probabilities,
-checked against an Aer density-matrix simulation. Alpha, batch size, and grids were
-written before the full grid was generated, and no threshold was tuned. The calibration
+checked against an Aer density-matrix simulation. Alpha, batch size, and grids are
+frozen repository rules committed together with the results. The calibration
 study has workloads of 1, 5, 20, and 100 decisions, four drift models, four policies, and
 30 repeats, for \LifetimeRows{} decision rows.
 
@@ -343,7 +343,7 @@ negative gains remain visible rather than being clipped or filtered.}
 
 \subsection{ZNE validity under negative controls}
 The probability-level diagnostic contains \ZNEProbabilityRepeats{} simulated
-repeat records across \ZNEValidityCells{} preregistered cells. Of these,
+repeat records across \ZNEValidityCells{} declared cells. Of these,
 \ZNEUnstableRepeats{} repeats are classified as extrapolation-unstable and
 \ZNEDestroyedRepeats{} as signal-destroyed. The cell-level validity gate accepts
 \ZNECredibleCells{} cells and rejects \ZNERejectedCells{}. All
@@ -356,7 +356,7 @@ than broadens the evidence for linear ZNE.
 \centering
 \includegraphics[width=\columnwidth]{zne_genuine_vs_garbage_folding.png}
 \caption{Matched-cost garbage folding separates an apparent correction from a
-unitary-equivalent ZNE effect; only cells passing the full preregistered gate are
+unitary-equivalent ZNE effect; only cells passing the full gate are
 reported as credible.}
 \label{fig:zne-control}
 \end{figure}
@@ -372,7 +372,7 @@ despite some favorable individual diagnostics.}
 
 \subsection{Combined QEM under one budget}
 Combined mitigation has the lowest expectation RMSE in
-\CombinedExpectationWins{} of \CombinedExpectationCells{} preregistered
+\CombinedExpectationWins{} of \CombinedExpectationCells{} repository-precommitted
 circuit--budget--allocation conditions. This descriptive win count is insufficient
 for a mechanism claim: combined RMSE gain versus raw ranges from negative to
 positive, and additional execution burden does not guarantee improvement
@@ -398,7 +398,7 @@ estimator outcomes rather than validated ZNE effects.
 \begin{figure}[t]
 \centering
 \includegraphics[width=\columnwidth]{combined_interaction_effect.png}
-\caption{Paired factorial interactions change sign across preregistered cells,
+\caption{Paired factorial interactions change sign across repository-precommitted cells,
 budgets, and allocations; many intervals cross zero, rejecting a universal synergy
 claim.}
 \label{fig:combined-interaction}
@@ -476,7 +476,7 @@ ZNE fit residual does not discriminate, with rates of 24--33\% in every adequate
 bin, and the selector's residual limits are never reached. Three cells flip across the
 condition-number gate of 8 under repeat resampling, with means of 7.87, 8.10, and 8.16.
 
-\subsection{Preregistered selector test}
+\subsection{Repository-precommitted selector test}
 All three criteria fail, so the runtime selector is a no-go. For H1, \VTwoReliableCells{} of
 \VTwoDecidedCells{} decided cells are reliable (\VTwoHOneRate{}, lower bound \VTwoHOneLow{}). For
 H2, \VTwoAvoidedCells{} of \VTwoNoSafeCells{} no-safe cells avoid a failure (\VTwoHTwoRate{},
@@ -742,7 +742,7 @@ Raw wins most cells, largely where the reference is near zero, some cells favor 
 ZNE, and low-shot readout calibration can fail explicitly. The frozen rule selector is
 reproducible and explainable, but it does not clearly beat fixed policies even without being
 charged for its diagnostics, so it is a baseline for further study rather than a successful
-adaptive policy. A preregistered runtime selector also fails on unseen circuits, so simple fixed
+adaptive policy. A repository-precommitted runtime selector also fails on unseen circuits, so simple fixed
 policies remain the reference that any adaptive rule must beat. The strongest supported
 conclusion is operational: mitigation should be compared with raw estimation under
 equal resource accounting, with ties, negative gains, abstention, and failed ZNE
@@ -773,11 +773,10 @@ estimator performance and mechanism validity: lower RMSE can coexist with reject
 ZNE diagnostics and unresolved near-tie decisions.
 
 \subsection{Hypotheses and limitations}
-Commit order proves preregistration only for the combined, QAOA, scalable-readout, and runtime-selector
-studies. The ZNE gate's checks were named before its results, but its numeric thresholds first appear
-with them, and the sequential and calibration rules also first appear with their results.
-The selector's freeze before holdout evaluation is likewise a process claim: its rules and first results
-appeared in one commit, so version history alone cannot prove the order. We found no evidence of
+The combined, QAOA, scalable-readout, and runtime-selector protocols are preregistered in the repository:
+their commits precede the result artifacts. The validity checks were named in advance, but the numerical thresholds and the reported results first appeared together in the same repository state; therefore this is not an independently timestamped preregistration. The sequential and calibration studies and the first selector use frozen repository
+rules that first appear with their results; the first selector's rules and results share one commit. Commit
+order proves repository publication order only, not the wall-clock order of design or execution. We found no evidence of
 tuning, but the corrected analysis is not an independent test. The later runtime-selector test
 has that independence for its own rules, but it covers one design, and its H2 fallback may be too
 lenient for sign decisions near zero, a hypothesis that needs a new preregistration.
@@ -793,7 +792,7 @@ same seed family and simulator implementation bound generalization. No ML select
 is trained. The hardware-efficient grid has one circuit per width and depth, so width and depth
 effects are confounded with specific angles, and reliability ranges are marginal values on a
 coarse grid that must not be interpolated or extrapolated. The combined study covers
-only six preregistered cells, two budgets, and two allocation policies; it does not
+only six repository-precommitted cells, two budgets, and two allocation policies; it does not
 compare extrapolate-then-correct ordering or establish that readout and gate errors
 are separable on hardware.
 The scalable-readout mismatch study is limited to synthetic disjoint pair flips,
@@ -869,6 +868,11 @@ Tests check analytic references, statevector agreement, folding equivalence, sho
 accounting, deterministic seeds, manifest coverage, metric recomputation, and the
 holdout boundary. \texttt{src.verify\_final\_project} recomputes the main summaries from raw rows
 at tolerance $10^{-9}$, accounts for every manifest, and checks figures and this document.
-\texttt{src.claim\_ledger} separately recomputes the printed values of computed claims, shares no
-code with the generators, and labels review judgments, manual interpretation, hypotheses, and limitations.
+\texttt{src.claim\_ledger} separately checks 15 computed claims and 140 printed numbers without
+importing project code, and labels computed results, manual interpretation, hypotheses, limitations,
+and review judgments. Five deterministic sampled claims are recomputed from repeat rows after a
+correction to the audit implementation. Eight tables and seventeen figures have source provenance but
+have not all been independently recomputed, so the paper as a whole is not independently verified.
+Replacing the original BCa interval with a deterministic percentile-bootstrap sensitivity calculation
+did not change the 144 cell labels.
 \end{document}

@@ -29,3 +29,7 @@ pdf,contains Hardware readiness,True,True,True
 pdf,contains no-go,True,True,True
 pdf,contains References,True,True,True
 pdf,contains Reproducibility,True,True,True
+pdf,contains not an independently timestamped preregistration,True,True,True
+pdf,contains publication order only,True,True,True
+pdf,contains not independently verified,True,True,True
+pdf,contains src.claim_ledger,True,True,True

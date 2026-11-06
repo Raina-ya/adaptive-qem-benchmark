@@ -6,7 +6,7 @@ This contract governs the decision-reliability, ZNE-validity, combined-mitigatio
 readout-scalability, and hardware-readiness extensions. It does not retroactively
 change existing raw data or authorize hardware execution.
 
-## Preregistration boundary
+## Repository precommitment boundary
 
 Experiment grids, exact-reference construction, tie policies, uncertainty methods,
 practical-effect thresholds, cost penalties, validity gates, and holdout partitions
@@ -47,7 +47,7 @@ resource columns; one cannot substitute silently for another.
 - A decision is `unresolved` when its frozen gap interval crosses zero.
 - A unique exact optimum with an estimated zero margin follows the configured error
   tie policy.
-- Practical RMSE differences below `0.005` remain ties unless a later preregistered
+- Practical RMSE differences below `0.005` remain ties unless a later repository-precommitted
   metric defines a separate practical threshold.
 
 Intervals quantify finite sampling or finite repeats; they do not correct model
@@ -58,7 +58,7 @@ misspecification.
 Factor-level observations at every noise scale remain available. Apparent gain and
 validated gain are separate outputs. No ZNE result may support a mitigation-success
 claim until an observable-specific floor and signal-retention assessment exist and
-the result passes the preregistered physical-bound, uncertainty, and matched-cost
+the result passes the declared physical-bound, uncertainty, and matched-cost
 negative-control checks. Invalid, unstable, or unphysical extrapolates remain in raw
 data with an explicit status.
 
