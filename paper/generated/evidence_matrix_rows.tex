@@ -1,0 +1,10 @@
+Expectation accuracy & Y & Y & Y & -- & No universal winner: 77 raw, 26 ties, 18 readout, 14 ZNE. & Which method wins when the signal is strong and the circuit is new? & Raw wins are mostly near-zero references; one circuit per width and depth. \\
+Decision reliability & Y & Y & Y & -- & Lower RMSE does not ensure a better decision; near-tie error is 0.26-0.48 for combined QEM. & How does this extend beyond two candidates? & Controlled margins on small circuits. \\
+ZNE validity & Y & Y & Y & -- & Apparent gain is not validated gain: 5 of 16 cells pass, none hardware-efficient. & Does the gate hold for other circuits and fits? & Two circuits, linear fit, and folds 1, 3, and 5. \\
+Combined mitigation & -- & Y & Y & -- & Lowest RMSE in 12 of 16 conditions, yet all 16 validity checks fail. & Are readout and gate errors separable on a device? & Six cells, two budgets, two allocations, higher overhead. \\
+Readout scalability & Y & Y & Y & -- & Lower memory is not robustness: mismatch error reaches 0.88-0.94. & How large is real correlated readout error? & Synthetic channels; correction amplifies sampling spread. \\
+Application case study & Y & Y & Y & -- & Lower energy RMSE does not imply better selection; 2 of 828 completed selections certify. & Does this hold for other graphs and depths? & Three graphs, five frozen candidates, and p=1. \\
+Calibration drift & -- & -- & Y & -- & Triggered recalibration saves about 40\% of shots with similar error; never recalibrating reaches 0.386 under abrupt drift. & What drift does a real device show? & Directed synthetic stress; not a physical lifetime. \\
+Sequential certification & Y & Y & Y & -- & Corrected looks keep false certification at or below 2.7\%, versus up to 24.9\% for peeking; bias is not detected. & How can bias be detected before certifying? & Two-qubit circuits, one observable, conservative bounds. \\
+Hardware readiness & -- & -- & Y & -- & Review decision: no-go. No job was submitted. & Can a backend-specific, powered, controlled protocol be justified? & Predictions depend on simulator noise; no backend data. \\
+\bottomrule

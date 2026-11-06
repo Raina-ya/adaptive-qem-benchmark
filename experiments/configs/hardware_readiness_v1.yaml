@@ -1,0 +1,120 @@
+{
+  "version": "hardware_readiness_v1",
+  "evidence_label": "noisy_simulated",
+  "simulator_only": true,
+  "hardware_execution_authorized": false,
+  "jobs_submitted": 0,
+  "reference_budget": 16384,
+  "reference_allocation": "balanced",
+  "planned_repeats": 50,
+  "alpha": 0.05,
+  "power": 0.8,
+  "decision_error_tolerance": 0.2,
+  "calibration_reuse": {
+    "workload_length": 100,
+    "repeats": 30
+  },
+  "required_metadata": [
+    "provider",
+    "backend",
+    "job_id",
+    "submission_time",
+    "execution_time",
+    "calibration_timestamp",
+    "backend_properties",
+    "qubit_mapping",
+    "transpiler_version",
+    "transpiler_seed",
+    "optimization_level",
+    "physical_circuit_depth",
+    "one_qubit_gate_count",
+    "two_qubit_gate_count",
+    "shots",
+    "noise_factors",
+    "mitigation_method",
+    "calibration_circuits",
+    "queue_time",
+    "failure_status"
+  ],
+  "cells": [
+    {
+      "cell_id": "readout_stable",
+      "role": "stable readout-dominated cell",
+      "source_cell": "readout_dominated",
+      "circuit": "ghz_w2",
+      "observable": "XX",
+      "reference_noise": "high",
+      "zne_validity_source": [
+        "bell_xx",
+        "high"
+      ],
+      "hypothesis": "Readout correction has lower absolute error than raw estimation on this circuit.",
+      "falsifier": "The 95% paired interval for readout-minus-raw absolute-error gain is at or below zero.",
+      "needs_garbage_control": false
+    },
+    {
+      "cell_id": "zne_positive_control",
+      "role": "potential ZNE-valid cell",
+      "source_cell": "practical_tie",
+      "circuit": "ghz_w2",
+      "observable": "XX",
+      "reference_noise": "low",
+      "zne_validity_source": [
+        "bell_xx",
+        "low"
+      ],
+      "hypothesis": "Linear ZNE passes the frozen validity gate on this shallow stabilizer circuit.",
+      "falsifier": "Any frozen gate check fails, including the matched-cost garbage-folding control.",
+      "needs_garbage_control": true
+    },
+    {
+      "cell_id": "zne_signal_risk",
+      "role": "ZNE signal-destruction risk cell",
+      "source_cell": "gate_noise_dominated",
+      "circuit": "he_w4_d3",
+      "observable": "XZXZ",
+      "reference_noise": "medium",
+      "zne_validity_source": null,
+      "hypothesis": "Apparent ZNE gain on this deeper circuit does not pass the frozen validity gate.",
+      "falsifier": "Every frozen gate check passes, including a positive garbage-folding advantage.",
+      "needs_garbage_control": true
+    },
+    {
+      "cell_id": "decision_near_tie",
+      "role": "near-tie decision",
+      "source_cell": "decision_near_tie",
+      "circuit": "controlled_margin_002",
+      "observable": "ZI",
+      "reference_noise": "medium",
+      "zne_validity_source": null,
+      "hypothesis": "No method reaches a decision-error upper bound of 0.20 at this budget.",
+      "falsifier": "Any method has a Wilson upper bound for decision error at or below 0.20.",
+      "needs_garbage_control": false
+    },
+    {
+      "cell_id": "decision_clear",
+      "role": "clear-margin decision",
+      "source_cell": "decision_larger_margin",
+      "circuit": "controlled_margin_020",
+      "observable": "ZI",
+      "reference_noise": "medium",
+      "zne_validity_source": null,
+      "hypothesis": "Every method resolves this decision at this budget.",
+      "falsifier": "Any method has a Wilson lower bound for decision error above 0.20.",
+      "needs_garbage_control": false
+    },
+    {
+      "cell_id": "calibration_reuse",
+      "role": "calibration-reuse test",
+      "source_cell": null,
+      "circuit": "one_qubit_threshold",
+      "observable": "Z",
+      "reference_noise": "slow_monotonic",
+      "zne_validity_source": null,
+      "hypothesis": "Decision error rises with calibration age when calibration is never refreshed.",
+      "falsifier": "Decision error does not rise with age while measured drift is present.",
+      "needs_garbage_control": false
+    }
+  ],
+  "scope_boundary": "predictions are conditional on the named simulator noise; no job is submitted in this phase"
+}

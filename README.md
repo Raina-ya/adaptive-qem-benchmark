@@ -63,6 +63,14 @@ differed between candidates (high noise, margin 0.05), raw certified the wrong w
 in every repeat after about 2,000 shots. Details are in
 [the protocol](docs/sequential_decision_protocol.md).
 
+A hardware readiness review of six candidate cells ended in a documented **no-go**, and no job was
+submitted. Only one of seven go requirements is fully met and all six no-go triggers apply: the plan
+would need about 72.1 million shots with no declared budget, no code captures device metadata, and a
+near-tie cell is already inconclusive in simulation. See
+[the review](docs/hardware_readiness_review.md),
+[the protocol](docs/hardware_protocol.md), and the
+[evidence matrix](results/processed/final_evidence_matrix_v1.csv).
+
 ![Operating-regime map showing raw, readout, ZNE, and failed cells](paper/figures/operating_regime_map.png)
 
 Read the full paper: **[Adaptive Quantum Error Mitigation Under Fixed Shot Budgets](paper/main.pdf)**
@@ -125,7 +133,10 @@ $env:MPLCONFIGDIR = ".matplotlib-cache"
 .\.venv\Scripts\python.exe -m src.run_with_log src.reliability_envelopes
 .\.venv\Scripts\python.exe -m src.run_with_log src.generate_selector_holdout_v2
 .\.venv\Scripts\python.exe -m src.run_with_log src.generate_audit_paper_assets
+.\.venv\Scripts\python.exe -m src.run_with_log src.hardware_readiness
+.\.venv\Scripts\python.exe -m src.run_with_log src.final_synthesis
 tectonic paper/main.tex --outdir paper
+.\.venv\Scripts\python.exe -m src.run_with_log src.verify_final_project
 ```
 
 Verify committed deterministic outputs:
@@ -134,7 +145,11 @@ Verify committed deterministic outputs:
 python -m src.verify_generated_artifacts --current
 python -m src.verify_generated_artifacts --phase-f
 python -m src.verify_generated_artifacts --include-expensive
+python -m src.verify_final_project
 ```
+
+`src.verify_final_project` accounts for every manifest, recomputes the main summaries from raw rows,
+checks figures and the PDF, and writes `results/processed/final_verification_v1.csv`.
 
 The second command includes the approximately 35-minute width-scalability benchmark.
 Routine CI validates its committed schema and coverage through the test suite without
@@ -156,8 +171,10 @@ ls results/runs/
 
 ## Limitations
 
-This is a simulator-only benchmark. It does not model device drift, leakage,
-relaxation, calibrated hardware noise, or calibration uncertainty. The structured
+This is a simulator-only benchmark. It does not model measured device drift, leakage,
+relaxation, or calibrated hardware noise. Further detail is in
+[the limitations](docs/limitations.md), including 960 planned correlated-readout repeats at widths
+8-12 that were not run. The structured
 noise-shift study adds asymmetric readout, coherent over-rotation, and correlated-ZZ
 controls, but these remain synthetic models. Declared GHZ depths 3 and 6 remain
 `not_applicable`; hardware-efficient circuits supply the nontrivial depth grid.
@@ -178,8 +195,7 @@ noisy target counts with a frozen minimum count of two. All 2,480 rows completed
 their declared shot budgets. Mean retained support fell to 22.6% at width 8 and 8.3%
 at width 10 for sparse outputs, while expectation RMSE increased with width. The
 result demonstrates a classical memory reduction, not a quantum-shot saving, and
-does not establish robustness to broad or correlated-error cases. Correlated-mismatch
-outcomes are not yet available.
+does not establish robustness to broad or correlated-error cases.
 
 The matrix-free validation applies tensor-factorized assignment operators without
 forming a support-square matrix. All 1,280 planned rows converged with exact shot
@@ -187,7 +203,7 @@ accounting and zero materialized matrix entries; observed iterations rose from a
 width-2 mean of 23.3 to a width-10 mean of 94.6. This validates deterministic solver
 behavior for independent and asymmetric local readout models. It does not establish
 an advantage under correlated errors, and the length-`2**w` working vector remains
-exponential. Correlated-mismatch outcomes are not yet available.
+exponential.
 
 The unified width-2--12 scalability benchmark contains 5,760 repeat-level rows. Full
 matrix correction completes 1,242 rows, fails 38 width-8 repeats as ill-conditioned,
@@ -225,7 +241,7 @@ or quantum hardware.
 ```text
 src/                         Benchmark and mitigation implementations
 tests/                       Analytic, statistical, and reproducibility invariants
-experiments/                 Frozen configuration and manifest
+experiments/                 Frozen configurations, manifests, and proposed hardware cells
 results/raw/                 Immutable repeat-level benchmark rows
 results/processed/           Coverage and runtime summaries
 results/runs/                Per-run generation metadata and output hashes

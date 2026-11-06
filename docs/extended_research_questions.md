@@ -24,6 +24,8 @@ budget?
 **Falsifier:** Every preregistered margin is resolved under every applicable method and
 budget according to the frozen uncertainty rule.
 
+**Status:** Not falsified in simulation. Lower RMSE does not ensure a better decision, and near-tie decision error for combined QEM is 0.26-0.48.
+
 ### ZNE validity
 
 **Question:** Can linear ZNE report apparent improvement after amplified circuits have
@@ -32,6 +34,8 @@ lost useful signal relative to the observable floor?
 **Falsifier:** Every apparent improvement occurs only in cells that retain signal at
 the amplified factors, remain physically bounded, and outperform a matched-cost
 negative control.
+
+**Status:** Not falsified in simulation. Five of 16 cells pass the gate, and none is hardware-efficient.
 
 ### Combined mitigation
 
@@ -48,6 +52,8 @@ overhead?
 **Falsifier:** Every combined result is dominated in the declared cost-and-accuracy
 comparison, practically tied, failed, or inconclusive.
 
+**Status:** Mixed in simulation. Combined QEM has the lowest RMSE in 12 of 16 conditions, but all 16 validity checks fail, so the gain is not validated.
+
 ### Readout scalability
 
 **Question:** Can readout mitigation preserve useful accuracy and uncertainty bounds
@@ -57,6 +63,8 @@ without constructing the full `2^w` assignment matrix?
 agreement tests or becomes inaccurate, unstable, or resource-dominated as width and
 observed support increase.
 
+**Status:** Partly answered in simulation. Reduced methods pass small-width checks under matched local models, but mismatch error reaches 0.88-0.94 in the representative cell.
+
 ### Hardware readiness
 
 **Question:** Would optional hardware execution discriminate between explicit
@@ -65,6 +73,8 @@ hypotheses, or would it only decorate a simulator study?
 **Falsifier for readiness:** No proposed hardware cell has frozen simulator
 predictions, sufficient metadata, a declared budget, and outcomes that would
 distinguish competing explanations. In that case the correct result is `no_go`.
+
+**Status:** Answered in simulation-only review: `no_go`, with no job submitted. One of seven go requirements is met and all six no-go triggers apply.
 
 ## Non-claims
 
@@ -80,3 +90,13 @@ distinguish competing explanations. In that case the correct result is `no_go`.
 The required order is analytic construction, noiseless statevector verification,
 noisy finite-shot simulation, frozen holdout evaluation, and only then an optional
 hardware go/no-go review. Hardware execution is not authorized by this contract.
+
+## Open questions
+
+These are hypotheses, and they are not answered by current evidence.
+
+- Which method wins when the signal is strong and the circuit is new?
+- Are readout and gate errors separable on a device?
+- How large is real correlated readout error, and what drift does a device show?
+- How can estimator bias be detected before a decision is certified?
+- Can a backend-specific, powered, controlled protocol be justified?

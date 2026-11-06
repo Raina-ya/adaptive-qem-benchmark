@@ -38,6 +38,9 @@ GENERATORS = (
     "src.regime_labels_v2",
     "src.selector_audit",
     "src.reliability_envelopes",
+    "src.hardware_readiness",
+    "src.final_synthesis",
+    "src.verify_final_project",
     "src.generate_audit_manifest",
 )
 EXPENSIVE_GENERATORS = (
@@ -58,6 +61,7 @@ PHASE_F_ARTIFACTS = {
 ARTIFACT_ROOTS = (
     "results",
     "experiments/manifests",
+    "experiments/hardware",
     "paper/generated",
     "paper/figures",
     "figures",

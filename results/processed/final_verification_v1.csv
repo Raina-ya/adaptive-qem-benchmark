@@ -1,0 +1,31 @@
+group,check,expected,observed,passed
+manifest,volumetric_v1_manifest,5400,5400,True
+manifest,hardware_efficient_v1_manifest,16200,16200,True
+manifest,noise_shift_holdout_v1_manifest,5400,5400,True
+manifest,decision_benchmark_v1_manifest,28800,28800,True
+manifest,combined_qem_v1_manifest,4800,4800,True
+manifest,qaoa_selection_v1_manifest,4500,4500,True
+manifest,readout_scalability_v1_manifest,5760,5760,True
+manifest,selector_v2_holdout_manifest,24000,24000,True
+manifest,"readout correlated widths 2-6, run in readout_mismatch_v1",4800,4800,True
+manifest,"readout correlated widths 8-12, planned_not_executed (960 repeats disclosed)",0,0,True
+summary,benchmark_summary_v1 rmse,324 values within 1e-09,324 values within 1e-09,True
+summary,benchmark_summary_v1 GHZ rmse,108 values within 1e-09,108 values within 1e-09,True
+summary,combined_qem_summary_v1 rmse,96 values within 1e-09,96 values within 1e-09,True
+summary,decision_margin_summary_v1 error,288 values within 1e-09,288 values within 1e-09,True
+summary,sequential_decision_summary_v1 wrong certification,1980 values within 1e-09,1980 values within 1e-09,True
+summary,readout_tensor_validation_summary_v1 rmse,48 values within 1e-09,48 values within 1e-09,True
+summary,readout_subspace_validation_summary_v1 rmse,56 values within 1e-09,56 values within 1e-09,True
+summary,readout_matrix_free_validation_summary_v1 rmse,32 values within 1e-09,32 values within 1e-09,True
+summary,readout_scalability_summary_v1 rmse,159 values within 1e-09,159 values within 1e-09,True
+summary,readout_mismatch_summary_v1 rmse,192 values within 1e-09,192 values within 1e-09,True
+summary,qaoa_selection_summary_v1 resolved groups,828,828,True
+summary,selector_v2_cells raw rmse,120 values within 1e-09,120 values within 1e-09,True
+figure,figures,48 valid PNG files,48 valid PNG files,True
+figure,paper/figures,29 valid PNG files,29 valid PNG files,True
+pdf,page count,at least 1,parsed,True
+pdf,contains Abstract,True,True,True
+pdf,contains Hardware readiness,True,True,True
+pdf,contains no-go,True,True,True
+pdf,contains References,True,True,True
+pdf,contains Reproducibility,True,True,True

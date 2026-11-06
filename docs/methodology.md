@@ -32,10 +32,48 @@ ranking before rule evaluation. A separate out-of-distribution holdout introduce
 intermediate mixed channel, asymmetric readout, coherent over-rotation, and correlated
 `ZZ` noise. Selector rules remain unchanged after either holdout is evaluated.
 
+## Later tracks
+
+- **Combined mitigation:** readout correction at each noise factor, then linear extrapolation,
+  charged in one ledger under two frozen allocations.
+- **ZNE validity:** a frozen gate on signal retention, physical bounds, negative mass, gain
+  uncertainty, trend, and a matched-cost garbage-folding control.
+- **Decision reliability:** controlled margins scored by decision error, with Wilson intervals.
+- **Readout scalability:** tensor, observed-subspace, and matrix-free correction, including
+  correlated and mismatched channels.
+- **Application:** top-1 selection among five frozen QAOA candidates, with exact values used only
+  for evaluation.
+- **Sequential certification:** Bonferroni-corrected looks with Wilson, Hoeffding, and empirical
+  Bernstein bounds. See [the protocol](sequential_decision_protocol.md).
+- **Calibration reuse:** recalibration policies under synthetic drift.
+- **Selector audit:** consequences of selector choices, then a preregistered runtime selector on a
+  fresh grid. See [the protocol](selector_audit_protocol.md).
+
+## Hardware readiness
+
+Six candidate cells have frozen simulator predictions, uncertainty, a hypothesis, and a falsifier.
+Required shots use a two-sided normal approximation at alpha 0.05 and 80% power. Seven go
+requirements and six no-go triggers decide the outcome. The result is a no-go, and no job was
+submitted. See [the protocol](hardware_protocol.md) and [the review](hardware_readiness_review.md).
+
+## Reported distinctions
+
+- Expectation RMSE is reported separately from decision error.
+- Apparent ZNE gain is reported separately from gain that passes the validity gate.
+- Single-method and combined-method overhead use the same ledger.
+- Measured results are reported separately from hypotheses.
+- Simulator evidence is labeled separately from hardware evidence, of which there is none.
+
+## Verification
+
+`src/verify_final_project.py` accounts for every manifest, recomputes the main summaries from raw
+rows at tolerance 1e-9, and checks figures and the PDF. `src/verify_generated_artifacts.py` compares
+regenerated artifacts with committed files at relative tolerance 1e-9 and absolute tolerance 1e-12.
+
 ## Limitations
 
 The channels are controlled simulator models, not device calibrations. The benchmark
-does not establish hardware performance, temporal drift robustness, leakage behavior,
+does not establish hardware performance, physical drift robustness, leakage behavior,
 or universality across algorithms and observables. Full readout calibration scales
 exponentially with width. Statistical intervals quantify finite-repeat uncertainty but
 do not remove model misspecification.

@@ -7,10 +7,11 @@
 \graphicspath{{figures/}}
 \input{generated/adaptive_metrics.tex}
 \input{generated/audit_metrics.tex}
+\input{generated/final_metrics.tex}
 \title{Adaptive Quantum Error Mitigation Under Fixed Shot Budgets:\
 Operating Regimes, Abstention, and Noise-Model Shift}
 \author{Zhen-Jun Liu}
-\date{November 5, 2026}
+\date{November 6, 2026}
 
 \begin{document}
 \maketitle
@@ -53,6 +54,8 @@ estimation certifies the wrong candidate in every repeat after about 2,000 shots
 Under synthetic readout drift, triggered recalibration uses about
 \TriggerShotSaving{} fewer shots than recalibrating at every decision with similar
 reliability, whereas indefinite reuse fails under directed drift.
+A hardware readiness review of six candidate cells ends in a documented no-go, with
+no job submitted: only \HardwareGoMet{} of \HardwareGoTotal{} go requirements is met.
 These simulated results support selective mitigation and abstention as research
 questions, but do not validate a general selector or establish hardware performance.
 \end{abstract}
@@ -72,6 +75,7 @@ mitigated energy estimate improves a complete MaxCut/QAOA candidate-selection
 decision rather than only an expectation metric. Finally, we ask whether a decision
 can stop early without losing error control, how long a calibration can be reused,
 and what the selector's outcomes cost rather than only how often its labels match.
+Last, we ask whether running on a device could currently discriminate between explanations.
 The contribution is a
 reproducible simulator benchmark with repeat-level data, explicit execution ledgers,
 cost-aware labels, abstention rules, and evaluation under noise-model mismatch. It is
@@ -239,6 +243,14 @@ candidate energy, energy RMSE, and unresolved probability separately. At nested
 shot checkpoints, a candidate is certified only if its adjusted uncertainty interval
 is separated from every challenger under a Bonferroni simultaneous-coverage rule;
 the runtime selector never receives the ideal winner.
+
+\subsection{Hardware readiness review}
+For each of six candidate cells we freeze simulator predictions for all four methods, the
+expected decision, validity status, and uncertainty, along with a hypothesis and the outcome
+that would falsify it. Required shots use a two-sided normal approximation at
+$\alpha=0.05$ and 80\% power. The review applies seven go requirements and six no-go triggers
+fixed in the study plan. Every prediction is conditional on a named simulator noise condition,
+because a device's noise cannot be set to match it.
 
 \section{Experiment Setup}
 The main grid crosses widths $2,4,6$, hardware-efficient depths $1,3,6$, noise levels
@@ -679,6 +691,51 @@ under the bidirectional control.}
 \label{fig:lifetime}
 \end{figure}
 
+\subsection{Hardware readiness}
+Table~\ref{tab:hardware} lists the frozen predictions. The review decision is no-go: only
+\HardwareGoMet{} of \HardwareGoTotal{} go requirements is fully met, and all
+\HardwareTriggers{} no-go triggers apply. The plan would need about \HardwareTotalShots{}
+million shots, with no budget declared. The near-tie cell alone needs \HardwareNearTieShots{}
+shots per repeat and is already inconclusive at 16,384. The positive control is credible at
+16,384 shots but rejected at 4,096, three of five ZNE-relevant cells have no single-method
+validity assessment, and no code captures device metadata. This is a measured outcome of
+the review, not a statement about how any device would behave, since no job was submitted.
+
+\begin{table}[t]
+\centering
+\caption{Frozen simulator predictions for proposed cells at 16,384 shots, or a 100-decision
+workload for calibration reuse. These are hypotheses for a device, not hardware results.
+Val.\ is single-method ZNE validity; Mshots is the planned total in millions.}
+\label{tab:hardware}
+\footnotesize
+\setlength{\tabcolsep}{2.4pt}
+\begin{tabular}{lrrrrlr}
+\toprule
+Cell & Raw & RO & ZNE & Comb. & Val. & Mshots\\
+\midrule
+\input{generated/hardware_cell_rows.tex}
+\end{tabular}
+\end{table}
+
+\subsection{Evidence by track}
+Table~\ref{tab:evidence} separates each finding by evidence type. The hardware column is empty
+for every track.
+
+\begin{table*}[t]
+\centering
+\caption{Final evidence matrix. Y marks evidence of that type; An.\ is analytic, NL noiseless
+simulation, NS noisy simulation, HW hardware. Findings are measured in simulation, and
+unresolved questions are hypotheses.}
+\label{tab:evidence}
+\footnotesize
+\begin{tabular}{@{}p{0.10\textwidth}@{\hspace{4pt}}c@{\hspace{3pt}}c@{\hspace{3pt}}c@{\hspace{3pt}}c@{\hspace{5pt}}p{0.325\textwidth}p{0.195\textwidth}p{0.195\textwidth}@{}}
+\toprule
+Track & An. & NL & NS & HW & Supported finding & Unresolved question & Limitation\\
+\midrule
+\input{generated/evidence_matrix_rows.tex}
+\end{tabular}
+\end{table*}
+
 \section{Conclusion}
 No QEM method is uniformly useful under the declared fixed-budget simulator grid.
 Raw wins most cells, largely where the reference is near zero, some cells favor readout or
@@ -699,7 +756,8 @@ proxy for top-1 selection, simple regret, or certified decision, and the added Q
 executions do not produce a general application advantage.
 Sequential stopping can save shots with corrected looks, but a certified decision is only as
 sound as the estimator's bias, and calibration reuse is safe only for the drift it was tested
-against.
+against. A device run is not yet justified: without a declared budget, metadata capture, and
+complete validity controls it could not separate method failure from device drift.
 
 \section{Discussion}
 \subsection{Supported findings}
@@ -752,6 +810,34 @@ over looks rather than an optimized spending rule. The calibration study is a on
 task under directed synthetic stress models; it does not establish a physical calibration
 lifetime.
 
+\subsection{Distinctions kept separate}
+Expectation RMSE and decision error are reported separately because one can improve while the
+other does not. Apparent ZNE gain counts only movement toward a reference, whereas validated gain
+must also pass the frozen gate. Single-method and combined-method costs are charged in the same
+ledger: at width 2 and 16,384 shots, combined mitigation uses 7 circuit executions compared with 1
+for raw, 3 for ZNE, and 5 for readout. Measured values come from committed rows; the causes offered
+above and the predictions in Table~\ref{tab:hardware} remain hypotheses. All evidence is analytic
+or simulated, so nothing here is hardware evidence.
+
+\subsection{Why the review ends in no-go}
+A disagreement between a device and Table~\ref{tab:hardware} would first falsify the transfer of
+a synthetic noise model, not the simulated conclusion itself. Separating drift from method
+failure needs interleaved circuits, repeated reference controls, and a calibration record around
+each block, none of which exists here. One backend could support at most a time-bound claim about
+that device. Separate jobs can cross a calibration update, so paired comparison would hold only
+within blocks that do not. The power calculation is also optimistic for a device because its
+effect sizes are simulated, and the drift cell cannot be powered without a drift estimate. A run now
+would mainly produce a demonstration, so a no-go is the more honest result. Reopening the
+review requires a backend-specific preregistration, declared budget, and working metadata capture.
+
+\subsection{Manifest deviation}
+The scalable-readout manifest planned 960 repeats of correlated readout at widths 8--12
+that were never run; correlated models ran only at widths 2--6, in the separate mismatch study.
+These rows are reported as not executed.
+
+\bibliographystyle{abbrv}
+\bibliography{references}
+
 \appendix
 \section{Reproducibility}
 {\footnotesize
@@ -767,15 +853,16 @@ python -m src.reliability_envelopes
 python -m src.generate_paper_assets
 python -m src.generate_selector_holdout_v2
 python -m src.generate_audit_paper_assets
+python -m src.hardware_readiness
+python -m src.final_synthesis
 tectonic paper/main.tex --outdir paper
+python -m src.verify_final_project
 \end{verbatim}
 }
 Repeat-level rows remain under \texttt{results/raw}; processed summaries, manifests,
 run metadata, seeds, diagnostics, and execution counts remain separate and auditable.
 Tests check analytic references, statevector agreement, folding equivalence, shot
 accounting, deterministic seeds, manifest coverage, metric recomputation, and the
-holdout boundary.
-
-\bibliographystyle{abbrv}
-\bibliography{references}
+holdout boundary. \texttt{src.verify\_final\_project} recomputes the main summaries from raw rows
+at tolerance $10^{-9}$, accounts for every manifest, and checks figures and this document.
 \end{document}

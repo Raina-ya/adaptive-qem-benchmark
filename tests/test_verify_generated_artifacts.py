@@ -41,6 +41,9 @@ def test_comparator_regenerates_adaptive_extension() -> None:
     assert "src.regime_labels_v2" in GENERATORS
     assert "src.selector_audit" in GENERATORS
     assert "src.reliability_envelopes" in GENERATORS
+    assert "src.hardware_readiness" in GENERATORS
+    assert "src.final_synthesis" in GENERATORS
+    assert "src.verify_final_project" in GENERATORS
     assert "src.generate_readout_scalability_benchmark" in EXPENSIVE_GENERATORS
     assert "src.generate_readout_mismatch_benchmark" in EXPENSIVE_GENERATORS
     assert "src.generate_qaoa_selection" in EXPENSIVE_GENERATORS
