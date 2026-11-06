@@ -174,7 +174,8 @@ def run_module_with_log(
         "git_dirty_before": dirty_before,
         "git_commit_after": _git_commit(root),
         "git_dirty_after": _git_dirty(root),
-        "host": platform.node(),
+        # Logs are public, so the field stays for schema stability without the machine name.
+        "host": None,
         "args": arguments,
         "seed_root": ROOT_SEED,
         "output_hashes": output_hashes,

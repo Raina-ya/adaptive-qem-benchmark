@@ -1,0 +1,16 @@
+cff-version: 1.2.0
+message: "If you use this repository, please cite it using these metadata."
+type: software
+title: "Adaptive QEM Benchmark: Quantum Error Mitigation Under Fixed Shot Budgets"
+abstract: "A reproducible simulator benchmark of when quantum error mitigation helps, wastes a fixed shot budget, or fails explicitly. It contains no hardware-derived results."
+authors:
+  - family-names: Liu
+    given-names: Zhen-Jun
+version: 0.1.0
+license: MIT
+repository-code: "https://github.com/Raina-ya/adaptive-qem-benchmark"
+keywords:
+  - quantum error mitigation
+  - zero-noise extrapolation
+  - readout mitigation
+  - benchmarking

@@ -221,5 +221,8 @@ paper/generated/             Tables and macros derived from authoritative CSV da
 paper/figures/               Paper figures generated from repository outputs
 ```
 
-The project contains no license file because repository licensing intent has not been
-established.
+## License and citation
+
+Source code and tests are under the [MIT License](LICENSE). The paper, documentation, figures,
+configurations, manifests, and results are under
+[CC BY 4.0](LICENSE-CC-BY-4.0.md). Citation metadata is in [CITATION.cff](CITATION.cff).

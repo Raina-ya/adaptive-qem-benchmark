@@ -1,0 +1,11 @@
+criterion,value,wilson_low,wilson_high,passed
+H1_decided_cells_reliable,0.538461538462,0.354579387469,0.712441464696,False
+H2_no_safe_outputs_informative,0.287234042553,0.205543611682,0.385631739931,False
+H3_better_than_fixed_policies,0.00589591698446,,,False
+verdict_all_criteria,,,,False
+cells_total,120,,,
+cells_decided,26,,,
+cells_no_safe,94,,,
+decided_mean_selector_regret,0.00589591698446,,,
+decided_mean_raw_regret,0.0605777815579,,,
+decided_mean_readout_regret,0.00332874752704,,,
