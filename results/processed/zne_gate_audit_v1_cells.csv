@@ -1,0 +1,65 @@
+study,cell,circuit_id,noise,total_shot_budget,gate_half,held_gain_mean,really_improved,practically_improved,accepted,failure_reasons_json,signal_retention_pass,physical_bounds_pass,negative_mass_pass,garbage_control_pass,gain_uncertainty_pass,trend_pass,analysis_role
+combined_qem,gate_noise_dominated|he_w4_d3|balanced,he_w4_d3,medium,4096,even,0.0443317142311,True,True,False,"[""garbage_control"", ""trend""]",True,True,True,False,True,False,post_hoc_descriptive
+combined_qem,gate_noise_dominated|he_w4_d3|balanced,he_w4_d3,medium,4096,odd,0.0395329478285,True,True,False,"[""garbage_control"", ""trend""]",True,True,True,False,True,False,post_hoc_descriptive
+combined_qem,gate_noise_dominated|he_w4_d3|balanced,he_w4_d3,medium,16384,even,0.0382017548531,True,True,False,"[""garbage_control"", ""trend""]",True,True,True,False,True,False,post_hoc_descriptive
+combined_qem,gate_noise_dominated|he_w4_d3|balanced,he_w4_d3,medium,16384,odd,0.0405215040111,True,True,False,"[""garbage_control"", ""trend""]",True,True,True,False,True,False,post_hoc_descriptive
+combined_qem,gate_noise_dominated|he_w4_d3|base_heavy,he_w4_d3,medium,4096,even,0.0367121906141,True,True,False,"[""garbage_control"", ""trend""]",True,True,True,False,True,False,post_hoc_descriptive
+combined_qem,gate_noise_dominated|he_w4_d3|base_heavy,he_w4_d3,medium,4096,odd,0.0479483390726,True,True,False,"[""garbage_control"", ""trend""]",True,True,True,False,True,False,post_hoc_descriptive
+combined_qem,gate_noise_dominated|he_w4_d3|base_heavy,he_w4_d3,medium,16384,even,0.0400037661919,True,True,False,"[""garbage_control"", ""trend""]",True,True,True,False,True,False,post_hoc_descriptive
+combined_qem,gate_noise_dominated|he_w4_d3|base_heavy,he_w4_d3,medium,16384,odd,0.0401437038261,True,True,False,"[""garbage_control"", ""trend""]",True,True,True,False,True,False,post_hoc_descriptive
+combined_qem,practical_tie|ghz_w2|balanced,ghz_w2,low,4096,even,0.00926207566835,True,True,False,"[""physical_bounds"", ""trend""]",True,False,True,True,True,False,post_hoc_descriptive
+combined_qem,practical_tie|ghz_w2|balanced,ghz_w2,low,4096,odd,0.00604973340344,True,True,False,"[""physical_bounds"", ""trend""]",True,False,True,True,True,False,post_hoc_descriptive
+combined_qem,practical_tie|ghz_w2|balanced,ghz_w2,low,16384,even,0.00808409840314,True,True,False,"[""physical_bounds"", ""trend""]",True,False,True,True,True,False,post_hoc_descriptive
+combined_qem,practical_tie|ghz_w2|balanced,ghz_w2,low,16384,odd,0.00877363496467,True,True,False,"[""physical_bounds"", ""trend""]",True,False,True,True,True,False,post_hoc_descriptive
+combined_qem,practical_tie|ghz_w2|base_heavy,ghz_w2,low,4096,even,0.00743370207766,True,True,False,"[""physical_bounds"", ""trend""]",True,False,True,True,True,False,post_hoc_descriptive
+combined_qem,practical_tie|ghz_w2|base_heavy,ghz_w2,low,4096,odd,0.00336909596036,True,False,False,"[""physical_bounds"", ""trend""]",True,False,True,True,True,False,post_hoc_descriptive
+combined_qem,practical_tie|ghz_w2|base_heavy,ghz_w2,low,16384,even,0.00749529714862,True,True,False,"[""physical_bounds"", ""trend""]",True,False,True,True,True,False,post_hoc_descriptive
+combined_qem,practical_tie|ghz_w2|base_heavy,ghz_w2,low,16384,odd,0.00680620765783,True,True,False,"[""physical_bounds"", ""trend""]",True,False,True,True,True,False,post_hoc_descriptive
+combined_qem,readout_dominated|ghz_w2|balanced,ghz_w2,high,4096,even,0.0585289936504,True,True,False,"[""physical_bounds"", ""trend""]",True,False,True,True,True,False,post_hoc_descriptive
+combined_qem,readout_dominated|ghz_w2|balanced,ghz_w2,high,4096,odd,0.0624819129069,True,True,False,"[""physical_bounds"", ""trend""]",True,False,True,True,True,False,post_hoc_descriptive
+combined_qem,readout_dominated|ghz_w2|balanced,ghz_w2,high,16384,even,0.0634537026547,True,True,False,"[""physical_bounds""]",True,False,True,True,True,True,post_hoc_descriptive
+combined_qem,readout_dominated|ghz_w2|balanced,ghz_w2,high,16384,odd,0.0676563615847,True,True,False,"[""physical_bounds""]",True,False,True,True,True,True,post_hoc_descriptive
+combined_qem,readout_dominated|ghz_w2|base_heavy,ghz_w2,high,4096,even,0.0597165068402,True,True,False,"[""physical_bounds""]",True,False,True,True,True,True,post_hoc_descriptive
+combined_qem,readout_dominated|ghz_w2|base_heavy,ghz_w2,high,4096,odd,0.0706892088724,True,True,False,"[""physical_bounds""]",True,False,True,True,True,True,post_hoc_descriptive
+combined_qem,readout_dominated|ghz_w2|base_heavy,ghz_w2,high,16384,even,0.0623349213328,True,True,False,"[""physical_bounds""]",True,False,True,True,True,True,post_hoc_descriptive
+combined_qem,readout_dominated|ghz_w2|base_heavy,ghz_w2,high,16384,odd,0.0658339420863,True,True,True,[],True,True,True,True,True,True,post_hoc_descriptive
+combined_qem,zne_invalid|he_w2_d3|balanced,he_w2_d3,medium,4096,even,0.00044522657137,False,False,False,"[""gain_uncertainty"", ""trend""]",True,True,True,True,False,False,post_hoc_descriptive
+combined_qem,zne_invalid|he_w2_d3|balanced,he_w2_d3,medium,4096,odd,-0.00376641001347,False,False,False,"[""signal_retention"", ""gain_uncertainty"", ""trend""]",False,True,True,True,False,False,post_hoc_descriptive
+combined_qem,zne_invalid|he_w2_d3|balanced,he_w2_d3,medium,16384,even,-0.00124802172952,False,False,False,"[""gain_uncertainty"", ""trend""]",True,True,True,True,False,False,post_hoc_descriptive
+combined_qem,zne_invalid|he_w2_d3|balanced,he_w2_d3,medium,16384,odd,-0.00301356830483,False,False,False,"[""signal_retention"", ""gain_uncertainty"", ""trend""]",False,True,True,True,False,False,post_hoc_descriptive
+combined_qem,zne_invalid|he_w2_d3|base_heavy,he_w2_d3,medium,4096,even,-0.00127835575085,False,False,False,"[""gain_uncertainty"", ""trend""]",True,True,True,True,False,False,post_hoc_descriptive
+combined_qem,zne_invalid|he_w2_d3|base_heavy,he_w2_d3,medium,4096,odd,-0.00122232261565,False,False,False,"[""gain_uncertainty"", ""trend""]",True,True,True,True,False,False,post_hoc_descriptive
+combined_qem,zne_invalid|he_w2_d3|base_heavy,he_w2_d3,medium,16384,even,-0.000979348102291,False,False,False,"[""gain_uncertainty"", ""trend""]",True,True,True,True,False,False,post_hoc_descriptive
+combined_qem,zne_invalid|he_w2_d3|base_heavy,he_w2_d3,medium,16384,odd,-0.006714487459,False,False,False,"[""gain_uncertainty"", ""trend""]",True,True,True,True,False,False,post_hoc_descriptive
+zne_falsification,bell_xx|high,bell_xx,high,4096,even,0.0518595759211,True,True,True,[],True,True,True,True,True,True,post_hoc_descriptive
+zne_falsification,bell_xx|high,bell_xx,high,4096,odd,0.0589070984327,True,True,True,[],True,True,True,True,True,True,post_hoc_descriptive
+zne_falsification,bell_xx|high,bell_xx,high,16384,even,0.054615448675,True,True,True,[],True,True,True,True,True,True,post_hoc_descriptive
+zne_falsification,bell_xx|high,bell_xx,high,16384,odd,0.056992329775,True,True,True,[],True,True,True,True,True,True,post_hoc_descriptive
+zne_falsification,bell_xx|low,bell_xx,low,4096,even,0.0108638252914,True,True,False,"[""physical_bounds""]",True,False,True,True,True,True,post_hoc_descriptive
+zne_falsification,bell_xx|low,bell_xx,low,4096,odd,0.0103155868046,True,True,True,[],True,True,True,True,True,True,post_hoc_descriptive
+zne_falsification,bell_xx|low,bell_xx,low,16384,even,0.0102525670918,True,True,True,[],True,True,True,True,True,True,post_hoc_descriptive
+zne_falsification,bell_xx|low,bell_xx,low,16384,odd,0.0102977161959,True,True,True,[],True,True,True,True,True,True,post_hoc_descriptive
+zne_falsification,bell_xx|medium,bell_xx,medium,4096,even,0.0316112997138,True,True,True,[],True,True,True,True,True,True,post_hoc_descriptive
+zne_falsification,bell_xx|medium,bell_xx,medium,4096,odd,0.0287150562143,True,True,True,[],True,True,True,True,True,True,post_hoc_descriptive
+zne_falsification,bell_xx|medium,bell_xx,medium,16384,even,0.0295078958632,True,True,True,[],True,True,True,True,True,True,post_hoc_descriptive
+zne_falsification,bell_xx|medium,bell_xx,medium,16384,odd,0.0293589623328,True,True,True,[],True,True,True,True,True,True,post_hoc_descriptive
+zne_falsification,bell_xx|zero,bell_xx,zero,4096,even,-2.22044604925e-16,False,False,False,"[""gain_uncertainty""]",True,True,True,True,False,True,post_hoc_descriptive
+zne_falsification,bell_xx|zero,bell_xx,zero,4096,odd,-2.22044604925e-16,False,False,False,"[""gain_uncertainty""]",True,True,True,True,False,True,post_hoc_descriptive
+zne_falsification,bell_xx|zero,bell_xx,zero,16384,even,-2.22044604925e-16,False,False,False,"[""gain_uncertainty""]",True,True,True,True,False,True,post_hoc_descriptive
+zne_falsification,bell_xx|zero,bell_xx,zero,16384,odd,-2.22044604925e-16,False,False,False,"[""gain_uncertainty""]",True,True,True,True,False,True,post_hoc_descriptive
+zne_falsification,hardware_efficient_w2_d3_xz|high,hardware_efficient_w2_d3_xz,high,4096,even,-0.00787939082229,False,False,False,"[""gain_uncertainty"", ""trend""]",True,True,True,True,False,False,post_hoc_descriptive
+zne_falsification,hardware_efficient_w2_d3_xz|high,hardware_efficient_w2_d3_xz,high,4096,odd,-0.00151756028999,False,False,False,"[""gain_uncertainty"", ""trend""]",True,True,True,True,False,False,post_hoc_descriptive
+zne_falsification,hardware_efficient_w2_d3_xz|high,hardware_efficient_w2_d3_xz,high,16384,even,-0.000820417844532,False,False,False,"[""gain_uncertainty"", ""trend""]",True,True,True,True,False,False,post_hoc_descriptive
+zne_falsification,hardware_efficient_w2_d3_xz|high,hardware_efficient_w2_d3_xz,high,16384,odd,0.000164747695664,False,False,False,"[""gain_uncertainty"", ""trend""]",True,True,True,True,False,False,post_hoc_descriptive
+zne_falsification,hardware_efficient_w2_d3_xz|low,hardware_efficient_w2_d3_xz,low,4096,even,-0.00452019415289,False,False,False,"[""gain_uncertainty"", ""trend""]",True,True,True,True,False,False,post_hoc_descriptive
+zne_falsification,hardware_efficient_w2_d3_xz|low,hardware_efficient_w2_d3_xz,low,4096,odd,-0.00148589476388,False,False,False,"[""gain_uncertainty"", ""trend""]",True,True,True,True,False,False,post_hoc_descriptive
+zne_falsification,hardware_efficient_w2_d3_xz|low,hardware_efficient_w2_d3_xz,low,16384,even,-0.00382435727633,False,False,False,"[""gain_uncertainty"", ""trend""]",True,True,True,True,False,False,post_hoc_descriptive
+zne_falsification,hardware_efficient_w2_d3_xz|low,hardware_efficient_w2_d3_xz,low,16384,odd,-0.00186793566192,False,False,False,"[""gain_uncertainty"", ""trend""]",True,True,True,True,False,False,post_hoc_descriptive
+zne_falsification,hardware_efficient_w2_d3_xz|medium,hardware_efficient_w2_d3_xz,medium,4096,even,-0.00955424868558,False,False,False,"[""gain_uncertainty"", ""trend""]",True,True,True,True,False,False,post_hoc_descriptive
+zne_falsification,hardware_efficient_w2_d3_xz|medium,hardware_efficient_w2_d3_xz,medium,4096,odd,-0.00383097336562,False,False,False,"[""gain_uncertainty"", ""trend""]",True,True,True,True,False,False,post_hoc_descriptive
+zne_falsification,hardware_efficient_w2_d3_xz|medium,hardware_efficient_w2_d3_xz,medium,16384,even,-0.00227416991974,False,False,False,"[""gain_uncertainty"", ""trend""]",True,True,True,True,False,False,post_hoc_descriptive
+zne_falsification,hardware_efficient_w2_d3_xz|medium,hardware_efficient_w2_d3_xz,medium,16384,odd,0.00038410853948,False,False,False,"[""gain_uncertainty"", ""trend""]",True,True,True,True,False,False,post_hoc_descriptive
+zne_falsification,hardware_efficient_w2_d3_xz|zero,hardware_efficient_w2_d3_xz,zero,4096,even,-0.0067824180198,False,False,False,"[""gain_uncertainty"", ""trend""]",True,True,True,True,False,False,post_hoc_descriptive
+zne_falsification,hardware_efficient_w2_d3_xz|zero,hardware_efficient_w2_d3_xz,zero,4096,odd,-0.000667381747909,False,False,False,"[""gain_uncertainty"", ""trend""]",True,True,True,True,False,False,post_hoc_descriptive
+zne_falsification,hardware_efficient_w2_d3_xz|zero,hardware_efficient_w2_d3_xz,zero,16384,even,-0.00263124940869,False,False,False,"[""gain_uncertainty"", ""trend""]",True,True,True,True,False,False,post_hoc_descriptive
+zne_falsification,hardware_efficient_w2_d3_xz|zero,hardware_efficient_w2_d3_xz,zero,16384,odd,-0.00303358600321,False,False,False,"[""gain_uncertainty"", ""trend""]",True,True,True,True,False,False,post_hoc_descriptive

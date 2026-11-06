@@ -1,0 +1,13 @@
+margin,method,conditions,median_decision_error,max_decision_error,analysis_role
+0.02,raw,9,0,0.02,post_hoc_descriptive
+0.02,readout,9,0,0.03,post_hoc_descriptive
+0.02,zne,5,0,0,post_hoc_descriptive
+0.05,raw,15,0,0.02,post_hoc_descriptive
+0.05,readout,14,0,0.02,post_hoc_descriptive
+0.05,zne,8,0,0.02,post_hoc_descriptive
+0.1,raw,20,0,0.01,post_hoc_descriptive
+0.1,readout,18,0,0.02,post_hoc_descriptive
+0.1,zne,15,0,0.03,post_hoc_descriptive
+0.2,raw,23,0,0.01,post_hoc_descriptive
+0.2,readout,23,0,0.01,post_hoc_descriptive
+0.2,zne,20,0,0.01,post_hoc_descriptive

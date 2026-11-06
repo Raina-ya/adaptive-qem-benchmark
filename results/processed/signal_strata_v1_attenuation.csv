@@ -1,0 +1,13 @@
+raw_attenuation_band,method,summaries,median_rmse,oracle_wins,analysis_role
+0.01_to_0.05,raw,29,0.0302046850347,19,post_hoc_descriptive
+0.01_to_0.05,readout,29,0.0415565242739,0,post_hoc_descriptive
+0.01_to_0.05,zne,29,0.0401538978875,0,post_hoc_descriptive
+0.05_to_0.2,raw,24,0.0925622839637,2,post_hoc_descriptive
+0.05_to_0.2,readout,24,0.0755075513343,3,post_hoc_descriptive
+0.05_to_0.2,zne,24,0.0674053984523,12,post_hoc_descriptive
+at_least_0.2,raw,24,0.31629177565,0,post_hoc_descriptive
+at_least_0.2,readout,24,0.252439964643,15,post_hoc_descriptive
+at_least_0.2,zne,24,0.281842164291,2,post_hoc_descriptive
+below_0.01,raw,31,0.0164818811849,29,post_hoc_descriptive
+below_0.01,readout,31,0.028136952246,0,post_hoc_descriptive
+below_0.01,zne,31,0.0306418181935,0,post_hoc_descriptive

@@ -88,6 +88,9 @@
         "src.hardware_readiness",
         "src.final_synthesis",
         "src.qaoa_mechanism",
+        "src.signal_strata_v1",
+        "src.zne_gate_audit_v1",
+        "src.signal_manifest_v2",
         "src.cross_validation"
       ],
       "post_checks": [
@@ -626,6 +629,46 @@
         "results/processed/qaoa_mechanism_mse_contributions_v1.csv",
         "results/processed/qaoa_mechanism_pairs_v1.csv",
         "results/processed/qaoa_mechanism_transitions_v1.csv"
+      ]
+    },
+    {
+      "module": "src.signal_strata_v1",
+      "args": [],
+      "tier": "routine",
+      "configs": [],
+      "manifests": [],
+      "outputs": [
+        "results/processed/signal_strata_v1_attenuation.csv",
+        "results/processed/signal_strata_v1_cells.csv",
+        "results/processed/signal_strata_v1_circuits.csv",
+        "results/processed/signal_strata_v1_margins.csv",
+        "results/processed/signal_strata_v1_summary.csv"
+      ]
+    },
+    {
+      "module": "src.zne_gate_audit_v1",
+      "args": [],
+      "tier": "routine",
+      "configs": [],
+      "manifests": [],
+      "outputs": [
+        "results/processed/zne_gate_audit_v1_cells.csv",
+        "results/processed/zne_gate_audit_v1_checks.csv",
+        "results/processed/zne_gate_audit_v1_trend_overlap.csv"
+      ]
+    },
+    {
+      "module": "src.signal_manifest_v2",
+      "args": [],
+      "tier": "routine",
+      "configs": [
+        "experiments/configs/signal_v2.yaml"
+      ],
+      "manifests": [],
+      "outputs": [
+        "experiments/manifests/signal_v2_manifest.csv",
+        "experiments/manifests/signal_v2_manifest.sha256",
+        "results/processed/signal_v2_coverage.csv"
       ]
     },
     {

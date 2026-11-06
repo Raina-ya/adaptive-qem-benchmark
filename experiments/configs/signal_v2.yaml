@@ -1,0 +1,135 @@
+{
+  "version": "signal_v2",
+  "evidence_label": "noisy_simulated",
+  "simulator": "src/density_sim.py exact density matrix with sampled shots",
+  "selection_rule": "Take the first parameter seeds, in order, whose noiseless value falls in a band. No noisy or mitigation result is read.",
+  "widths": [
+    2,
+    4,
+    6
+  ],
+  "depths": [
+    1,
+    3,
+    6
+  ],
+  "circuits_per_cell": 3,
+  "seed_search_limit": 1500,
+  "minimum_circuits_per_band": 12,
+  "band_edges": [
+    0.06,
+    0.2,
+    0.5,
+    0.9
+  ],
+  "bands": [
+    "near_zero",
+    "weak",
+    "medium",
+    "strong",
+    "boundary_adjacent"
+  ],
+  "split_fractions": {
+    "train": 0.5,
+    "validation": 0.25,
+    "holdout": 0.25
+  },
+  "budgets": [
+    4096,
+    16384
+  ],
+  "repeats": 50,
+  "truth_draws": 5000,
+  "readout_fraction": 0.2,
+  "practical_threshold": 0.005,
+  "noise": {
+    "none": {},
+    "depolarizing": {
+      "depolarizing_1q": 0.005,
+      "depolarizing_2q": 0.03,
+      "readout_p01": 0.02,
+      "readout_p10": 0.016
+    },
+    "amplitude_damping": {
+      "damping_1q": 0.005,
+      "damping_2q": 0.03,
+      "readout_p01": 0.02,
+      "readout_p10": 0.016
+    },
+    "dephasing": {
+      "dephasing_1q": 0.005,
+      "dephasing_2q": 0.03,
+      "readout_p01": 0.02,
+      "readout_p10": 0.016
+    },
+    "coherent_overrotation": {
+      "overrotation": 0.02,
+      "readout_p01": 0.02,
+      "readout_p10": 0.016
+    },
+    "coherent_detuning": {
+      "detuning": 0.02,
+      "readout_p01": 0.02,
+      "readout_p10": 0.016
+    },
+    "mixed": {
+      "depolarizing_1q": 0.002,
+      "depolarizing_2q": 0.012,
+      "damping_1q": 0.002,
+      "damping_2q": 0.012,
+      "dephasing_1q": 0.002,
+      "dephasing_2q": 0.012,
+      "overrotation": 0.01,
+      "readout_p01": 0.02,
+      "readout_p10": 0.016,
+      "detuning": 0.005
+    }
+  },
+  "designs": {
+    "global_135": {
+      "folding": "global",
+      "factors": [
+        1,
+        3,
+        5
+      ],
+      "models": [
+        "linear",
+        "quadratic",
+        "exponential"
+      ]
+    },
+    "global_1357": {
+      "folding": "global",
+      "factors": [
+        1,
+        3,
+        5,
+        7
+      ],
+      "models": [
+        "linear",
+        "quadratic",
+        "richardson",
+        "exponential"
+      ]
+    },
+    "local_135": {
+      "folding": "local",
+      "factors": [
+        1,
+        3,
+        5
+      ],
+      "models": [
+        "linear",
+        "quadratic",
+        "exponential"
+      ]
+    }
+  },
+  "gate_target": {
+    "design": "global_135",
+    "model": "linear"
+  }
+}

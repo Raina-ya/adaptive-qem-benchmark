@@ -1,0 +1,6 @@
+signal_band,circuits,meets_minimum,train,validation,holdout,width_2,width_4,width_6,depth_1,depth_3,depth_6
+near_zero,27,True,14,7,6,9,9,9,9,9,9
+weak,27,True,14,7,6,9,9,9,9,9,9
+medium,27,True,14,7,6,9,9,9,9,9,9
+strong,24,True,12,6,6,9,9,6,9,9,6
+boundary_adjacent,21,True,10,5,6,9,6,6,9,9,3
