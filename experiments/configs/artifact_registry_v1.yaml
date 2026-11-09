@@ -59,7 +59,8 @@
         "src.generate_paper_assets",
         "src.generate_audit_paper_assets",
         "src.hardware_readiness",
-        "src.final_synthesis"
+        "src.final_synthesis",
+        "src.generate_paper_v2_assets"
       ],
       "post_checks": [
         "src.verify_final_project",
@@ -115,6 +116,7 @@
         "src.generate_readout_mismatch_dose",
         "src.generate_drift_policy",
         "src.readout_boundaries_analysis",
+        "src.generate_paper_v2_assets",
         "src.cross_validation"
       ],
       "post_checks": [
@@ -985,6 +987,25 @@
         "results/processed/readout_feasibility_v2_summary.csv",
         "results/processed/readout_mismatch_dose_summary_v1.csv",
         "results/processed/readout_mismatch_thresholds_v1.csv"
+      ]
+    },
+    {
+      "module": "src.generate_paper_v2_assets",
+      "args": [],
+      "tier": "routine",
+      "configs": [],
+      "manifests": [],
+      "outputs": [
+        "paper/generated/boundaries_metrics.tex",
+        "paper/figures/fig_certification.png",
+        "paper/figures/fig_drift_policy.png",
+        "paper/figures/fig_mismatch_dose.png",
+        "paper/figures/fig_readout_width.png",
+        "paper/figures/fig_regime_shares.png",
+        "paper/figures/fig_rmse_vs_selection.png",
+        "paper/figures/fig_shots_to_reliability.png",
+        "paper/figures/fig_signal_bands.png",
+        "paper/figures/fig_zne_gate_holdout.png"
       ]
     },
     {

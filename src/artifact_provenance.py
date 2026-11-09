@@ -198,7 +198,7 @@ def paper_failures(registry: dict[str, object] | None = None) -> list[str]:
 
     registry = load_registry() if registry is None else registry
     owned = {path for generator in registry["generators"] for path in generator["outputs"]}
-    source = (ROOT / "paper/main.tex").read_text(encoding="utf-8")
+    source = (ROOT / "paper/main_v2.tex").read_text(encoding="utf-8")
     inputs = [f"paper/{name}" for name in re.findall(r"\\input\{([^}]+)\}", source)]
     pattern = r"\\includegraphics(?:\[[^\]]*\])?\{([^}]+)\}"
     figures = [f"paper/figures/{name}" for name in re.findall(pattern, source)]

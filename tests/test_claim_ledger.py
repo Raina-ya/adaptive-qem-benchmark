@@ -207,10 +207,10 @@ def test_bootstrap_comparison_is_labeled_as_sensitivity() -> None:
 def test_coverage_summary_states_what_is_not_verified(ledger: pd.DataFrame) -> None:
     summary = claim_ledger.coverage_summary(ledger, provenance_table(ledger))
     values = dict(zip(summary.metric, summary.value, strict=True))
-    assert values["computed_claims_checked"] == 15
-    assert values["printed_numbers_checked"] == 140
+    assert values["computed_claims_checked"] == 22
+    assert values["printed_numbers_checked"] == 189
     assert values["generated_tables"] == 8
-    assert values["figures"] == 17
+    assert values["figures"] == 9
     assert values["generated_tables_values_recomputed"] == 0
     assert values["figures_values_recomputed"] == 0
     assert values["paper_independently_verified_as_a_whole"] == "no"
@@ -234,10 +234,32 @@ ALLOWED_PREREGISTRATION = (
 
 
 def test_preregistration_language_is_qualified() -> None:
-    paths = [ROOT / "README.md", ROOT / "paper/main.tex"]
+    paths = [ROOT / "README.md", ROOT / "paper/main.tex", ROOT / "paper/main_v2.tex"]
     paths += sorted((ROOT / "docs").glob("*.md")) + sorted((ROOT / "paper/generated").glob("*.tex"))
     for path in paths:
         text = " ".join(path.read_text(encoding="utf-8").split()).lower()
         for phrase in ALLOWED_PREREGISTRATION:
             text = text.replace(phrase, "")
         assert "preregist" not in text and "pre-regist" not in text, path.name
+
+
+def test_every_paper_v2_macro_is_recomputed_except_the_gate_ratio(ledger: pd.DataFrame) -> None:
+    table = provenance_table(ledger)
+    owned = table.loc[
+        (table.item_kind == "macro")
+        & table.used_in_paper
+        & table.generated_file.eq("paper/generated/boundaries_metrics.tex")
+    ].set_index("item")
+    claims = ledger.set_index("claim_id").claim_type
+    kinds = owned.claim_id.map(claims)
+    assert kinds.drop("ThreeCostRatioSelector").eq("computed").all()
+    assert kinds["ThreeCostRatioSelector"] == "source_traced_only"
+
+
+def test_signal_truth_table_agrees_with_normal_theory() -> None:
+    assert claim_ledger.signal_truth_deviation() < 0.002
+
+
+def test_new_audit_claims_do_not_change_the_declared_sample() -> None:
+    population = set(CONFIG["audit_population"])
+    assert population == {f"C{index:02d}" for index in range(1, 16)}

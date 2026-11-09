@@ -23,18 +23,34 @@ frozen inputs, measured runtime data, QAOA pilot and smoke files, and unreferenc
 | `expensive` | Scalable readout, mismatch, QAOA, and selector v2 | About 2 hours |
 | `release` | All of the above and every cheaper generator | About 5 hours |
 
-Other machines will differ. A GitHub job stops at 350 minutes, so a slow `release` run may need a
-local machine.
+Other machines will differ. The table predates Parts 5 to 9, whose generators add several more hours.
+A GitHub job stops at 350 minutes, so the full `release` scope does not fit in one job.
 
 ## Run on GitHub
+
+The full release scope runs as one job per long generator. Each job deletes that generator's committed
+outputs in a clean clone, runs it with the locked dependencies, and compares the result. Routine CI
+already rebuilds every other generator on each push, so the two together cover the release scope.
+
+```powershell
+gh workflow run rebuild-generators.yml
+gh run list --workflow rebuild-generators.yml --limit 3
+gh run view <run-id>
+```
+
+A single generator can be rebuilt locally the same way:
+
+```powershell
+.\.venv\Scripts\python.exe -m src.verify_generated_artifacts --scope release --module src.generate_signal_v2
+```
+
+For the smaller scopes, one job still fits. It rebuilds and compares, runs the tests, builds the paper,
+validates it, and uploads the run logs and PDF:
 
 ```powershell
 gh workflow run release-audit.yml -f scope=combined_decision
 gh run list --workflow release-audit.yml --limit 3
 ```
-
-The workflow uses a fresh checkout and locked dependencies. It rebuilds and compares, runs the tests,
-builds the paper, validates it, and uploads the run logs and PDF.
 
 ## Run locally
 
@@ -49,8 +65,8 @@ Set-Location "$env:TEMP\qem-regenerated"
 ..\qem-clean\.venv\Scripts\python.exe -m pytest --deselect tests/test_artifact_provenance.py::test_committed_hashes_match_the_tree
 ```
 
-Build the paper in `paper/` with `pdflatex`, `bibtex`, then `pdflatex` twice, and run
-`python -m src.verify_final_project`.
+Build the paper in `paper/` with `pdflatex -jobname="main(2)" main_v2.tex`, `bibtex "main(2)"`, then
+the `pdflatex` command twice more, and run `python -m src.verify_final_project`.
 
 ## Reading the result
 
@@ -63,7 +79,8 @@ Build the paper in `paper/` with `pdflatex`, `bibtex`, then `pdflatex` twice, an
 ## Before a release
 
 - [ ] Routine CI is green on the release commit.
-- [ ] The `release` scope passes, or each difference is documented.
+- [ ] Every job of `rebuild-generators.yml` passes on the release commit, or each difference is
+  documented.
 - [ ] `python -m src.artifact_provenance` reports no failures.
 - [ ] `python -m src.claim_ledger` reports no mismatches.
 - [ ] The rebuilt PDF has the expected page count and required text.

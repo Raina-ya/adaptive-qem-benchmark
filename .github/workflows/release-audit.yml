@@ -55,10 +55,10 @@ jobs:
       - name: Build the paper from the regenerated tree
         working-directory: ${{ runner.temp }}/regenerated/paper
         run: |
-          pdflatex -interaction=nonstopmode -halt-on-error main.tex
-          bibtex main
-          pdflatex -interaction=nonstopmode -halt-on-error main.tex
-          pdflatex -interaction=nonstopmode -halt-on-error main.tex
+          pdflatex -interaction=nonstopmode -halt-on-error -jobname="main(2)" main_v2.tex
+          bibtex "main(2)"
+          pdflatex -interaction=nonstopmode -halt-on-error -jobname="main(2)" main_v2.tex
+          pdflatex -interaction=nonstopmode -halt-on-error -jobname="main(2)" main_v2.tex
       - name: Validate the rebuilt paper
         working-directory: ${{ runner.temp }}/regenerated
         run: python -m src.verify_final_project
@@ -69,5 +69,5 @@ jobs:
           name: release-audit-${{ inputs.scope }}
           path: |
             audit-logs/
-            ${{ runner.temp }}/regenerated/paper/main.pdf
+            ${{ runner.temp }}/regenerated/paper/main(2).pdf
           retention-days: 90

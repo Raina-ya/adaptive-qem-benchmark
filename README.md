@@ -73,7 +73,10 @@ near-tie cell is already inconclusive in simulation. See
 
 ![Operating-regime map with the corrected raw, tie, readout, ZNE, and inconclusive labels](paper/figures/operating_regime_map_v2.png)
 
-Read the full paper: **[Adaptive Quantum Error Mitigation Under Fixed Shot Budgets](paper/main.pdf)**
+Read the current paper: **[When Does Quantum Error Mitigation Pay Off Under a Fixed Shot Budget?](paper/main(2).pdf)**
+(source `paper/main_v2.tex`). It covers every study, including the signal, confirmatory,
+selector, certification, and readout-boundary results. The earlier paper,
+[Adaptive Quantum Error Mitigation Under Fixed Shot Budgets](paper/main.pdf), is kept unchanged.
 
 ## Evidence boundary
 
@@ -135,7 +138,8 @@ $env:MPLCONFIGDIR = ".matplotlib-cache"
 .\.venv\Scripts\python.exe -m src.run_with_log src.generate_audit_paper_assets
 .\.venv\Scripts\python.exe -m src.run_with_log src.hardware_readiness
 .\.venv\Scripts\python.exe -m src.run_with_log src.final_synthesis
-tectonic paper/main.tex --outdir paper
+.\.venv\Scripts\python.exe -m src.run_with_log src.generate_paper_v2_assets
+cd paper; pdflatex -jobname="main(2)" main_v2.tex; bibtex "main(2)"; pdflatex -jobname="main(2)" main_v2.tex; pdflatex -jobname="main(2)" main_v2.tex; cd ..
 .\.venv\Scripts\python.exe -m src.run_with_log src.verify_final_project
 .\.venv\Scripts\python.exe -m src.run_with_log src.claim_ledger
 ```
@@ -157,6 +161,7 @@ come with worse candidate selection.
 QAOA selections with enumerated code that shares nothing with the benchmark implementation.
 
 To rebuild expensive results from a clean clone, follow [the release checklist](docs/release_checklist.md).
+`gh workflow run rebuild-generators.yml` rebuilds each long generator as its own job.
 `python -m src.artifact_provenance` checks the hash, generator, and row count of every generated
 artifact without running a simulation.
 
@@ -261,8 +266,9 @@ results/raw/                 Immutable repeat-level benchmark rows
 results/processed/           Coverage and runtime summaries
 results/runs/                Per-run generation metadata and output hashes
 figures/                     Generated project figures
-paper/main.tex               Technical paper source
-paper/main.pdf               Compiled paper
+paper/main_v2.tex            Current paper source
+paper/main(2).pdf            Current compiled paper
+paper/main.tex, main.pdf     Earlier paper, kept unchanged
 paper/generated/             Tables and macros derived from authoritative CSV data
 paper/figures/               Paper figures generated from repository outputs
 ```

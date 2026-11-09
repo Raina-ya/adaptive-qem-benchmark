@@ -10,6 +10,7 @@ from src.verify_generated_artifacts import (
     ComparisonFailure,
     compare_artifact_trees,
     load_registry,
+    plan_module,
     plan_scope,
     remove_outputs,
 )
@@ -96,6 +97,35 @@ def test_frozen_inputs_remain_when_a_scope_clears_outputs(tmp_path: Path) -> Non
     remove_outputs(tmp_path, plan.remove)
     assert kept.exists()
     assert not removed.exists()
+
+
+def test_one_generator_jobs_cover_the_release_scope_without_overlap() -> None:
+    release = plan_scope("release", REGISTRY)
+    split = [
+        plan_module("release", module, REGISTRY)
+        for module in REGISTRY["scopes"]["release"]["fresh"]
+    ]
+    removed = [path for plan in split for path in plan.remove]
+    assert len(removed) == len(set(removed))
+    assert set(removed) == set(release.remove)
+    qaoa = plan_module("release", "src.generate_qaoa_selection", REGISTRY)
+    assert qaoa.commands == (("src.generate_qaoa_selection", "--full"),)
+    assert qaoa.compare == qaoa.remove
+    assert not qaoa.remove & set(REGISTRY["frozen_inputs"])
+
+
+def test_rebuild_workflow_lists_every_generator_outside_routine_ci() -> None:
+    workflow = Path(__file__).resolve().parents[1] / ".github/workflows/rebuild-generators.yml"
+    text = workflow.read_text(encoding="utf-8")
+    outside = [m for m in REGISTRY["scopes"]["release"]["fresh"] if m not in GENERATORS]
+    assert outside
+    for module in outside:
+        assert f"- {module}\n" in text, module
+
+
+def test_a_module_outside_its_scope_is_rejected() -> None:
+    with pytest.raises(ValueError, match="not regenerated"):
+        plan_module("combined_decision", "src.generate_signal_v2", REGISTRY)
 
 
 def test_unknown_scope_generators_are_rejected() -> None:

@@ -7,18 +7,23 @@ readout_mismatch_v1,decision_error,reconstructed,9600,0
 calibration_lifetime_v1,decision_error,reconstructed,60480,0
 calibration_lifetime_v1,amortized_shots_per_decision,reconstructed,60480,0
 sequential_decision_v1,wrong_certified,reconstructed,198000,0
+used by G02,asymptotic_gap,not_reconstructed,0,0
 used by C10,certification_status,not_reconstructed,0,0
 used by C11,certified_choice,not_reconstructed,0,0
-used by C04,condition_number,not_reconstructed,0,0
+used by G06,certified_look,not_reconstructed,0,0
+used by G07,check_z,not_reconstructed,0,0
+used by C04;G07,condition_number,not_reconstructed,0,0
 used by C08,corrected_estimate,not_reconstructed,0,0
 used by C10,corrected_or_extrapolated_estimate,not_reconstructed,0,0
 used by C12,corrected_probability_one,not_reconstructed,0,0
 used by C13,decision,not_reconstructed,0,0
+used by G02,decision_error,not_reconstructed,0,0
 used by C02;C03;C04;C06;C13,estimate,not_reconstructed,0,0
 used by C07,estimate_a,not_reconstructed,0,0
 used by C06,factor_estimates_json,not_reconstructed,0,0
 used by C07,final_signal_retention,not_reconstructed,0,0
 used by C04,fit_residual_sum_squares,not_reconstructed,0,0
+used by G01;G04,fit_rmse,not_reconstructed,0,0
 used by C04,folded_two_qubit_gate_count,not_reconstructed,0,0
 used by C06;C07,negative_mass,not_reconstructed,0,0
 used by C07,physical_overshoot,not_reconstructed,0,0
@@ -27,5 +32,7 @@ used by C15,signed_error,not_reconstructed,0,0
 used by C03,total_circuit_executions,not_reconstructed,0,0
 used by C11,total_shots_used,not_reconstructed,0,0
 used by C07,true_gain,not_reconstructed,0,0
+used by G04,v1_full,not_reconstructed,0,0
+used by G04,v1_runtime,not_reconstructed,0,0
 used by C05;C06;C07,validity_classification,not_reconstructed,0,0
 used by C12,workflow_total_shots,not_reconstructed,0,0

@@ -13,8 +13,10 @@ import math
 import random
 import re
 from collections.abc import Callable
+from fractions import Fraction
 from functools import lru_cache
 from pathlib import Path
+from statistics import NormalDist
 
 import numpy as np
 import pandas as pd
@@ -23,7 +25,7 @@ ROOT = Path(__file__).resolve().parents[1]
 RAW = ROOT / "results/raw"
 PROCESSED = ROOT / "results/processed"
 GENERATED = ROOT / "paper/generated"
-PAPER_PATH = ROOT / "paper/main.tex"
+PAPER_PATH = ROOT / "paper/main_v2.tex"
 CONFIG_PATH = ROOT / "experiments/configs/claim_ledger_v1.yaml"
 LEDGER_PATH = PROCESSED / "claim_ledger_v1.csv"
 PROVENANCE_PATH = PROCESSED / "paper_number_provenance_v1.csv"
@@ -36,6 +38,7 @@ MACRO_FILES = {
     "adaptive_metrics.tex": "src/generate_paper_assets.py",
     "audit_metrics.tex": "src/generate_audit_paper_assets.py",
     "final_metrics.tex": "src/final_synthesis.py",
+    "boundaries_metrics.tex": "src/generate_paper_v2_assets.py",
 }
 TABLE_SOURCES = {
     "regime_rows_v2.tex": ("src/generate_audit_paper_assets.py", "regime_labels_v2.csv"),
@@ -419,9 +422,7 @@ def _scored_policies() -> pd.DataFrame:
                 else:
                     category = "material"
                 backup = (*keys, fallback)
-                complete = backup in combined.index and (
-                    combined.repeats[backup] >= ANY_REPEATS
-                )
+                complete = backup in combined.index and (combined.repeats[backup] >= ANY_REPEATS)
                 backup_regret = (
                     float(combined.rmse[backup] - best[keys])
                     if backup in combined.index
@@ -473,13 +474,9 @@ def claim_selector_v1() -> dict[str, str]:
         "ShiftAlwaysReadout": f"{fixed['noise_shift', 'always_readout']:.4f}",
         "SelectorCatastrophic": _count(len(catastrophic)),
         "SelectorCatastrophicGHZ": _count((catastrophic.family == "ghz").sum()),
-        "SelectorCatastrophicLowSignal": _count(
-            (catastrophic.reference.abs() < LOW_SIGNAL).sum()
-        ),
+        "SelectorCatastrophicLowSignal": _count((catastrophic.reference.abs() < LOW_SIGNAL).sum()),
         "SelectorAbstentions": _count(len(abstained)),
-        "SelectorUnnecessaryAbstentions": _count(
-            abstained.unnecessary.sum()
-        ),
+        "SelectorUnnecessaryAbstentions": _count(abstained.unnecessary.sum()),
         "SelectorHarm": _count(harm["selector"]),
         "AlwaysRawHarm": _count(harm["always_raw"]),
         "StrongSignalCells": _count((strong.policy == "selector").sum()),
@@ -679,8 +676,10 @@ def claim_combined() -> dict[str, str]:
         & (primary.allocation_policy == "balanced")
     ]
     executions = (
-        width_two.calibration_executions + width_two.folded_executions
-    ).groupby(width_two.method).mean()
+        (width_two.calibration_executions + width_two.folded_executions)
+        .groupby(width_two.method)
+        .mean()
+    )
     return {
         "CombinedExpectationCells": _count(len(rmse)),
         "CombinedExpectationWins": _count((rmse.idxmin(axis=1) == "combined").sum()),
@@ -807,10 +806,13 @@ def claim_qaoa() -> dict[str, str]:
     done = overall.loc[overall.resolved].copy()
     near = decisions.loc[(decisions.regime == "near_tie") & decisions.resolved]
     near_rates = near.groupby(["total_selection_budget", "method"]).error.mean()
+
     def stratum_rmse(graph: str) -> tuple[float, float]:
-        group = done.loc[
-            (done.graph_id == graph) & (done.total_selection_budget == 4096)
-        ].groupby("method").energy_rmse.apply(lambda item: math.sqrt(np.mean(item**2)))
+        group = (
+            done.loc[(done.graph_id == graph) & (done.total_selection_budget == 4096)]
+            .groupby("method")
+            .energy_rmse.apply(lambda item: math.sqrt(np.mean(item**2)))
+        )
         return float(group["raw"]), float(group["readout"])
 
     ring = stratum_rmse("ring4")
@@ -970,9 +972,7 @@ def claim_selector_v2() -> dict[str, str]:
         ["circuit_id", "noise", "shots", "method", "status", "decision", "estimate"],
     )
     references = (
-        pd.read_csv(PROCESSED / "selector_v2_cells.csv")
-        .groupby("circuit_id")
-        .reference.first()
+        pd.read_csv(PROCESSED / "selector_v2_cells.csv").groupby("circuit_id").reference.first()
     )
     raw["error"] = raw.estimate - raw.circuit_id.map(references)
     rows = []
@@ -1101,6 +1101,505 @@ def claim_hardware_shots() -> dict[str, str]:
     }
 
 
+MANIFESTS = ROOT / "experiments/manifests"
+CONFIGS = ROOT / "experiments/configs"
+
+
+def _density_seed(*parts: object) -> int:
+    """Repeat the density-simulator seed rule, which hashes the same way as the main rule."""
+
+    return _derive_seed(*parts)
+
+
+def _frac(value: float, digits: int = 3) -> str:
+    return f"{value:.{digits}f}"
+
+
+def _counts(text: pd.Series) -> np.ndarray:
+    return np.array([[int(item) for item in row.split(";")] for row in text], dtype=float)
+
+
+def _split_evenly(total: int, parts: int) -> np.ndarray:
+    base, extra = divmod(int(total), parts)
+    return np.array([base + (1 if index < extra else 0) for index in range(parts)], dtype=float)
+
+
+def claim_signal_bands() -> dict[str, str]:
+    """Signal-band shares and the circuit-cluster contrast, from the truth table."""
+
+    truth = pd.read_csv(PROCESSED / "signal_v2_truth.csv")
+    manifest = pd.read_csv(MANIFESTS / "signal_v2_manifest.csv")
+    frame = truth.loc[
+        (truth.design == "global_135") & (truth.model == "linear") & (truth.noise != "none")
+    ].merge(manifest[["circuit_id", "signal_band"]], on="circuit_id")
+    gain = frame.raw_rmse - frame.fit_rmse
+    frame["outcome"] = np.select([gain > PRACTICAL, gain < -PRACTICAL], ["fit", "raw"], "tie")
+    low = frame.loc[frame.total_shot_budget == 4096]
+    near = low.loc[low.signal_band == "near_zero"]
+    edge = low.loc[low.signal_band == "boundary_adjacent"]
+    per = frame.groupby(["signal_band", "circuit_id"]).outcome.apply(
+        lambda values: (values == "fit").mean()
+    )
+    near_share = per.loc["near_zero"].to_numpy()
+    edge_share = per.loc["boundary_adjacent"].to_numpy()
+    rng = np.random.default_rng(_density_seed("signal-v2-contrast"))
+    draws = rng.choice(edge_share, (2000, len(edge_share))).mean(axis=1) - rng.choice(
+        near_share, (2000, len(near_share))
+    ).mean(axis=1)
+    return {
+        "NearZeroRawBetter": _percent(float((near.outcome == "raw").mean())),
+        "BoundaryFitBetter": _percent(float((edge.outcome == "fit").mean())),
+        "BandContrast": _frac(edge_share.mean() - near_share.mean()),
+        "BandContrastLow": _frac(float(np.quantile(draws, 0.025))),
+        "BandContrastHigh": _frac(float(np.quantile(draws, 0.975))),
+    }
+
+
+def signal_truth_deviation() -> float:
+    """Largest gap between the truth table's fit RMSE and its normal-theory value."""
+
+    truth = pd.read_csv(PROCESSED / "signal_v2_truth.csv")
+    truth = truth.loc[(truth.design == "global_135") & (truth.model == "linear")]
+    exact = pd.read_csv(PROCESSED / "signal_v2_exact.csv")
+    exact = exact.loc[exact.folding == "global"].pivot_table(
+        index=["circuit_id", "noise"], columns="factor", values="expectation"
+    )
+    weights = np.array([13.0, 4.0, -5.0]) / 12.0
+    worst = 0.0
+    for row in truth.itertuples():
+        means = exact.loc[(row.circuit_id, row.noise), [1, 3, 5]].to_numpy(float)
+        shots = _split_evenly(row.total_shot_budget, 3)
+        variance = float(np.sum(weights**2 * (1.0 - means**2) / shots))
+        expected = math.sqrt((means @ weights - row.reference) ** 2 + variance)
+        worst = max(worst, abs(expected - row.fit_rmse))
+    return worst
+
+
+def _wilson_high(errors: int, total: int) -> float:
+    rate = errors / total
+    scale = 1.0 + Z_95**2 / total
+    center = rate + Z_95**2 / (2.0 * total)
+    margin = Z_95 * math.sqrt(rate * (1.0 - rate) / total + Z_95**2 / (4.0 * total**2))
+    return (center + margin) / scale
+
+
+def claim_shots_reliability() -> dict[str, str]:
+    """Apply the frozen first-budget rule to the per-budget error counts."""
+
+    ladder = pd.read_csv(PROCESSED / "shots_reliability_ladder_v1.csv")
+    status: dict[str, list[str]] = {method: [] for method in ladder.method.unique()}
+    for (_, _, _, method), group in ladder.groupby(["task", "margin", "noise", "method"]):
+        ordered = group.sort_values("budget")
+        errors = np.rint(ordered.decision_error * ordered.repeats).astype(int)
+        highs = [
+            _wilson_high(int(error), int(total))
+            for error, total in zip(errors, ordered.repeats, strict=True)
+        ]
+        passing = np.array(highs) <= 0.10
+        tail = np.logical_and.accumulate(passing[::-1])[::-1]
+        if tail.any():
+            status[method].append("reached")
+        elif ordered.asymptotic_gap.iloc[0] <= 0.0:
+            status[method].append("blocked")
+        else:
+            status[method].append("not_reached")
+    values = {"ReliabilityCells": str(len(status["raw"]))}
+    for method, name in (
+        ("raw", "Raw"),
+        ("readout", "Readout"),
+        ("zne", "Zne"),
+        ("combined", "Combined"),
+    ):
+        values[f"Reached{name}"] = str(status[method].count("reached"))
+        values[f"Blocked{name}"] = str(status[method].count("blocked"))
+    return values
+
+
+def _two_sided_sign_test(first_only: int, discordant: int) -> float:
+    """Exact two-sided binomial test at one half, summing outcomes no likelier than observed."""
+
+    if discordant == 0:
+        return 1.0
+    weights = [math.comb(discordant, count) for count in range(discordant + 1)]
+    observed = weights[first_only]
+    total = sum(weight for weight in weights if weight <= observed * (1.0 + 1e-7))
+    return min(1.0, float(Fraction(total, 2**discordant)))
+
+
+def _paired(first: pd.Series, second: pd.Series, delta: float, alpha: float) -> dict[str, object]:
+    joined = pd.concat([first.rename("a"), second.rename("b")], axis=1).dropna()
+    a, b = joined.a.astype(bool), joined.b.astype(bool)
+    first_only, second_only = int((a & ~b).sum()), int((~a & b).sum())
+    pairs = len(joined)
+    z = NormalDist().inv_cdf(1.0 - alpha)
+    low_count, high_count, total = first_only + 0.5, second_only + 0.5, pairs + 2.0
+    center = (high_count - low_count) / total
+    spread = (
+        z
+        * math.sqrt(max(low_count + high_count - (high_count - low_count) ** 2 / total, 0.0))
+        / total
+    )
+    return {
+        "pairs": pairs,
+        "first_rate": float(a.mean()),
+        "second_rate": float(b.mean()),
+        "p": _two_sided_sign_test(first_only, first_only + second_only),
+        "inside": bool(center - spread >= -delta and center + spread <= delta),
+    }
+
+
+def _holm(values: list[float], alpha: float) -> list[bool]:
+    order = sorted(range(len(values)), key=values.__getitem__)
+    survive = [False] * len(values)
+    for rank, index in enumerate(order):
+        if values[index] > alpha / (len(values) - rank):
+            break
+        survive[index] = True
+    return survive
+
+
+def _classes(rows: list[dict[str, object]]) -> list[str]:
+    survive = _holm([float(row["p"]) for row in rows], 0.05)
+    return [
+        "resolved" if flag else ("close" if row["inside"] else "underpowered")
+        for flag, row in zip(survive, rows, strict=True)
+    ]
+
+
+def claim_confirmatory() -> dict[str, str]:
+    """Rebuild every confirmatory and holdout comparison from repeat rows."""
+
+    plan = pd.read_csv(MANIFESTS / "confirmatory_v1_manifest.csv")
+    settings = json.loads((CONFIGS / "confirmatory_v1.yaml").read_text(encoding="utf-8"))
+    exact = _raw(
+        "confirmatory_exact_v1",
+        ["group", "task", "margin", "noise", "budget", "method", "repeat", "gap_estimate"],
+    )
+    # A decision is wrong unless the estimated gap favours the right candidate.
+    exact["error"] = ~(exact.gap_estimate > 0.0)
+    qaoa = pd.read_csv(RAW / "confirmatory_qaoa_v1.csv", keep_default_na=False)
+    selections = []
+    keys = ["graph_id", "total_selection_budget", "method", "repeat"]
+    for key, group in qaoa.groupby(keys, sort=True):
+        if group.status.eq("complete").all():
+            pick = group.sort_values(
+                ["corrected_or_extrapolated_estimate", "candidate_id"], ascending=[False, True]
+            ).iloc[0]
+            error = float(group.exact_ideal_energy.max() - pick.exact_ideal_energy > 1e-12)
+        else:
+            error = math.nan
+        selections.append({**dict(zip(keys, key, strict=True)), "error": error})
+    selection = pd.DataFrame(selections)
+    alpha = float(plan.alpha_per_comparison.iloc[0])
+    rows = []
+    for row in plan.itertuples():
+        if row.engine == "aer":
+            part = selection.loc[
+                (selection.graph_id == row.task) & (selection.total_selection_budget == row.budget)
+            ]
+        else:
+            part = exact.loc[
+                (exact.group == "confirmatory")
+                & (exact.task == row.task)
+                & (exact.margin == row.margin)
+                & (exact.noise == row.noise)
+                & (exact.budget == row.budget)
+            ]
+        series = [
+            part.loc[part.method == method].set_index("repeat")["error"]
+            for method in (row.first, row.second)
+        ]
+        rows.append(
+            {"role": row.role, "cell": row.cell, **_paired(*series, row.minimum_difference, alpha)}
+        )
+    holdout = []
+    delta = float(settings["holdout_minimum_difference"])
+    hold = exact.loc[exact.group == "holdout"]
+    for _, group in hold.groupby(["task", "margin", "noise", "budget"], sort=True):
+        for first, second in settings["holdout_comparisons"]:
+            series = [
+                group.loc[group.method == method].set_index("repeat")["error"]
+                for method in (first, second)
+            ]
+            holdout.append(_paired(*series, delta, 0.05))
+    core = next(
+        row
+        for row in rows
+        if row["role"] == "core_counterexample" and str(row["cell"]).endswith("16384")
+    )
+    confirm, held = _classes(rows), _classes(holdout)
+    values = {
+        "CoreRawError": _frac(float(core["first_rate"])),
+        "CoreZneError": _frac(float(core["second_rate"])),
+        "CorePairs": str(core["pairs"]),
+        "CorePValue": _frac(float(core["p"])),
+        "ConfirmatoryCount": str(len(rows)),
+        "HoldoutComparisons": str(len(holdout)),
+    }
+    for prefix, labels in (("Confirm", confirm), ("Holdout", held)):
+        values[f"{prefix}Resolved"] = str(labels.count("resolved"))
+        values[f"{prefix}Close"] = str(labels.count("close"))
+        values[f"{prefix}Underpowered"] = str(labels.count("underpowered"))
+    return values
+
+
+def _rates(accepted: pd.Series, truth: pd.Series) -> tuple[str, str]:
+    accepted, truth = accepted.astype(bool), truth.astype(bool)
+    false_accept = int((accepted & ~truth).sum())
+    true_reject = int((~accepted & ~truth).sum())
+    false_reject = int((~accepted & truth).sum())
+    true_accept = int((accepted & truth).sum())
+    return (
+        _frac(false_accept / (false_accept + true_reject)),
+        _frac(false_reject / (false_reject + true_accept)),
+    )
+
+
+def claim_zne_gate_v2() -> dict[str, str]:
+    """Holdout error rates: the v2 slope check rebuilt from counts, v1 from its decisions."""
+
+    manifest = pd.read_csv(MANIFESTS / "signal_v2_manifest.csv")
+    holdout_ids = set(manifest.loc[manifest.split == "holdout", "circuit_id"])
+    repeats = _raw(
+        "signal_v2_repeats",
+        ["circuit_id", "noise", "total_shot_budget", "repeat", "global_135_plus"],
+    )
+    repeats = repeats.loc[repeats.circuit_id.isin(holdout_ids)]
+    truth = pd.read_csv(PROCESSED / "signal_v2_truth.csv")
+    truth = truth.loc[(truth.design == "global_135") & (truth.model == "linear")].set_index(
+        ["circuit_id", "noise", "total_shot_budget"]
+    )
+    centered = np.array([-2.0, 0.0, 2.0])
+    accepted, clipped_truth = [], []
+    for key, group in repeats.groupby(["circuit_id", "noise", "total_shot_budget"], sort=True):
+        shots = _split_evenly(int(key[2]), 3)
+        values = 2.0 * _counts(group.sort_values("repeat").global_135_plus) / shots - 1.0
+        slopes = values @ centered
+        accepted.append(bool(np.mean(np.sign(slopes) == np.sign(slopes.mean())) >= 0.9))
+        row = truth.loc[key]
+        clipped_truth.append(bool(row.raw_rmse - row.fit_rmse_clipped > PRACTICAL))
+    v2_fa, v2_fr = _rates(pd.Series(accepted), pd.Series(clipped_truth))
+    conditions = pd.read_csv(PROCESSED / "zne_gate_v2_conditions.csv")
+    conditions = conditions.loc[conditions.split == "holdout"]
+    improved = conditions.raw_rmse - conditions.fit_rmse > PRACTICAL
+    full_fa, full_fr = _rates(conditions.v1_full, improved)
+    runtime_fa, runtime_fr = _rates(conditions.v1_runtime, improved)
+    return {
+        "GateVTwoFA": v2_fa,
+        "GateVTwoFR": v2_fr,
+        "GateVOneFullFA": full_fa,
+        "GateVOneFullFR": full_fr,
+        "GateVOneRuntimeFA": runtime_fa,
+        "GateVOneRuntimeFR": runtime_fr,
+    }
+
+
+SELECTOR_ARRAYS = (
+    "base_raw",
+    "base_readout",
+    "pilot_raw",
+    "pilot_raw_se",
+    "pilot_readout",
+    "pilot_fit",
+    "pilot_fit_se",
+    "branch_raw",
+    "branch_raw_se",
+    "branch_readout",
+    "branch_readout_se",
+    "branch_combined",
+    "branch_combined_se",
+)
+
+
+@lru_cache(maxsize=1)
+def selector_v3_holdout() -> tuple[pd.DataFrame, dict[str, np.ndarray]]:
+    manifest = pd.read_csv(MANIFESTS / "selector_v3_manifest.csv")
+    ideal = (
+        manifest.sort_values(["task_id", "candidate"])
+        .groupby("task_id")
+        .agg(
+            ideal=("ideal_expectation", list),
+            split=("split", "first"),
+            gap_class=("gap_class", "first"),
+        )
+        .reset_index()
+    )
+    raw = pd.read_csv(RAW / "selector_v3_repeats.csv").merge(ideal, on="task_id")
+    frame = raw.loc[raw.split == "holdout"].reset_index(drop=True)
+    data = {
+        name: np.array([[float(item) for item in text.split(";")] for text in frame[name]])
+        for name in SELECTOR_ARRAYS
+    }
+    data["ideal"] = np.array(frame.ideal.tolist(), dtype=float)
+    return frame, data
+
+
+def claim_selector_v3() -> dict[str, str]:
+    """Apply the frozen selector rule to holdout repeat rows and score it."""
+
+    frame, data = selector_v3_holdout()
+    rules = pd.read_csv(PROCESSED / "selector_v3_rule_selection.csv")
+    rule = rules.loc[rules.selected.astype(bool)].iloc[0]
+    ideal = data["ideal"]
+    index = np.arange(len(frame))
+    best = ideal.max(axis=1)
+    order = np.argsort(-data["pilot_readout"], axis=1, kind="stable")[:, :2]
+    rows = index[:, None]
+    shift = np.abs(data["pilot_fit"][rows, order]) - np.abs(data["pilot_readout"][rows, order])
+    strong = np.all(shift >= float(rule.z_deviate) * data["pilot_fit_se"][rows, order], axis=1)
+    branch = np.where(strong, 1, 0)
+    if bool(rule.allow_raw):
+        unresolved = np.all(
+            np.abs(data["pilot_readout"] - data["pilot_raw"]) < data["pilot_raw_se"], axis=1
+        )
+        branch = np.where(unresolved & ~strong, 2, branch)
+    estimates = np.stack([data["branch_readout"], data["branch_combined"], data["branch_raw"]])
+    errors = np.stack(
+        [data["branch_readout_se"], data["branch_combined_se"], data["branch_raw_se"]]
+    )
+    chosen, chosen_errors = estimates[branch, index], errors[branch, index]
+    pick = np.argmax(chosen, axis=1)
+    ordered = np.sort(chosen, axis=1)
+    runner = np.argsort(chosen, axis=1)[:, -2]
+    joint = np.hypot(chosen_errors[index, pick], chosen_errors[index, runner])
+    abstain = (frame.drift_statistic.to_numpy(float) >= 3.0) | (
+        ordered[:, -1] - ordered[:, -2] < float(rule.z_separate) * joint
+    )
+    regret = best - ideal[index, pick]
+
+    def baseline(column: str) -> float:
+        return float(np.mean(best - ideal[index, np.argmax(data[column], axis=1)]))
+
+    return {
+        "ThreeRegretSelector": f"{regret.mean():.4f}",
+        "ThreeCoverageSelector": _frac(float((~abstain).mean()), 2),
+        "ReadoutThreeRegret": f"{baseline('base_readout'):.4f}",
+        "RawThreeRegret": f"{baseline('base_raw'):.4f}",
+    }
+
+
+def claim_certification_v3() -> dict[str, str]:
+    """Certification outcomes on holdout repeat rows, scored against ideal values."""
+
+    frame, data = selector_v3_holdout()
+    ideal = data["ideal"]
+    index = np.arange(len(frame))
+    best = ideal[index, np.argmax(ideal, axis=1)]
+
+    def outcome(passed: np.ndarray, column: str) -> np.ndarray:
+        winner = frame[column].to_numpy(int)
+        return passed & (ideal[index, np.where(winner >= 0, winner, 0)] < best)
+
+    both = frame.certified_look.to_numpy() > 0
+    layer = frame.l1_look.to_numpy() > 0
+    naive = frame.naive_pass.astype(str).str.lower().eq("true").to_numpy()
+    wrong_both = outcome(both, "certified_winner")
+    near = (frame.gap_class == "near_tie").to_numpy()
+    over = (frame.noise == "coherent_overrotation").to_numpy()
+    return {
+        "BothLayersCertified": _frac(float(both.mean())),
+        "LayerOneCertified": _frac(float(layer.mean())),
+        "NaiveCertified": _frac(float(naive.mean())),
+        "BothLayersFalse": f"{wrong_both.mean():.4f}",
+        "NaiveFalse": f"{outcome(naive, 'naive_winner').mean():.4f}",
+        "CertWrongNearTie": _percent(float(wrong_both[near].sum() / both[near].sum())),
+        "CertWrongOverrotation": _percent(float(wrong_both[over].sum() / both[over].sum())),
+    }
+
+
+def _bootstrap_low(raw_errors: np.ndarray, method_errors: np.ndarray, seed: int) -> float:
+    rng = np.random.default_rng(seed)
+    picks = rng.integers(0, len(raw_errors), size=(2000, len(raw_errors)))
+    difference = np.sqrt(np.nanmean(method_errors[picks] ** 2, axis=1)) - np.sqrt(
+        np.nanmean(raw_errors[picks] ** 2, axis=1)
+    )
+    return float(np.quantile(difference, 0.025))
+
+
+def claim_readout_boundaries() -> dict[str, str]:
+    """Full-matrix failure and calibration shares, and when each warning fired."""
+
+    feasibility = _raw(
+        "readout_feasibility_v2",
+        [
+            "width",
+            "model",
+            "regime",
+            "regime_setting",
+            "distribution",
+            "candidate_pair",
+            "method",
+            "status",
+            "target_shots",
+            "calibration_shots",
+        ],
+    )
+    full = feasibility.loc[feasibility.method == "full_matrix"]
+    keys = ["width", "model", "regime", "regime_setting", "distribution", "candidate_pair"]
+    failure = full.groupby(keys).status.apply(lambda s: float((s != "complete").mean()))
+    failure = failure.reset_index()
+    low = failure.loc[
+        (failure.width == 8) & (failure.regime == "fixed_total") & (failure.regime_setting == 4096)
+    ].status
+    quality = full.loc[(full.regime == "fixed_quality") & (full.width >= 8)]
+    share = quality.calibration_shots / (quality.calibration_shots + quality.target_shots)
+    settings = json.loads((CONFIGS / "readout_boundaries_v1.yaml").read_text(encoding="utf-8"))
+    pairs = settings["candidates"]
+    mismatch = _raw(
+        "readout_mismatch_dose_v1",
+        [
+            "width",
+            "scenario",
+            "lambda",
+            "distribution",
+            "candidate_pair",
+            "method",
+            "repeat",
+            "estimate_high",
+            "condition_number",
+            "check_z",
+        ],
+    )
+    mismatch["error"] = mismatch.estimate_high - mismatch.candidate_pair.map(
+        lambda name: pairs[name][0]
+    )
+    group_keys = ["width", "scenario", "distribution", "candidate_pair"]
+    check, condition = [], []
+    for key, part in mismatch.groupby(group_keys, sort=True):
+        curves = part.groupby(["method", "lambda"]).agg(
+            rmse=("error", lambda e: float(np.sqrt(np.nanmean(e**2)))),
+            condition=("condition_number", "median"),
+            alarm=("check_z", lambda z: float((z > 3.0).mean())),
+        )
+        for method in sorted(set(part.method) - {"none"}):
+            curve = curves.loc[method].sort_index()
+            lambdas = curve.index.to_numpy()
+            resolved = []
+            for weight in lambdas:
+                chosen = part.loc[part["lambda"] == weight]
+                base = chosen.loc[chosen.method == "none"].sort_values("repeat").error
+                other = chosen.loc[chosen.method == method].sort_values("repeat").error
+                seed = _density_seed("mismatch-threshold", *key, method, weight)
+                if _bootstrap_low(base.to_numpy(), other.to_numpy(), seed) > 0.0:
+                    resolved.append(weight)
+            target = min(resolved) if resolved else math.nan
+            for flags, store in (
+                (curve.alarm >= 0.5, check),
+                (curve.condition > 2.0 * float(curve.condition.iloc[0]), condition),
+            ):
+                fired = lambdas[flags.to_numpy()]
+                first = float(fired.min()) if fired.size else math.nan
+                store.append(not math.isnan(first) and (math.isnan(target) or first <= target))
+    return {
+        "FullFailLow": _percent(float(low.min())),
+        "FullFailHigh": _percent(float(low.max())),
+        "FullQualityShareLow": _percent(float(share.min())),
+        "FullQualityShareHigh": _percent(float(share.max())),
+        "CheckWarnShare": _percent(float(np.mean(check))),
+        "ConditionWarnShare": _percent(float(np.mean(condition))),
+    }
+
+
 RECOMPUTE: dict[str, Callable[[], dict[str, str]]] = {
     "grid": claim_grid,
     "negative_gains": claim_negative_gains,
@@ -1117,6 +1616,13 @@ RECOMPUTE: dict[str, Callable[[], dict[str, str]]] = {
     "selector_v2": claim_selector_v2,
     "envelope": claim_envelope_diagnostics,
     "hardware_shots": claim_hardware_shots,
+    "signal_bands": claim_signal_bands,
+    "shots_reliability": claim_shots_reliability,
+    "confirmatory": claim_confirmatory,
+    "zne_gate_v2": claim_zne_gate_v2,
+    "selector_v3": claim_selector_v3,
+    "certification_v3": claim_certification_v3,
+    "readout_boundaries": claim_readout_boundaries,
 }
 
 
@@ -1158,9 +1664,7 @@ def compare_claim(
         recomputed = values.get(item["name"])
         compared.append(f"{item['name']}={recomputed}")
         if recomputed != item["value"]:
-            mismatches.append(
-                f"{item['name']}: printed {item['value']}, recomputed {recomputed}"
-            )
+            mismatches.append(f"{item['name']}: printed {item['value']}, recomputed {recomputed}")
         if " ".join(item["context"].split()) not in text:
             mismatches.append(f"{item['name']}: context not found in paper")
         if item["value"] not in item["context"].replace("\\%", "%"):
@@ -1466,7 +1970,14 @@ def coverage_summary(ledger: pd.DataFrame, provenance: pd.DataFrame) -> pd.DataF
 def audit_sample(ledger: pd.DataFrame, size: int, seed: int) -> pd.DataFrame:
     """Draw computed claims with a declared seed and report how each was verified."""
 
-    computed = sorted(ledger.loc[ledger.claim_type == "computed", "claim_id"])
+    # The declared audit drew from the claims that existed when it was declared; later claims
+    # are checked by the ledger but do not change which claims that audit sampled.
+    population = set(CONFIG["audit_population"])
+    computed = sorted(
+        claim
+        for claim in ledger.loc[ledger.claim_type == "computed", "claim_id"]
+        if claim in population
+    )
     chosen = random.Random(seed).sample(computed, size)
     columns = [
         "claim_id",

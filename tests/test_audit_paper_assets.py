@@ -5,7 +5,7 @@ import pandas as pd
 
 ROOT = Path(__file__).resolve().parents[1]
 GENERATED = ROOT / "paper/generated"
-PAPER = (ROOT / "paper/main.tex").read_text(encoding="utf-8")
+PAPER = (ROOT / "paper/main_v2.tex").read_text(encoding="utf-8")
 
 
 def _macros() -> dict[str, str]:

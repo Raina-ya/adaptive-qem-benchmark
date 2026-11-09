@@ -1,0 +1,67 @@
+name: Rebuild long generators
+
+# The release scope is too long for one 350-minute job. Each generator that routine CI does not
+# rebuild runs here as its own job: its committed outputs are deleted in a clean clone, it runs
+# with the locked dependencies, and its outputs are compared with the committed ones.
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+env:
+  OPENBLAS_NUM_THREADS: "1"
+  OMP_NUM_THREADS: "1"
+  MKL_NUM_THREADS: "1"
+  PYTHONHASHSEED: "0"
+  MPLBACKEND: Agg
+
+jobs:
+  rebuild:
+    runs-on: ubuntu-latest
+    timeout-minutes: 350
+    strategy:
+      fail-fast: false
+      matrix:
+        module:
+          - src.generate_days08_12
+          - src.generate_decision_benchmark
+          - src.generate_combined_qem
+          - src.generate_readout_scalability_benchmark
+          - src.generate_readout_mismatch_benchmark
+          - src.generate_qaoa_selection
+          - src.generate_selector_holdout_v2
+          - src.generate_runtime_report
+          - src.generate_signal_v2
+          - src.shots_to_reliability
+          - src.confirmatory_v1
+          - src.confirmatory_qaoa_v1
+          - src.generate_selector_v3
+          - src.generate_readout_feasibility_v2
+          - src.generate_readout_mismatch_dose
+          - src.generate_drift_policy
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install locked dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install --only-binary=:all: -r requirements-ci.txt
+      - name: Rebuild one generator from a clean clone and compare
+        run: >
+          python -m src.verify_generated_artifacts
+          --scope release
+          --module "${{ matrix.module }}"
+          --run-log-output audit-logs
+      - name: Upload run logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: rebuild-${{ matrix.module }}
+          path: audit-logs/
+          retention-days: 90
