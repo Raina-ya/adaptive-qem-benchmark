@@ -207,9 +207,9 @@ def test_bootstrap_comparison_is_labeled_as_sensitivity() -> None:
 def test_coverage_summary_states_what_is_not_verified(ledger: pd.DataFrame) -> None:
     summary = claim_ledger.coverage_summary(ledger, provenance_table(ledger))
     values = dict(zip(summary.metric, summary.value, strict=True))
-    assert values["computed_claims_checked"] == 22
-    assert values["printed_numbers_checked"] == 189
-    assert values["generated_tables"] == 8
+    assert values["computed_claims_checked"] == 23
+    assert values["printed_numbers_checked"] == 195
+    assert values["generated_tables"] == 9
     assert values["figures"] == 9
     assert values["generated_tables_values_recomputed"] == 0
     assert values["figures_values_recomputed"] == 0
@@ -263,3 +263,15 @@ def test_signal_truth_table_agrees_with_normal_theory() -> None:
 def test_new_audit_claims_do_not_change_the_declared_sample() -> None:
     population = set(CONFIG["audit_population"])
     assert population == {f"C{index:02d}" for index in range(1, 16)}
+
+
+def test_rewritten_label_rule_reproduces_the_frozen_labels() -> None:
+    summary = pd.read_csv(claim_ledger.PROCESSED / "benchmark_summary_v1.csv")
+    frozen = pd.read_csv(claim_ledger.PROCESSED / "regime_labels_v2.csv")
+    keys = ["family", "circuit_id", "width", "depth", "noise", "shots"]
+    rebuilt = [
+        claim_ledger._grid_label(group, 0.005, 0.01)
+        for _, group in summary.groupby(keys, sort=True)
+    ]
+    expected = frozen.sort_values(keys).oracle_label.tolist()
+    assert rebuilt == expected

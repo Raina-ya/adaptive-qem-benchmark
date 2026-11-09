@@ -35,8 +35,8 @@ macro,MismatchDecisionMinimum,0.88,False,src/generate_paper_assets.py,paper/gene
 macro,MismatchDecisionMaximum,0.94,False,src/generate_paper_assets.py,paper/generated/adaptive_metrics.tex,,C08,matches_printed_value,raw_recomputed,True,True,not_applicable,not_applicable
 macro,VTwoPracticalTies,26,True,src/generate_audit_paper_assets.py,paper/generated/audit_metrics.tex,,C03,matches_printed_value,raw_recomputed,True,True,not_applicable,not_applicable
 macro,VTwoRawWinners,77,True,src/generate_audit_paper_assets.py,paper/generated/audit_metrics.tex,,C03,matches_printed_value,raw_recomputed,True,True,not_applicable,not_applicable
-macro,VTwoReadoutWinners,18,True,src/generate_audit_paper_assets.py,paper/generated/audit_metrics.tex,,C03,matches_printed_value,raw_recomputed,True,True,not_applicable,not_applicable
-macro,VTwoZNEWinners,14,True,src/generate_audit_paper_assets.py,paper/generated/audit_metrics.tex,,C03,matches_printed_value,raw_recomputed,True,True,not_applicable,not_applicable
+macro,VTwoReadoutWinners,18,False,src/generate_audit_paper_assets.py,paper/generated/audit_metrics.tex,,C03,matches_printed_value,raw_recomputed,True,True,not_applicable,not_applicable
+macro,VTwoZNEWinners,14,False,src/generate_audit_paper_assets.py,paper/generated/audit_metrics.tex,,C03,matches_printed_value,raw_recomputed,True,True,not_applicable,not_applicable
 macro,VTwoInconclusive,9,False,src/generate_audit_paper_assets.py,paper/generated/audit_metrics.tex,,C03,matches_printed_value,raw_recomputed,True,True,not_applicable,not_applicable
 macro,RawWinsAccuracy,40,True,src/generate_audit_paper_assets.py,paper/generated/audit_metrics.tex,,C03,matches_printed_value,raw_recomputed,True,True,not_applicable,not_applicable
 macro,RawWinsCostOnly,37,True,src/generate_audit_paper_assets.py,paper/generated/audit_metrics.tex,,C03,matches_printed_value,raw_recomputed,True,True,not_applicable,not_applicable
@@ -156,6 +156,12 @@ macro,ReliabilityCells,40,True,src/generate_paper_v2_assets.py,paper/generated/b
 macro,ThreeCostRatioSelector,1.63,True,src/generate_paper_v2_assets.py,paper/generated/boundaries_metrics.tex,,G08,not_computable_source_traced_only,source_only_not_recomputed,True,False,not_applicable,not_applicable
 macro,ThreeCoverageSelector,0.64,False,src/generate_paper_v2_assets.py,paper/generated/boundaries_metrics.tex,,G05,matches_printed_value,raw_recomputed,True,True,not_applicable,not_applicable
 macro,ThreeRegretSelector,0.0031,True,src/generate_paper_v2_assets.py,paper/generated/boundaries_metrics.tex,,G05,matches_printed_value,raw_recomputed,True,True,not_applicable,not_applicable
+macro,ThresholdNearZeroTwenty,0.0%,True,src/generate_paper_v2_assets.py,paper/generated/boundaries_metrics.tex,,G09,matches_printed_value,processed_recomputed,True,True,not_applicable,not_applicable
+macro,ThresholdRawTen,46,True,src/generate_paper_v2_assets.py,paper/generated/boundaries_metrics.tex,,G09,matches_printed_value,processed_recomputed,True,True,not_applicable,not_applicable
+macro,ThresholdRawTwenty,12,True,src/generate_paper_v2_assets.py,paper/generated/boundaries_metrics.tex,,G09,matches_printed_value,processed_recomputed,True,True,not_applicable,not_applicable
+macro,ThresholdReadoutHigh,19,True,src/generate_paper_v2_assets.py,paper/generated/boundaries_metrics.tex,,G09,matches_printed_value,processed_recomputed,True,True,not_applicable,not_applicable
+macro,ThresholdReadoutLow,18,True,src/generate_paper_v2_assets.py,paper/generated/boundaries_metrics.tex,,G09,matches_printed_value,processed_recomputed,True,True,not_applicable,not_applicable
+macro,ThresholdTieTen,62,True,src/generate_paper_v2_assets.py,paper/generated/boundaries_metrics.tex,,G09,matches_printed_value,processed_recomputed,True,True,not_applicable,not_applicable
 generated_table,regime_rows_v2.tex,,True,src/generate_audit_paper_assets.py,paper/generated/regime_rows_v2.tex,regime_labels_v2.csv,,traced_not_recomputed,source_only_not_recomputed,True,False,not_applicable,not_applicable
 generated_table,audit_category_rows.tex,,True,src/generate_audit_paper_assets.py,paper/generated/audit_category_rows.tex,selector_audit_v1.csv,,traced_not_recomputed,source_only_not_recomputed,True,False,not_applicable,not_applicable
 generated_table,envelope_rows.tex,,True,src/generate_audit_paper_assets.py,paper/generated/envelope_rows.tex,method_reliability_envelopes_v1.csv,,traced_not_recomputed,source_only_not_recomputed,True,False,not_applicable,not_applicable
@@ -164,6 +170,7 @@ generated_table,calibration_lifetime_rows.tex,,True,src/generate_audit_paper_ass
 generated_table,selector_v2_rows.tex,,False,src/generate_audit_paper_assets.py,paper/generated/selector_v2_rows.tex,selector_v2_cells.csv,,traced_not_recomputed,source_only_not_recomputed,True,False,not_applicable,not_applicable
 generated_table,hardware_cell_rows.tex,,True,src/final_synthesis.py,paper/generated/hardware_cell_rows.tex,hardware_manifest_v1.csv,,traced_not_recomputed,source_only_not_recomputed,True,False,not_applicable,not_applicable
 generated_table,evidence_matrix_rows.tex,,True,src/final_synthesis.py,paper/generated/evidence_matrix_rows.tex,final_evidence_matrix_v1.csv,,traced_not_recomputed,source_only_not_recomputed,True,False,not_applicable,not_applicable
+generated_table,threshold_sensitivity_rows.tex,,True,src/generate_paper_v2_assets.py,paper/generated/threshold_sensitivity_rows.tex,benchmark_summary_v1.csv,,traced_not_recomputed,source_only_not_recomputed,True,False,not_applicable,not_applicable
 figure,fig_certification.png,,True,src/generate_paper_v2_assets.py,paper/figures/fig_certification.png,,,traced_not_recomputed,source_only_not_recomputed,True,False,False,False
 figure,fig_drift_policy.png,,True,src/generate_paper_v2_assets.py,paper/figures/fig_drift_policy.png,,,traced_not_recomputed,source_only_not_recomputed,True,False,False,False
 figure,fig_mismatch_dose.png,,True,src/generate_paper_v2_assets.py,paper/figures/fig_mismatch_dose.png,,,traced_not_recomputed,source_only_not_recomputed,True,False,False,False

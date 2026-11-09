@@ -181,3 +181,15 @@ def test_log_match_accepts_either_line_ending(tmp_path: Path) -> None:
     crlf = hashlib.sha256(b"x\r\n1\r\n").hexdigest()
     assert provenance._matches_log(path, crlf)
     assert not provenance._matches_log(path, "0" * 64)
+
+
+def test_differences_report_how_many_rows_and_how_far() -> None:
+    from src.verify_generated_artifacts import _difference_detail
+
+    left, right = pd.Series([1.0, 2.0, 3.0]), pd.Series([1.0, 2.5, 3.0])
+    detail = _difference_detail(left, right, [True, False, True], numeric=True)
+    assert detail == " in 1 of 3 rows; largest absolute difference 0.5"
+    words = _difference_detail(
+        pd.Series(["complete", "failed"]), pd.Series(["complete", "complete"]), [True, False], False
+    )
+    assert words == " in 1 of 2 rows; first at row 1: 'failed' vs 'complete'"

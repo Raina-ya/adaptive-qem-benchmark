@@ -55,6 +55,10 @@ TABLE_SOURCES = {
     "selector_v2_rows.tex": ("src/generate_audit_paper_assets.py", "selector_v2_cells.csv"),
     "hardware_cell_rows.tex": ("src/final_synthesis.py", "hardware_manifest_v1.csv"),
     "evidence_matrix_rows.tex": ("src/final_synthesis.py", "final_evidence_matrix_v1.csv"),
+    "threshold_sensitivity_rows.tex": (
+        "src/generate_paper_v2_assets.py",
+        "benchmark_summary_v1.csv",
+    ),
 }
 CONFIG = json.loads(CONFIG_PATH.read_text(encoding="utf-8"))
 PRACTICAL = float(CONFIG["practical_rmse_threshold"])
@@ -1600,6 +1604,62 @@ def claim_readout_boundaries() -> dict[str, str]:
     }
 
 
+def _grid_label(group: pd.DataFrame, threshold: float, penalty: float) -> str:
+    """The corrected cost-aware label rule, written out again with a variable threshold."""
+
+    complete = group.loc[group.complete_repeats > 0]
+    if set(complete.method) != {"raw", "readout", "zne"} or (complete.complete_repeats != 50).any():
+        return "inconclusive"
+    largest = max(float(complete.execution_overhead.max()), 1.0)
+    utility = complete.rmse + penalty * complete.execution_overhead / largest
+    ordered = complete.assign(utility=utility).sort_values(["utility", "method"])
+    winner, runner_up = ordered.iloc[0], ordered.iloc[1]
+    raw = complete.loc[complete.method == "raw"].iloc[0]
+    if float(runner_up.utility - winner.utility) < threshold:
+        return "practical_tie"
+    if winner.method == "raw":
+        return "raw"
+    if float(winner.rmse_gain_ci_low) <= 0.0 <= float(winner.rmse_gain_ci_high):
+        return "inconclusive"
+    if float(raw.rmse - winner.rmse) < threshold:
+        return "practical_tie"
+    return str(winner.method)
+
+
+def claim_threshold_sensitivity() -> dict[str, str]:
+    """Label counts and signal shares if the 0.005 threshold had been another value."""
+
+    settings = json.loads((CONFIGS / "selector_audit_v1.yaml").read_text(encoding="utf-8"))
+    summary = pd.read_csv(PROCESSED / "benchmark_summary_v1.csv")
+    keys = ["family", "circuit_id", "width", "depth", "noise", "shots"]
+    groups = [group for _, group in summary.groupby(keys, sort=True)]
+
+    def counts(threshold: float) -> dict[str, int]:
+        labels = [_grid_label(g, threshold, float(settings["overhead_penalty"])) for g in groups]
+        return {label: labels.count(label) for label in set(labels)}
+
+    truth = pd.read_csv(PROCESSED / "signal_v2_truth.csv")
+    manifest = pd.read_csv(MANIFESTS / "signal_v2_manifest.csv")
+    frame = truth.loc[
+        (truth.design == "global_135")
+        & (truth.model == "linear")
+        & (truth.noise != "none")
+        & (truth.total_shot_budget == 4096)
+    ].merge(manifest[["circuit_id", "signal_band"]], on="circuit_id")
+    gain = frame.raw_rmse - frame.fit_rmse
+    near = gain[frame.signal_band == "near_zero"]
+    at = {threshold: counts(threshold) for threshold in (0.002, 0.005, 0.01, 0.02)}
+    readout = [table.get("readout", 0) for table in at.values()]
+    return {
+        "ThresholdRawTen": str(at[0.01].get("raw", 0)),
+        "ThresholdTieTen": str(at[0.01].get("practical_tie", 0)),
+        "ThresholdRawTwenty": str(at[0.02].get("raw", 0)),
+        "ThresholdNearZeroTwenty": _percent(float((near < -0.02).mean())),
+        "ThresholdReadoutLow": str(min(readout)),
+        "ThresholdReadoutHigh": str(max(readout)),
+    }
+
+
 RECOMPUTE: dict[str, Callable[[], dict[str, str]]] = {
     "grid": claim_grid,
     "negative_gains": claim_negative_gains,
@@ -1623,6 +1683,7 @@ RECOMPUTE: dict[str, Callable[[], dict[str, str]]] = {
     "selector_v3": claim_selector_v3,
     "certification_v3": claim_certification_v3,
     "readout_boundaries": claim_readout_boundaries,
+    "threshold_sensitivity": claim_threshold_sensitivity,
 }
 
 

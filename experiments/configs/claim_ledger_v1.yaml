@@ -1010,6 +1010,40 @@
       ]
     },
     {
+      "claim_id": "G09",
+      "claim_text": "The share of raw wins depends on the 0.005 practical threshold: at 0.01 there are 46 raw wins and 62 practical ties, at 0.02 only 12 raw wins; readout wins stay at 18 to 19.",
+      "claim_type": "computed",
+      "recompute": "threshold_sensitivity",
+      "source_raw_files": [],
+      "source_processed_inputs": [
+        "results/processed/benchmark_summary_v1.csv",
+        "results/processed/signal_v2_truth.csv",
+        "experiments/manifests/signal_v2_manifest.csv"
+      ],
+      "processing_script": "src/generate_paper_v2_assets.py",
+      "metric_definition": "The corrected cost-aware label rule and the signal-band outcome rule, rerun with the practical threshold set to 0.002, 0.005, 0.01, and 0.02; everything else frozen.",
+      "figure_or_table": "Operating regimes; Table threshold sensitivity",
+      "applicable_scope": "Exploratory sensitivity analysis added after all results were known; simulated synthetic-noise study",
+      "preregistered_before_result": "post_hoc_sensitivity_analysis",
+      "commit_hash": "",
+      "macros": [
+        "ThresholdRawTen",
+        "ThresholdTieTen",
+        "ThresholdRawTwenty",
+        "ThresholdNearZeroTwenty",
+        "ThresholdReadoutLow",
+        "ThresholdReadoutHigh"
+      ],
+      "literals": [],
+      "evidence_origin": "processed_recomputed",
+      "derived_fields": [
+        "rmse:not_reconstructed",
+        "rmse_gain_ci_low:not_reconstructed",
+        "fit_rmse:not_reconstructed"
+      ],
+      "processed_input_trace": "Cell RMSE and BCa gain intervals come from benchmark_summary_v1.csv, which src.verify_final_project recomputes from raw rows; signal fit RMSE comes from signal_v2_truth.csv."
+    },
+    {
       "claim_id": "R01",
       "claim_text": "The hardware readiness decision is no-go, with 1 of 7 go requirements met and 6 of 6 no-go triggers applying.",
       "claim_type": "review_judgment",

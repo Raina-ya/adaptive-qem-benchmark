@@ -214,29 +214,50 @@ def _compare_csv(reference: Path, candidate: Path, relative: str) -> list[str]:
             if not finite_left.all() or not finite_right.all():
                 failures.append(f"measured timing column {column!r} contains invalid values")
             continue
-        if pd.api.types.is_integer_dtype(left_column) and pd.api.types.is_integer_dtype(
+        numeric = pd.api.types.is_numeric_dtype(left_column) and pd.api.types.is_numeric_dtype(
             right_column
-        ):
-            equal = left_column.equals(right_column)
-        elif pd.api.types.is_numeric_dtype(left_column) and pd.api.types.is_numeric_dtype(
-            right_column
-        ):
-            equal = all(
+        )
+        if numeric:
+            same = [
                 math.isclose(float(a), float(b), rel_tol=RTOL, abs_tol=ATOL)
                 if not (pd.isna(a) or pd.isna(b))
-                else pd.isna(a) and pd.isna(b)
+                else bool(pd.isna(a) and pd.isna(b))
                 for a, b in zip(left_column, right_column, strict=True)
-            )
+            ]
         else:
-            equal = all(
-                (pd.isna(a) and pd.isna(b))
-                or a == b
-                or _json_values_equal(a, b)
+            same = [
+                bool((pd.isna(a) and pd.isna(b)) or a == b or _json_values_equal(a, b))
                 for a, b in zip(left_column, right_column, strict=True)
-            )
-        if not equal:
-            failures.append(f"column {column!r} differs")
+            ]
+        if not all(same):
+            failures.append(f"column {column!r} differs" + _difference_detail(
+                left_column, right_column, same, numeric
+            ))
     return failures
+
+
+def _difference_detail(
+    left: pd.Series, right: pd.Series, same: list[bool], numeric: bool
+) -> str:
+    """Say how many rows differ and by how much, so a platform difference can be judged."""
+
+    differing = [index for index, flag in enumerate(same) if not flag]
+    detail = f" in {len(differing)} of {len(same)} rows"
+    if numeric:
+        gaps = [
+            abs(float(left.iloc[index]) - float(right.iloc[index]))
+            for index in differing
+            if not (pd.isna(left.iloc[index]) or pd.isna(right.iloc[index]))
+        ]
+        if gaps:
+            detail += f"; largest absolute difference {max(gaps):.3g}"
+        missing = len(differing) - len(gaps)
+        if missing:
+            detail += f"; {missing} differ in whether the value is missing"
+    else:
+        first = differing[0]
+        detail += f"; first at row {first}: {left.iloc[first]!r} vs {right.iloc[first]!r}"
+    return detail
 
 
 def _validate_pdf(path: Path, relative: str) -> list[str]:

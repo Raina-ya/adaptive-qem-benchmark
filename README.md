@@ -162,6 +162,8 @@ QAOA selections with enumerated code that shares nothing with the benchmark impl
 
 To rebuild expensive results from a clean clone, follow [the release checklist](docs/release_checklist.md).
 `gh workflow run rebuild-generators.yml` rebuilds each long generator as its own job.
+The first such rebuild on Linux, and the four generators whose outputs differ from the Windows
+files, are recorded in [the rebuild record](docs/release_rebuild_v1.md).
 `python -m src.artifact_provenance` checks the hash, generator, and row count of every generated
 artifact without running a simulation.
 

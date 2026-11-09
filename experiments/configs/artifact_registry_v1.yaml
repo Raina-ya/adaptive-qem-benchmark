@@ -162,7 +162,6 @@
         "figures/day09_zne_extrapolation_lambda-1-3-5.png",
         "figures/day11_pilot_rmse_heatmap.png",
         "figures/day12_ghz_error_vs_noise.png",
-        "figures/rmse_heatmap.png",
         "results/day08_fold_validation_lambda-1-3-5.csv",
         "results/day09_method_validation_budget-4096_repeats-20.csv",
         "results/processed/day11_pilot_audit.csv",
@@ -216,6 +215,7 @@
         "figures/operating_regime_map_v1.png",
         "figures/overhead_vs_rmse_gain.png",
         "figures/regret_under_noise_shift.png",
+        "figures/rmse_heatmap.png",
         "figures/selector_confusion_matrix.png",
         "figures/selector_rmse_regret.png",
         "paper/generated/metrics.tex",
@@ -997,6 +997,7 @@
       "manifests": [],
       "outputs": [
         "paper/generated/boundaries_metrics.tex",
+        "paper/generated/threshold_sensitivity_rows.tex",
         "paper/figures/fig_certification.png",
         "paper/figures/fig_drift_policy.png",
         "paper/figures/fig_mismatch_dose.png",

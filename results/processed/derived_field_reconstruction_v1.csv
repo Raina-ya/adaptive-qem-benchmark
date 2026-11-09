@@ -23,10 +23,12 @@ used by C07,estimate_a,not_reconstructed,0,0
 used by C06,factor_estimates_json,not_reconstructed,0,0
 used by C07,final_signal_retention,not_reconstructed,0,0
 used by C04,fit_residual_sum_squares,not_reconstructed,0,0
-used by G01;G04,fit_rmse,not_reconstructed,0,0
+used by G01;G04;G09,fit_rmse,not_reconstructed,0,0
 used by C04,folded_two_qubit_gate_count,not_reconstructed,0,0
 used by C06;C07,negative_mass,not_reconstructed,0,0
 used by C07,physical_overshoot,not_reconstructed,0,0
+used by G09,rmse,not_reconstructed,0,0
+used by G09,rmse_gain_ci_low,not_reconstructed,0,0
 used by C06,signal_retention_json,not_reconstructed,0,0
 used by C15,signed_error,not_reconstructed,0,0
 used by C03,total_circuit_executions,not_reconstructed,0,0

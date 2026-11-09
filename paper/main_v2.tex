@@ -19,34 +19,23 @@ Accounting, Decision Reliability, and Operational Boundaries in Simulation}
 \maketitle
 
 \begin{abstract}
-Quantum error mitigation (QEM) removes bias at the price of extra circuit executions and
-amplified sampling variance. Whether that trade is worth making depends on what the estimate is
-used for. We study unmitigated estimation, readout correction, zero-noise extrapolation (ZNE), and
-their combination in noisy classical simulation, charging every calibration circuit, folded
-execution, pilot, and diagnostic to one declared shot budget. The paper makes three contributions.
-\emph{(i) Fixed-budget benchmarking.} On a 144-cell grid, a cost-aware oracle labels
-\VTwoRawWinners{} cells as raw wins and only \VTwoReadoutWinners{} and \VTwoZNEWinners{} as readout
-and ZNE wins. On 126 independent circuits frozen by noiseless value, ZNE beats raw more often at
-large references than near zero, by \BandContrast{} (circuit-cluster interval \BandContrastLow{} to
-\BandContrastHigh{}), and its gain tracks the attenuation it can remove rather than signal size.
-\emph{(ii) Estimator quality versus decision reliability.} Lower energy RMSE does not imply better
-decisions. In a QAOA candidate-selection task, ZNE lowers RMSE yet selects worse: on new repeats,
-raw errs in \CoreRawError{} of selections against \CoreZneError{} for ZNE (\CorePairs{} paired
-repeats, $p=\CorePValue$). A common-mode/contrast decomposition shows why: most of the error ZNE removes belongs to candidates
-that never contend for the top, while its extrapolation inflates the variance of the deciding gap by
-a factor of 4.375. When the error is biased between candidates, no budget
-reaches a 10\% decision-error target unless the method removes that bias.
-\emph{(iii) Validity and operational boundaries.} A runtime-only ZNE gate chosen on training
-circuits cuts false rejection to zero on held-out circuits, at a false acceptance of
-\GateVTwoFA{}. A pilot-based method selector fails all three frozen acceptance routes against
-always-readout. Sequential stopping with corrected looks, keeping false certification below 3\% at
-zero margin, compared with 22--25\% for uncorrected peeking, still certifies the wrong candidate
-after about 2,000 shots when the estimator is biased. Two-layer certification certifies wrongly in
-\CertWrongNearTie{} of certified near-tie runs. Full-matrix readout correction fails at width 8 in
-\FullFailLow{} to \FullFailHigh{} of runs under a shared 4,096-shot budget, and tensor-product
-correction becomes worse than no correction under pair-correlated readout. A hardware readiness
-review ends in a documented no-go with no job submitted. All results are simulated; none is a
-hardware result.
+Quantum error mitigation (QEM) removes bias at the price of extra circuit executions and amplified
+sampling variance. We ask when that trade pays off under one declared shot budget that charges every
+calibration circuit, folded execution, pilot, and diagnostic, and we judge methods by the decisions
+their estimates support rather than by root-mean-square error (RMSE) alone. In noisy classical
+simulation of unmitigated (raw) estimation, readout correction, zero-noise extrapolation (ZNE), and
+their combination, we find three things. First, no method dominates: raw estimation is the
+cost-aware choice in about half of a 144-cell grid, a count that falls as the practical-equivalence
+threshold grows, while readout and ZNE win in disjoint noise ranges. Second, lower RMSE does not imply
+better decisions. In QAOA candidate selection, ZNE lowers energy RMSE yet selects worse, an inversion
+confirmed on new repeats (selection error \CoreRawError{} for raw against \CoreZneError{} for ZNE,
+$p=\CorePValue$). We show that, for a normally distributed decisive gap, a debiasing method improves
+the decision only if noise has shrunk the raw gap below $1/\sqrt{\gamma}$ of its ideal value, where
+$\gamma$ is the method's variance amplification (0.48 for linear ZNE), and that this preference does
+not depend on the budget. Third, every runtime tool we tested, from validity gates and adaptive
+selectors to sequential and two-layer certification, controls sampling error but not differential
+bias, and a mismodeled readout correction does worse than none. A hardware readiness review ends in a
+documented no-go. All results are simulated.
 \end{abstract}
 
 \section{Introduction}
@@ -56,7 +45,18 @@ methods at unequal cost can manufacture an apparent advantage, and even at equal
 method changes with circuit, observable, noise, and sampling regime. A second gap is less often
 measured: a mitigated estimate is usually an input to a decision, such as which of several
 candidates is best, and the error that matters for that decision is not the error that RMSE
-measures.
+measures. We call unmitigated estimation \emph{raw} throughout.
+
+Two lines of work frame this gap. Theory shows that the sampling cost of mitigation grows
+exponentially with circuit size and depth for broad classes of methods
+\cite{takagi2022,takagi2023,quek2024}; these are bounds on estimating an expectation value.
+Experiments and benchmarks show that mitigated values can be accurate at useful scales
+\cite{kandala2019,kim2023,vandenberg2023} and compare techniques across circuits and devices
+\cite{bultrini2021,cirstoiu2023,larose2022}, while recent audits warn that a reported ZNE improvement can
+be artefactual \cite{koster2026}. Neither line asks what the estimate is for. When it feeds a choice
+among alternatives, the relevant theory is that of ranking and selection
+\cite{bechhofer1954}, where what matters is the error in the differences between alternatives, not in
+their values.
 
 We therefore ask four questions under one resource ledger. When does mitigation improve
 estimation at a fixed total budget? When does better estimation produce a better decision? Can
@@ -70,8 +70,9 @@ repeats, and diagnostics are charged to one budget. We report operating regimes,
 strata on a frozen independent circuit set, and the total shots each method needs to reach a
 decision-error target.
 \item \emph{Estimator quality versus decision reliability} (Section~\ref{sec:decision}). We give a
-common-mode/contrast decomposition of candidate errors and use it to explain, and then confirm on
-new repeats, why lower RMSE can coexist with worse selection.
+common-mode/contrast decomposition of candidate errors and a condition, Proposition~\ref{prop:help},
+for when a debiasing method improves a decision at a fixed budget. We use them to explain, and then
+confirm on new repeats, why lower RMSE can coexist with worse selection.
 \item \emph{Validity and operational boundaries} (Section~\ref{sec:boundaries}). We evaluate ZNE
 validity gates, method selectors, sequential and two-layer certification, readout correction up
 to width 10, mismatch dose-response, and recalibration policies under drift. Each negative result is
@@ -82,6 +83,60 @@ The contribution is a reproducible simulator benchmark with repeat-level data, e
 ledgers, frozen decision rules, and audited provenance (Section~\ref{sec:verification}). It is not a
 new QEM method and not a claim about hardware performance.
 
+\section{Related Work}
+\label{sec:related}
+Table~\ref{tab:related} places this study among the closest lines of work by what each measures.
+
+\paragraphlead{Limits of mitigation.}
+Takagi et al.\ bound the sampling cost of any mitigation strategy \cite{takagi2022} and give universal
+lower bounds on it \cite{takagi2023}; Quek et al.\ tighten these bounds to exponential growth in
+depth \cite{quek2024}. The variance amplification of linear ZNE used below is an elementary instance
+of this cost. Our results do not test these bounds; they show what the cost does to a decision at the
+small sizes where mitigation is affordable.
+
+\paragraphlead{Methods and practice.}
+ZNE was introduced with probabilistic error cancellation \cite{temme2017,li2017} and reviewed in
+\cite{endo2018,cai2023}. Digital folding makes it hardware agnostic \cite{giurgica2020}, and it was
+central to recent large-scale experiments \cite{kandala2019,kim2023}. Probabilistic error cancellation
+with learned sparse noise models \cite{vandenberg2023}, Clifford data regression \cite{czarnik2021},
+and randomized compiling \cite{wallman2016} have different cost structures and are not studied here.
+Readout correction ranges from full detector tomography \cite{maciejewski2020,bravyi2021} to scalable
+reduced models \cite{nation2021}.
+
+\paragraphlead{Benchmarks and audits.}
+Bultrini et al.\ unify and compare state-of-the-art techniques \cite{bultrini2021}. Qermit benchmarks
+mitigation volumetrically on superconducting hardware against classical simulation
+\cite{cirstoiu2023}, and Mitiq provides common implementations \cite{larose2022}. K\"oster and
+Mauerer show that a ZNE improvement can be an artefact of the benchmark \cite{koster2026}, which
+motivates our validity gates. A concurrent preprint also relates accuracy, decision risk, and
+sampling cost in mitigation \cite{scavino2026}.
+
+\paragraphlead{Statistical decisions.}
+Choosing the best of several noisy alternatives is the ranking-and-selection problem
+\cite{bechhofer1954}. Sequential stopping goes back to Wald \cite{wald1945}; confidence sequences
+give intervals valid at every look \cite{howard2021} and are an alternative to the Bonferroni-split
+looks used here.
+
+\begin{table}[t]
+\centering
+\caption{What each line of work measures. The columns describe the main question of each line,
+not every analysis in every paper.}
+\label{tab:related}
+\footnotesize
+\setlength{\tabcolsep}{3pt}
+\begin{tabular}{@{}p{0.27\columnwidth}p{0.33\columnwidth}p{0.32\columnwidth}@{}}
+\toprule
+Line of work & Quantity studied & Question\\
+\midrule
+Limits \cite{takagi2022,takagi2023,quek2024} & Sampling cost of an estimate & How fast must cost grow?\\
+Experiments \cite{kandala2019,kim2023} & Mitigated values at scale & Is the value accurate?\\
+Benchmarks \cite{bultrini2021,cirstoiu2023} & Accuracy across techniques & Which technique is closer?\\
+Audits \cite{koster2026} & Reported improvements & Is the gain genuine?\\
+This work & Decisions at one total budget & Does the gain change the decision?\\
+\bottomrule
+\end{tabular}
+\end{table}
+
 \section{Background and Notation}
 \label{sec:background}
 \paragraphlead{Estimators and error.}
@@ -89,9 +144,12 @@ For repeat $r$, $e_r=\widehat\mu_r-\mu_{\rm ref}$. We report bias, sample varian
 \begin{equation}
 \mathrm{RMSE}=\sqrt{R^{-1}\textstyle\sum_{r=1}^{R}e_r^2}.
 \end{equation}
-Paired RMSE-gain intervals use deterministic bias-corrected and accelerated bootstrap resampling.
-Decision-error probability is the fraction of repeats whose decision disagrees with the exact
-decision; Wilson intervals quantify its binomial uncertainty. Where conditions share a circuit,
+Paired RMSE-gain intervals use deterministic bias-corrected and accelerated bootstrap resampling
+\cite{efron1987}. Decision-error probability is the fraction of repeats whose decision disagrees with
+the exact decision; Wilson intervals \cite{wilson1927} quantify its binomial uncertainty. Paired
+decision comparisons use the exact sign test on discordant pairs \cite{mcnemar1947}, Agresti--Min
+intervals for paired proportions \cite{agresti2005}, and Holm's step-down correction across a family
+\cite{holm1979}. Where conditions share a circuit,
 intervals resample circuits as clusters.
 
 \paragraphlead{Methods.}
@@ -132,6 +190,41 @@ P_{\rm err}(N)\approx\Phi\!\left(-\frac{(\Delta+\beta)\sqrt N}{\sigma}\right).
 If the differential bias satisfies $\beta\le-\Delta$, the error rises toward one as $N$ grows:
 more shots make the wrong answer more certain. A confidence interval controls only the $\sigma$
 term, which is the root of several negative results below.
+
+\paragraphlead{When does debiasing help a decision?}
+Write the raw gap's mean as $\Delta_{\rm r}=\Delta+\beta_{\rm r}$ and a mitigated gap's mean as
+$\Delta_{\rm m}=\Delta+\beta_{\rm m}$, and let the mitigated gap's variance be $\gamma$ times the raw
+variance at the same total budget.
+
+\newtheorem{proposition}{Proposition}
+\begin{proposition}\label{prop:help}
+Under the normal approximation of Eq.~\eqref{eq:decision}, with $\Delta_{\rm r}>0$, the mitigated
+decision has lower error than the raw decision at some budget $N$ if and only if it does at every
+budget, and this holds if and only if
+\begin{equation}
+\Delta_{\rm m}>\sqrt{\gamma}\,\Delta_{\rm r}.
+\label{eq:help}
+\end{equation}
+In particular, a method that removes the gap's bias completely ($\Delta_{\rm m}=\Delta$) helps if and
+only if the raw attenuation $a=\Delta_{\rm r}/\Delta$ satisfies $a<1/\sqrt\gamma$. If instead
+$\Delta_{\rm r}\le0<\Delta_{\rm m}$, mitigation helps at every budget.
+\end{proposition}
+\noindent\emph{Proof.} The error probabilities are $\Phi(-\Delta_{\rm r}\sqrt N/\sigma)$ and
+$\Phi(-\Delta_{\rm m}\sqrt N/(\sqrt\gamma\,\sigma))$. Since $\Phi$ is increasing, the second is smaller
+exactly when $\Delta_{\rm m}/\sqrt\gamma>\Delta_{\rm r}$, and the factor $\sqrt N/\sigma>0$ cancels,
+so the comparison is the same at every $N$. Setting $\Delta_{\rm m}=\Delta$ gives the attenuation
+form. If $\Delta_{\rm r}\le0$, the raw error is at least $1/2$ while the mitigated error is below
+$1/2$. $\square$
+
+For linear ZNE with equal shots per fold, $\gamma=4.375$, so complete debiasing pays off only when
+noise has shrunk the decisive gap to less than $1/\sqrt{4.375}=0.48$ of its ideal value. Readout
+correction has $\gamma\ge1/0.8$ from its calibration share, plus a factor from inverting the
+assignment matrix that is small when assignment errors are small, so it can pay off for much milder
+attenuation, but only if the readout bias differs between the candidates; a bias common to both
+leaves $\Delta_{\rm r}=\Delta$ and cannot help. With $K$ candidates, the same comparison applies to
+the leading contender's gap, and a union bound over the other gaps gives an upper bound on the error.
+The proposition is a statement about the normal approximation and treats $\gamma$ and the gap means
+as known; Section~\ref{sec:decision} tests it on data that were collected before it was written.
 
 \section{Benchmark Design}
 \label{sec:design}
@@ -198,6 +291,9 @@ on training and validation, and read the holdout once.
 
 \section{Fixed-Budget Benchmarking}
 \label{sec:budget}
+\emph{Takeaway: once every overhead is charged, no method dominates, and mitigation pays off only
+where it removes attenuation large enough to outweigh its cost.}
+
 \subsection{Operating regimes}
 Table~\ref{tab:regimes} shows \VTwoRawWinners{} raw wins, \VTwoPracticalTies{} true
 practical ties, and distinct readout and ZNE subsets. Nine cells are inconclusive,
@@ -222,10 +318,38 @@ Cost-aware label & Cells\\
 \begin{figure}[t]
 \centering
 \includegraphics[width=\columnwidth]{fig_regime_shares.png}
-\caption{Cost-aware labels by noise level on the main grid. Raw wins most cells at every noise
-level; readout and ZNE win in disjoint noise ranges.}
+\caption{Cost-aware labels by noise level on the main grid at the frozen threshold. Readout and ZNE
+win in disjoint noise ranges; raw wins most of the remaining cells, mostly by small margins
+(Table~\ref{tab:threshold}).}
 \label{fig:regimes}
 \end{figure}
+
+\paragraphlead{Sensitivity to the practical threshold.}
+The threshold 0.005 was fixed before the labels were computed, but it is a judgment, so
+Table~\ref{tab:threshold} reruns the frozen label rule with other values. The number of raw wins
+depends strongly on it: at 0.01 there are \ThresholdRawTen{} raw wins and \ThresholdTieTen{} ties,
+and at 0.02 only \ThresholdRawTwenty{} raw wins remain. Raw estimation mostly wins by small RMSE
+margins. Readout wins are stable (\ThresholdReadoutLow{} to \ThresholdReadoutHigh{}), and ZNE wins
+shrink. On the signal set, raw's advantage near zero disappears entirely at 0.02
+(\ThresholdNearZeroTwenty{}), while ZNE's advantage at the boundary falls more slowly. The robust
+conclusion is therefore that no method dominates and that mitigated wins are concentrated in
+specific noise ranges, not that raw wins by a large margin. This analysis was added after all results
+were known.
+
+\begin{table}[t]
+\centering
+\caption{Main-grid labels and signal-set shares at four practical thresholds; the frozen value is in
+bold. Signal shares are at 4,096 shots.}
+\label{tab:threshold}
+\footnotesize
+\setlength{\tabcolsep}{3pt}
+\begin{tabular}{@{}lrrrrrrr@{}}
+\toprule
+Threshold & Raw & Tie & Read. & ZNE & Inc. & Near 0 raw & Edge ZNE\\
+\midrule
+\input{generated/threshold_sensitivity_rows.tex}
+\end{tabular}
+\end{table}
 
 Mitigation can also worsen estimation: \NegativeGains{} of \SummaryRows{} method summaries have
 negative RMSE gain relative to raw estimation. Readout produces \HardwareFailures{} explicit
@@ -282,6 +406,9 @@ methods help, and at high noise every method is blocked.
 
 \section{Estimator Quality Versus Decision Reliability}
 \label{sec:decision}
+\emph{Takeaway: a method can lower RMSE and still choose worse, because the decision depends on the
+decisive gap, whose variance mitigation inflates.}
+
 \subsection{Decision tasks}
 Expectation RMSE and decision reliability are distinct. The controlled combined-QEM decision study
 shows the separation directly. At margin 0.02, combined decision-error probability ranges from
@@ -295,7 +422,7 @@ negative, so there is no uniform synergy.
 
 \subsection{MaxCut/QAOA candidate selection}
 For a graph $G=(V,E)$ and bitstring $z$, the cut value is
-$C_G(z)=\sum_{(u,v)\in E}\mathbf{1}[z_u\ne z_v]$. Exhaustive enumeration fixes the optimum for one
+$C_G(z)=\sum_{(u,v)\in E}\mathbf{1}[z_u\ne z_v]$. We use $p=1$ QAOA \cite{farhi2014}. Exhaustive enumeration fixes the optimum for one
 width-4 ring, one width-6 sparse graph, and one width-8 medium/dense graph, each with five frozen
 $p=1$ QAOA candidates. Each method selects among all five within one budget
 $B\in\{4096,16384\}$; the manifest contains 4,500 candidate-level rows and 900 selection groups.
@@ -327,11 +454,16 @@ predicts inversion rates of 0.20 and 0.45 against the observed 0.18 and 0.50. Th
 held by non-contenders is specific to this graph (83--86\% against 42--51\% elsewhere), but the
 doubling of the gap's spread recurs in every cell (observed ratio 1.92 to 2.58). Off-diagonal error
 correlations across repeats are near zero for raw and ZNE, rejecting the hypothesis that raw rankings
-are stable because raw errors are shared. Because ZNE's gap standard deviation is
-2.09 times raw's at equal shots, ZNE helps selection only if it enlarges the mean contending gap by
-more than about 2.09 times. The ring and sparse graphs cannot reach that even with complete
-debiasing (at most about 1.33); the medium/dense graph could reach 3.73 but achieves 0.36. This
-threshold is derived from the same data and is a hypothesis for new graphs.
+are stable because raw errors are shared.
+
+Proposition~\ref{prop:help} explains the inversion. Equation~\eqref{eq:help} requires ZNE to enlarge
+the mean contending gap by more than $\sqrt{4.375}\approx2.09$ times. The ring and sparse graphs
+cannot reach that even with complete debiasing, because their raw gaps are attenuated only to about
+$a=0.75$ ($\Delta/\Delta_{\rm r}\le1.33$); the medium/dense graph could reach 3.73 ($a=0.27$) but ZNE
+achieves a ratio of 0.36. The proposition also predicts that the sign of the preference does not
+change with budget, and the confirmatory comparison agrees: raw is better at both budgets, by a margin
+within the minimum difference at 4,096 shots and resolved at 16,384. The threshold was derived after
+these data were collected, so for new graphs it is a hypothesis.
 
 \begin{figure*}[t]
 \centering
@@ -434,7 +566,7 @@ one readout, so its bias is common-mode and cancels in the comparison.
 \begin{table}[t]
 \centering
 \caption{Held-out selector comparison, 20 tasks and 14,000 runs. Reliable coverage is the share of
-runs that are covered and correct. The oracle picks the best baseline per condition after scoring.}
+runs that are covered and correct. The oracle picks the best baseline per condition after scoring. These are Windows results; a Linux rebuild gives a different pilot fit and combined estimate (Section~\ref{sec:verification}).}
 \label{tab:selector3}
 \footnotesize
 \setlength{\tabcolsep}{3pt}
@@ -455,6 +587,9 @@ Oracle baseline & 1.00 & 0.0022 & -- & --\\
 
 \section{Validity and Operational Boundaries}
 \label{sec:boundaries}
+\emph{Takeaway: the runtime checks we tested see sampling error, drift in marginals, and resolved
+decays, but not differential bias or a change in correlation structure.}
+
 \subsection{ZNE validity gates}
 An extrapolate is not credible merely because it moves toward the reference. The first gate
 requires retained signal, physical bounds, positive gain with uncertainty, an advantage over
@@ -489,13 +624,16 @@ circuit-cluster bootstrap intervals; the v2 gate had no false rejection in any r
 
 \subsection{Certification}
 \paragraphlead{Sequential stopping.}
-Two candidates are sampled in batches until an interval for their gap excludes zero; every look is
-tested at $\alpha/K$. At margin 0, where any certification is false, Wilson stopping certifies in
+Two candidates are sampled in batches until an interval for their gap excludes zero
+\cite{wald1945}; every look is tested at $\alpha/K$, a conservative alternative to confidence
+sequences \cite{howard2021}. Corrected looks work as intended against sampling error, keeping false
+certification below 3\% at zero margin, compared with 22--25\% for uncorrected peeking. At margin 0, where any certification is false, Wilson stopping certifies in
 \NullWilsonMin{}--\NullWilsonMax{} of repeats, whereas uncorrected peeking reaches
 \NullNaiveMin{}--\NullNaiveMax{}. Table~\ref{tab:sequential} shows the trade-off: stopping early
 saves shots but leaves more decisions unresolved. Certification does not detect bias: with strong
 gate-noise imbalance at margin 0.05, raw certifies the wrong candidate in \BiasedRawWrong{} of
-repeats after a mean of \BiasedRawShots{} shots, and ZNE still does so in \BiasedZNEWrong{}.
+repeats after a mean of \BiasedRawShots{} shots, that is, after about 2,000 shots, and ZNE still does
+so in \BiasedZNEWrong{}.
 
 \begin{table}[t]
 \centering
@@ -673,15 +811,15 @@ No steep decision-error rise found & -- & Design & -- & -- & Inconclusive\\
 \label{sec:verification}
 Raw repeat-level rows are never replaced by summaries. \texttt{src.verify\_final\_project}
 recomputes the main summaries from raw rows at tolerance $10^{-9}$, accounts for every manifest, and
-checks figures and this document. \texttt{src.claim\_ledger} separately checks 22 computed claims
-covering 189 printed numbers without importing project code, and labels computed results, manual
+checks figures and this document. \texttt{src.claim\_ledger} separately checks 23 computed claims
+covering 195 printed numbers without importing project code, and labels computed results, manual
 interpretation, hypotheses, limitations, and review judgments. Of these claims, 11 are recomputed from
-raw repeat rows, 8 from processed tables (for example, the signal study's truth table, whose fit
+raw repeat rows, 9 from processed tables (for example, the signal study's truth table, whose fit
 errors agree with normal theory to within 0.0014), 2 from manifests, and 1 from a processed table
 only. Every number generated for Sections~\ref{sec:budget} to~\ref{sec:boundaries} is recomputed
 except one ratio of gate executions, which needs the project's circuit builders. Five
 deterministic sampled claims are recomputed from repeat rows after a correction to the audit
-implementation. Eight tables and the figures have source provenance but have not all been
+implementation. Nine generated tables and the figures have source provenance but have not all been
 independently recomputed, so the paper as a whole is not independently verified.
 Replacing the original BCa interval with a deterministic percentile-bootstrap sensitivity
 calculation did not change the 144 cell labels.
@@ -691,10 +829,17 @@ and \texttt{src.artifact\_provenance} records a content hash for every tracked a
 Continuous integration rebuilds every routine generator from a clean clone on each push. The 16
 long generators of the release scope are rebuilt by a separate workflow, one job per generator, each
 deleting that generator's committed outputs in a clean clone, running it with the locked
-dependencies, and comparing the result with the committed files. When this version was written,
-that workflow had not yet completed, so the largest raw files had not been regenerated in a clean
-environment. NumPy's binomial stream changes between versions, so a rebuild with another NumPy
-version should be expected to differ slightly in sampled rows.
+dependencies, and comparing the result with the committed files, which were generated on Windows.
+Its first run, on Linux, reproduced 11 of the 16 generators within tolerance, including those behind
+the confirmatory, QAOA, decision, combined-QEM, shots-to-reliability, mismatch, and drift results.
+One job failed because the registry assigned a figure to the wrong generator; this is fixed. Four did
+not match the Windows files: the selector-v3 pilot fit and combined estimate, the readout-feasibility
+condition number, the signal study's out-of-bounds rate, and the scalable-readout iterative solver,
+whose convergence status, and with it every summary column, changes between platforms. The last
+three feed no number printed here except the planned repeat count, but the selector-v3 numbers may
+change, by an amount not yet measured. The committed results remain the Windows results, no
+tolerance was changed, and the scalable-readout study should be read as platform dependent. The full
+record is in \texttt{docs/release\_rebuild\_v1.md}.
 
 \texttt{src.independent\_reference} reproduces exact values within $10^{-12}$ and, from fixed
 counts, all completed QAOA selections. It does not check noisy sampling. Width-8 readout energies
@@ -711,6 +856,22 @@ sampling error. Runtime diagnostics see changes in marginals and resolved decays
 a change in correlation structure. And a correctly modeled local correction succeeds where a
 mismodeled one does worse than nothing.
 
+\paragraphlead{Relation to the limits of mitigation.}
+The exponential bounds of \cite{takagi2022,takagi2023,quek2024} say that mitigation becomes
+unaffordable as circuits grow. Our results add that it can fail to pay off well before that point:
+at widths 2 to 8, where its cost is modest, the decision still worsens whenever
+Eq.~\eqref{eq:help} fails. A mitigation method should therefore be judged against the decision it
+serves, not only against the error of the value it returns.
+
+\paragraphlead{Adaptive analysis across the project.}
+Each study froze its own rules before its run, but the sequence of studies was chosen after seeing
+earlier results: the signal study followed the main grid's confounding, the confirmatory study
+followed the QAOA inversion, and the readout-boundary study followed earlier readout failures. At
+the level of the whole project the analysis is therefore adaptive. Only the confirmatory
+comparisons were planned with a stated power and family-wise error rate; the other findings should be
+read as exploratory or as tests of one frozen study at a time, and the many studies increase the
+chance that some reported contrast is a false positive.
+
 \paragraphlead{Rule freezing and independence.}
 The combined, QAOA, scalable-readout, runtime-selector, signal, gate, confirmatory, selector-v3, and
 readout-boundary protocols were committed before their result artifacts. The first ZNE gate's checks
@@ -718,7 +879,8 @@ were named in advance, but its numerical thresholds and results first appeared t
 repository state; therefore this is not an independently timestamped preregistration. The
 sequential and calibration studies and the first selector use frozen repository rules that first
 appear with their results. Commit order proves repository publication order only, not the
-wall-clock order of design or execution. In the readout-boundary study, a 20-repeat smoke run showed
+wall-clock order of design or execution. A registration with an independent timestamp, such as those
+discussed by Nosek et al.\ \cite{nosek2018}, would remove this limitation in future work. In the readout-boundary study, a 20-repeat smoke run showed
 that an all-qubit parity is blind to pair flips; the observable was changed before freezing, and no
 hypothesis, threshold, or grid value changed.
 
@@ -731,7 +893,13 @@ the generating machine. The signal and selector holdouts have 30 circuits and 20
 candidates in the selector tasks share one readout, which favors raw estimation. The scalable-readout
 manifest planned 960 repeats of correlated readout at widths 8--12 that were never run; correlated
 models ran only at widths 2--6 in the original mismatch study and in the separate readout-boundary
-protocol, whose rows are not merged into the original table. The drift sweep uses one qubit.
+protocol, whose rows are not merged into the original table. The drift sweep uses one qubit. The
+practical threshold changes the count of raw wins substantially (Table~\ref{tab:threshold}).
+Only four method families are compared; probabilistic error cancellation, Clifford data regression,
+and randomized compiling, which converts coherent errors such as the over-rotation that defeated
+both the gate and certification into stochastic ones \cite{wallman2016}, are not. The independent
+reference implementation was written by the same author; an implementation from another code base,
+such as Mitiq's ZNE \cite{larose2022}, would be a stronger check.
 
 \paragraphlead{Why the hardware review ends in no-go.}
 A disagreement between a device and Table~\ref{tab:hardware} would first falsify the transfer of a
@@ -744,7 +912,8 @@ correlation to make independent models worse than none, which needs calibration 
 \section{Conclusion}
 No QEM method is uniformly useful under fixed-budget accounting, and better estimation is not
 better decision-making. Mitigation pays off when it removes a bias that differs between the
-alternatives being compared and that is larger than its own variance cost; it does not pay off
+alternatives being compared and that is larger than its own variance cost, which
+Proposition~\ref{prop:help} makes precise as $\Delta_{\rm m}>\sqrt\gamma\,\Delta_{\rm r}$; it does not pay off
 when the error is common-mode, when the method's model is wrong, or when its calibration consumes the
 budget. Adaptive selection, statistical certification, and the diagnostics we tested could not
 identify these cases reliably at runtime, so simple fixed policies remain the reference that any
@@ -754,6 +923,20 @@ adaptive rule must beat, and bias detection is the central open problem.
 \bibliography{references}
 
 \appendix
+\begin{table*}[t]
+\centering
+\caption{Evidence matrix for the original tracks. Y marks evidence of that type; An.\ is analytic,
+NL noiseless simulation, NS noisy simulation, HW hardware.}
+\label{tab:evidence}
+\footnotesize
+\begin{tabular}{@{}p{0.10\textwidth}@{\hspace{4pt}}c@{\hspace{3pt}}c@{\hspace{3pt}}c@{\hspace{3pt}}c@{\hspace{5pt}}p{0.325\textwidth}p{0.195\textwidth}p{0.195\textwidth}@{}}
+\toprule
+Track & An. & NL & NS & HW & Supported finding & Unresolved question & Limitation\\
+\midrule
+\input{generated/evidence_matrix_rows.tex}
+\end{tabular}
+\end{table*}
+
 \section{Reproducibility}
 {\footnotesize
 \begin{verbatim}
@@ -793,17 +976,5 @@ threshold fixed before the corresponding run.
 Table~\ref{tab:evidence} separates each original finding by evidence type. The hardware column is
 empty for every track.
 
-\begin{table*}[t]
-\centering
-\caption{Evidence matrix for the original tracks. Y marks evidence of that type; An.\ is analytic,
-NL noiseless simulation, NS noisy simulation, HW hardware.}
-\label{tab:evidence}
-\footnotesize
-\begin{tabular}{@{}p{0.10\textwidth}@{\hspace{4pt}}c@{\hspace{3pt}}c@{\hspace{3pt}}c@{\hspace{3pt}}c@{\hspace{5pt}}p{0.325\textwidth}p{0.195\textwidth}p{0.195\textwidth}@{}}
-\toprule
-Track & An. & NL & NS & HW & Supported finding & Unresolved question & Limitation\\
-\midrule
-\input{generated/evidence_matrix_rows.tex}
-\end{tabular}
-\end{table*}
+
 \end{document}
