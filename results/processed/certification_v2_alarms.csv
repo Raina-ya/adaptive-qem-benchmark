@@ -1,0 +1,7 @@
+alarm,runs_passing_layer_one,fire_rate
+raw_mitigated_winner_differs,7256,0
+fold_gap_reversal,7256,0.0165380374862
+calibration_age_drift,7256,0.0235667034179
+outside_physical_bound,7256,0.00137816979052
+variance_amplification,7256,0.00882028665932
+batch_sign_instability,7256,0

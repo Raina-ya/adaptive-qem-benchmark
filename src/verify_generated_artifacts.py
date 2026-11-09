@@ -51,6 +51,9 @@ GENERATORS = (
     "src.zne_gate_v2_diagnostics",
     "src.power_analysis_v1",
     "src.decision_tasks_v3",
+    "src.confirmatory_analysis_v1",
+    "src.selector_v3_analysis",
+    "src.readout_boundaries_analysis",
     "src.cross_validation",
     "src.verify_final_project",
     "src.claim_ledger",
@@ -64,6 +67,13 @@ EXPENSIVE_GENERATORS = (
     "src.generate_qaoa_selection",
     "src.generate_selector_holdout_v2",
     "src.generate_signal_v2",
+    "src.shots_to_reliability",
+    "src.confirmatory_v1",
+    "src.confirmatory_qaoa_v1",
+    "src.generate_selector_v3",
+    "src.generate_readout_feasibility_v2",
+    "src.generate_readout_mismatch_dose",
+    "src.generate_drift_policy",
 )
 REGISTRY_PATH = (
     Path(__file__).resolve().parents[1] / "experiments/configs/artifact_registry_v1.yaml"

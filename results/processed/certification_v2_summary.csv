@@ -1,0 +1,4 @@
+grouping,value,rule,runs,tasks,certified_rate,false_certification_per_run,false_certification_given_certified,missed_or_unresolved_rate,mean_shot_fraction_when_certified
+all,all,both_layers,14000,20,0.501857142857,0.00742857142857,0.0148021633931,0.498142857143,0.719954454882
+all,all,layer_one_only,14000,20,0.518285714286,0.00764285714286,0.0147464167585,0.481714285714,0.720782800441
+all,all,naive_independent_z,14000,20,0.699785714286,0.0175,0.0250076554047,0.300214285714,1

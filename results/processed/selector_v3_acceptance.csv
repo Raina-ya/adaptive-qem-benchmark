@@ -1,0 +1,4 @@
+route,estimate,cluster_low,cluster_high,passed
+lower_regret_than_always_readout,4.83792846625e-05,-0.000320325676398,0.000446098381049,False
+similar_regret_lower_overhead,1.62504504505,-0.000320325676398,0.000446098381049,False
+similar_overhead_higher_reliable_coverage,-0.0365,-0.0473589285714,-0.0251428571429,False

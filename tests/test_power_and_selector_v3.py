@@ -456,3 +456,25 @@ def test_generated_row_has_every_column_the_analysis_parses() -> None:
     assert all(values.shape == (2, 3) for name, values in data.items() if name != "drift_statistic")
     first = generator.simulate_task(tasks, noise, config)
     assert first == rows
+
+
+def test_confirmatory_results_cover_the_whole_frozen_plan() -> None:
+    table = pd.read_csv(confirmatory.RESULTS_PATH)
+    plan = pd.read_csv(power_analysis_v1.PLAN_PATH)
+    confirmed = table.loc[table.group == "confirmatory"]
+    assert len(confirmed) == len(plan)
+    assert confirmed.status.eq("run").all()
+    assert set(table.classification) <= {
+        "resolved_difference",
+        "close_within_margin",
+        "underpowered",
+    }
+    assert (confirmed.paired_repeats >= confirmed.pairs_planned).all()
+
+
+def test_selector_acceptance_table_is_frozen_three_routes() -> None:
+    table = pd.read_csv(selector_v3_analysis.ACCEPTANCE_PATH)
+    assert len(table) == 3
+    selection = pd.read_csv(selector_v3_analysis.RULE_PATH)
+    assert selection.selected.sum() == 1
+    assert not any("holdout" in column for column in selection.columns)

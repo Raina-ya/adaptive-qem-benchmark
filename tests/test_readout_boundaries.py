@@ -179,3 +179,24 @@ def test_config_hash_check_refuses_changes(tmp_path, monkeypatch) -> None:
     monkeypatch.setattr(feasibility, "CONFIG_PATH", changed)
     with pytest.raises(ValueError, match="differs from frozen"):
         feasibility.check_config_hash()
+
+
+def test_committed_results_keep_every_row_and_failure() -> None:
+    raw = pd.read_csv(feasibility.RAW_PATH, usecols=["width", "method", "regime", "status"])
+    assert len(raw) == 230400
+    full = raw.loc[
+        (raw.method == "full_matrix") & (raw.width == 10) & (raw.regime == "fixed_total")
+    ]
+    assert full.status.ne("complete").all()
+    assert len(pd.read_csv(mismatch.RAW_PATH, usecols=["repeat"])) == 346500
+    assert len(pd.read_csv(drift.RAW_PATH, usecols=["repeat"])) == 100800
+
+
+def test_threshold_table_names_a_first_crossing_or_none() -> None:
+    table = pd.read_csv(analysis.THRESHOLDS_PATH)
+    resolved = table.lambda_loses_to_raw_resolved.dropna()
+    assert resolved.between(0.0, 1.0).all()
+    pointwise = table.lambda_loses_to_raw
+    both = table.dropna(subset=["lambda_loses_to_raw", "lambda_loses_to_raw_resolved"])
+    assert (both.lambda_loses_to_raw <= both.lambda_loses_to_raw_resolved).all()
+    assert pointwise.notna().sum() >= resolved.size

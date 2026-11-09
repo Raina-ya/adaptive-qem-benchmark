@@ -40,7 +40,14 @@
         "src.generate_readout_mismatch_benchmark",
         "src.generate_qaoa_selection",
         "src.generate_selector_holdout_v2",
-        "src.generate_signal_v2"
+        "src.generate_signal_v2",
+        "src.shots_to_reliability",
+        "src.confirmatory_v1",
+        "src.confirmatory_qaoa_v1",
+        "src.generate_selector_v3",
+        "src.generate_readout_feasibility_v2",
+        "src.generate_readout_mismatch_dose",
+        "src.generate_drift_policy"
       ],
       "post_checks": [
         "src.verify_final_project",
@@ -98,6 +105,16 @@
         "src.zne_gate_v2_diagnostics",
         "src.power_analysis_v1",
         "src.decision_tasks_v3",
+        "src.shots_to_reliability",
+        "src.confirmatory_v1",
+        "src.confirmatory_qaoa_v1",
+        "src.confirmatory_analysis_v1",
+        "src.generate_selector_v3",
+        "src.selector_v3_analysis",
+        "src.generate_readout_feasibility_v2",
+        "src.generate_readout_mismatch_dose",
+        "src.generate_drift_policy",
+        "src.readout_boundaries_analysis",
         "src.cross_validation"
       ],
       "post_checks": [
@@ -777,6 +794,197 @@
         "experiments/manifests/selector_v3_manifest.csv",
         "experiments/manifests/selector_v3_manifest.sha256",
         "results/processed/selector_v3_coverage.csv"
+      ]
+    },
+    {
+      "module": "src.shots_to_reliability",
+      "args": [],
+      "tier": "expensive",
+      "configs": [
+        "experiments/configs/shots_reliability_v1.yaml",
+        "experiments/configs/sequential_decision_v1.yaml"
+      ],
+      "manifests": [],
+      "outputs": [
+        "results/processed/shots_reliability_ladder_v1.csv",
+        "results/processed/shots_reliability_targets_v1.csv"
+      ],
+      "expected_runtime_seconds": 60,
+      "runtime_source": "file timestamps of one Windows run with four workers",
+      "expected_rows": {
+        "results/processed/shots_reliability_ladder_v1.csv": 1760,
+        "results/processed/shots_reliability_targets_v1.csv": 480
+      }
+    },
+    {
+      "module": "src.confirmatory_v1",
+      "args": [],
+      "tier": "expensive",
+      "configs": [
+        "experiments/configs/confirmatory_v1.yaml"
+      ],
+      "manifests": [
+        "experiments/manifests/confirmatory_v1_manifest.csv"
+      ],
+      "outputs": [
+        "results/raw/confirmatory_exact_v1.csv"
+      ],
+      "expected_runtime_seconds": 120,
+      "runtime_source": "file timestamps of one Windows run with four workers",
+      "expected_rows": {
+        "results/raw/confirmatory_exact_v1.csv": 86079
+      }
+    },
+    {
+      "module": "src.confirmatory_qaoa_v1",
+      "args": [],
+      "tier": "expensive",
+      "configs": [
+        "experiments/configs/confirmatory_v1.yaml",
+        "experiments/configs/qaoa_selection_v1.yaml"
+      ],
+      "manifests": [
+        "experiments/manifests/confirmatory_v1_manifest.csv"
+      ],
+      "outputs": [
+        "results/raw/confirmatory_qaoa_v1.csv"
+      ],
+      "expected_runtime_seconds": 3960,
+      "runtime_source": "file timestamps of one Windows run with four workers",
+      "expected_rows": {
+        "results/raw/confirmatory_qaoa_v1.csv": 18505
+      }
+    },
+    {
+      "module": "src.confirmatory_analysis_v1",
+      "args": [],
+      "tier": "routine",
+      "configs": [
+        "experiments/configs/confirmatory_v1.yaml"
+      ],
+      "manifests": [
+        "experiments/manifests/confirmatory_v1_manifest.csv"
+      ],
+      "outputs": [
+        "results/processed/confirmatory_results_v1.csv"
+      ]
+    },
+    {
+      "module": "src.generate_selector_v3",
+      "args": [
+        "--workers",
+        "4"
+      ],
+      "tier": "expensive",
+      "configs": [
+        "experiments/configs/selector_v3.yaml"
+      ],
+      "manifests": [
+        "experiments/manifests/selector_v3_manifest.csv"
+      ],
+      "outputs": [
+        "results/raw/selector_v3_repeats.csv"
+      ],
+      "expected_runtime_seconds": 120,
+      "runtime_source": "file timestamps of one Windows run with four workers",
+      "expected_rows": {
+        "results/raw/selector_v3_repeats.csv": 50400
+      }
+    },
+    {
+      "module": "src.selector_v3_analysis",
+      "args": [],
+      "tier": "routine",
+      "configs": [
+        "experiments/configs/selector_v3.yaml"
+      ],
+      "manifests": [
+        "experiments/manifests/selector_v3_manifest.csv"
+      ],
+      "outputs": [
+        "results/processed/certification_v2_alarms.csv",
+        "results/processed/certification_v2_groups.csv",
+        "results/processed/certification_v2_summary.csv",
+        "results/processed/selector_v3_acceptance.csv",
+        "results/processed/selector_v3_groups.csv",
+        "results/processed/selector_v3_holdout.csv",
+        "results/processed/selector_v3_leave_group_out.csv",
+        "results/processed/selector_v3_rule_selection.csv"
+      ]
+    },
+    {
+      "module": "src.generate_readout_feasibility_v2",
+      "args": [
+        "--workers",
+        "4"
+      ],
+      "tier": "expensive",
+      "configs": [
+        "experiments/configs/readout_boundaries_v1.yaml"
+      ],
+      "manifests": [],
+      "outputs": [
+        "results/raw/readout_feasibility_v2.csv"
+      ],
+      "expected_runtime_seconds": 600,
+      "runtime_source": "file timestamps of one Windows run with four workers",
+      "expected_rows": {
+        "results/raw/readout_feasibility_v2.csv": 230400
+      }
+    },
+    {
+      "module": "src.generate_readout_mismatch_dose",
+      "args": [
+        "--workers",
+        "4"
+      ],
+      "tier": "expensive",
+      "configs": [
+        "experiments/configs/readout_boundaries_v1.yaml"
+      ],
+      "manifests": [],
+      "outputs": [
+        "results/raw/readout_mismatch_dose_v1.csv"
+      ],
+      "expected_runtime_seconds": 120,
+      "runtime_source": "file timestamps of one Windows run with four workers",
+      "expected_rows": {
+        "results/raw/readout_mismatch_dose_v1.csv": 346500
+      }
+    },
+    {
+      "module": "src.generate_drift_policy",
+      "args": [
+        "--workers",
+        "4"
+      ],
+      "tier": "expensive",
+      "configs": [
+        "experiments/configs/readout_boundaries_v1.yaml"
+      ],
+      "manifests": [],
+      "outputs": [
+        "results/raw/drift_policy_v1.csv"
+      ],
+      "expected_runtime_seconds": 60,
+      "runtime_source": "file timestamps of one Windows run with four workers",
+      "expected_rows": {
+        "results/raw/drift_policy_v1.csv": 100800
+      }
+    },
+    {
+      "module": "src.readout_boundaries_analysis",
+      "args": [],
+      "tier": "routine",
+      "configs": [
+        "experiments/configs/readout_boundaries_v1.yaml"
+      ],
+      "manifests": [],
+      "outputs": [
+        "results/processed/drift_policy_summary_v1.csv",
+        "results/processed/readout_feasibility_v2_summary.csv",
+        "results/processed/readout_mismatch_dose_summary_v1.csv",
+        "results/processed/readout_mismatch_thresholds_v1.csv"
       ]
     },
     {
