@@ -1,0 +1,83 @@
+{
+  "version": "readout_boundaries_v1",
+  "evidence_label": "noisy_simulated",
+  "scope": "Simulator sensitivity analysis of readout correction. Channels are synthetic and nothing here is hardware evidence.",
+  "relation_to_v1": "A new protocol version. v1 rows, including its 38 failed width-8 full-matrix repeats and 960 never-executed correlated repeats, stay as committed. No v2 row is written into a v1 table.",
+  "observable": "all-Z parity, the worst case for readout",
+  "candidates": {"margin_0.10": [0.30, 0.20], "margin_0.05": [0.25, 0.20]},
+  "distributions": ["product", "sparse"],
+  "feasibility": {
+    "widths": [4, 6, 8, 10],
+    "full_matrix_max_width": 10,
+    "repeats": 200,
+    "models": {
+      "independent": {"p01": 0.03, "p10": 0.03, "pair_flip": 0.0},
+      "asymmetric": {"p01": 0.015, "p10": 0.06, "pair_flip": 0.0},
+      "pair_correlated": {"p01": 0.02, "p10": 0.02, "pair_flip": 0.03}
+    },
+    "fixed_total_budgets": [4096, 16384],
+    "fixed_total_calibration_fraction": 0.2,
+    "fixed_quality_shots_per_calibration_circuit": [256, 1024],
+    "fixed_quality_target_shots": 16384,
+    "methods": ["none", "full_matrix", "tensor_product", "pairwise_local", "observed_subspace", "matrix_free"],
+    "condition_repeats_at_width_10": 20,
+    "full_failure_condition": 1e8
+  },
+  "mismatch": {
+    "widths": [4, 6, 8],
+    "full_matrix_max_width": 6,
+    "repeats": 150,
+    "candidate_pairs": ["margin_0.10"],
+    "lambdas": [0.0, 0.05, 0.1, 0.15, 0.2, 0.25, 0.3, 0.35, 0.4, 0.45, 0.5, 0.55, 0.6, 0.65, 0.7, 0.75, 0.8, 0.85, 0.9, 0.95, 1.0],
+    "target_shots": 16384,
+    "tensor_shots": 16384,
+    "pair_shots": 16384,
+    "full_shots_per_state": 1024,
+    "check_shots": 1024,
+    "diagnostic_shots_per_lambda": "2 * check_shots, charged as diagnostic and recorded here rather than per row",
+    "methods": ["none", "tensor_product", "pairwise_local", "full_matrix"],
+    "scenarios": {
+      "asymmetric_drift": {"cal": [0.02, 0.02, 0.0], "mismatch": [0.01, 0.08, 0.0]},
+      "pair_correlated": {"cal": [0.02, 0.02, 0.0], "mismatch": [0.02, 0.02, 0.05]},
+      "calibration_age": {"cal": [0.02, 0.03, 0.0], "mismatch": [0.035, 0.06, 0.0]},
+      "abrupt_change": {"cal": [0.02, 0.02, 0.0], "mismatch": [0.06, 0.12, 0.0]},
+      "independent_to_correlated": {"cal": [0.03, 0.03, 0.0], "mismatch": [0.0, 0.0, 0.03]}
+    },
+    "abrupt_change_reading": "lambda is the fraction of the target shots taken after the change",
+    "independent_to_correlated_reading": "both ends have one-qubit flip rate 0.03; the mismatch end makes every flip a pair flip",
+    "loses_to_raw_rule": "first lambda whose mitigated RMSE exceeds raw RMSE, and first lambda where the repeat-bootstrap interval of the difference lies above zero",
+    "steep_rise_rule": "first lambda whose decision error is at least the lambda-zero error plus 0.10",
+    "warning_rules": {
+      "condition_number": "median above 2 times its lambda-zero median",
+      "negative_mass": "median full-matrix negative quasi-probability mass above 0.05",
+      "check_drift": "at least half the runs have check z above 3",
+      "coverage": "nominal 95% interval covers the ideal value in under 90% of runs; not available at runtime"
+    }
+  },
+  "drift": {
+    "repeats": 100,
+    "amplitudes": [0.01, 0.03, 0.06],
+    "p01_fraction_of_p10_drift": 0.33,
+    "timescales": [25, 100],
+    "shapes": ["ramp", "abrupt", "sinusoid"],
+    "run_lengths": [100, 300],
+    "margins": [0.02, 0.05],
+    "calibration_costs": [1024, 4096],
+    "trigger_thresholds": [2.0, 3.0, 4.0],
+    "fixed_intervals": [10, 50],
+    "base_p01": 0.02,
+    "base_p10": 0.03,
+    "decision_center": 0.2,
+    "target_shots_per_decision": 2048,
+    "check_shots_per_state": 128,
+    "tolerance": 0.01,
+    "missed_drift_window": 20,
+    "policies": ["never", "every_decision", "fixed_interval", "triggered"]
+  },
+  "hypotheses": {
+    "H8": "Under a fixed total budget at width 8, where each full-matrix calibration state gets 3 shots at 4096 and 12 at 16384, full-matrix correction has a higher candidate RMSE than tensor-product correction for every model. Under fixed calibration quality it completes at width 8, with calibration shots above the target budget.",
+    "H9": "Calibration condition number cannot warn of mismatch, because it is computed from the stale calibration. A runtime check circuit can.",
+    "H10": "Tensor-product correction loses to raw at a smaller lambda under pair-correlated mismatch than under independent asymmetric drift.",
+    "H11": "A check-triggered policy matches every-decision recalibration in decision error with fewer shots when drift is slow, and loses its advantage when drift is abrupt and small compared with the check noise."
+  }
+}

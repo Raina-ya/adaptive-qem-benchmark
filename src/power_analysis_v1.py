@@ -198,7 +198,7 @@ def selection_rows() -> list[dict[str, object]]:
 def role_of(row: pd.Series) -> str:
     """Name why a comparison would earn more repeats, or return none."""
 
-    if row.task == "medium_dense8" and row.first == "raw" and row.second == "zne":
+    if row.task == "medium_dense8" and row["first"] == "raw" and row["second"] == "zne":
         return "core_counterexample"
     if row.outcome == "selection_error":
         rates = (row.first_bad_rate, row.second_bad_rate)
