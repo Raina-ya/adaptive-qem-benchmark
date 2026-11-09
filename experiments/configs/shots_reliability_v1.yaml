@@ -1,0 +1,17 @@
+{
+  "version": "shots_reliability_v1",
+  "evidence_label": "noisy_simulated",
+  "source_config": "experiments/configs/sequential_decision_v1.yaml",
+  "methods": ["raw", "readout", "zne", "combined"],
+  "ladder": [1024, 2048, 4096, 8192, 16384, 32768, 65536, 131072, 262144, 524288, 1048576],
+  "repeats": 400,
+  "target_errors": [0.05, 0.10, 0.20],
+  "confidence_level": 0.95,
+  "calibration_fraction": 0.20,
+  "zne_factors": [1, 3, 5],
+  "stopping_rule": "At each ladder look, stop when the delta-method gap interval excludes zero, at confidence 1 - alpha / looks.",
+  "unresolved_rule": "A run with no stop by a budget is unresolved at that budget. Its forced choice is still scored, and it never counts as reaching a target.",
+  "failure_rule": "A singular calibration or an exact-zero gap counts as a decision error.",
+  "reached_rule": "A target is reached at the smallest budget whose error Wilson upper bound and every larger budget's bound are at or below the target.",
+  "maximum_budget": 1048576
+}

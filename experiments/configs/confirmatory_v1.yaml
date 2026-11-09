@@ -1,0 +1,34 @@
+{
+  "version": "confirmatory_v1",
+  "evidence_label": "noisy_simulated",
+  "groups": {
+    "exploratory": "All v1 comparisons in results/processed/power_comparisons_v1.csv. They chose what to test and confirm nothing.",
+    "confirmatory": "New independent repeats for experiments/manifests/confirmatory_v1_manifest.csv. Holm correction across the family.",
+    "holdout": "New task settings that v1 never ran. They are read once, with the same labels, and they choose nothing."
+  },
+  "holdout_repeats": 800,
+  "holdout_minimum_difference": 0.10,
+  "holdout_tasks": {
+    "holdout_shifted_gate": {
+      "margins": [0.03, 0.07, 0.15],
+      "noise": ["medium", "high"],
+      "base_expectation": 0.3,
+      "depth_a": 4,
+      "depth_b": 2,
+      "readout_multiplier_a": 1.0,
+      "calibration": "shared"
+    },
+    "holdout_shifted_readout": {
+      "margins": [0.03, 0.07, 0.15],
+      "noise": ["medium", "high"],
+      "base_expectation": 0.3,
+      "depth_a": 2,
+      "depth_b": 2,
+      "readout_multiplier_a": 2.5,
+      "calibration": "per_candidate"
+    }
+  },
+  "holdout_budgets": [4096, 16384],
+  "holdout_comparisons": [["raw", "readout"], ["raw", "zne"], ["readout", "zne"]],
+  "null_rule": "After Holm, a comparison is resolved_difference if it survives. Otherwise it is close_within_margin if its interval at 1 - 2 * alpha_per_comparison lies inside the minimum difference, and otherwise underpowered."
+}

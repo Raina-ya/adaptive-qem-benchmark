@@ -36,6 +36,11 @@ def ry(angle: float) -> np.ndarray:
     return np.array([[cosine, -sine], [sine, cosine]], dtype=complex)
 
 
+def rx(angle: float) -> np.ndarray:
+    cosine, sine = math.cos(angle / 2.0), math.sin(angle / 2.0)
+    return np.array([[cosine, -1j * sine], [-1j * sine, cosine]], dtype=complex)
+
+
 def rz(angle: float) -> np.ndarray:
     return np.array([[np.exp(-0.5j * angle), 0.0], [0.0, np.exp(0.5j * angle)]], dtype=complex)
 
@@ -75,9 +80,9 @@ class Gate:
         cancels it: folding does not amplify it. A detuning keeps its sign, so it accumulates.
         """
 
-        if self.name in ("ry", "rz"):
+        if self.name in ("rx", "ry", "rz"):
             angle = self.angle + math.copysign(overrotation, self.angle) + detuning
-            return ry(angle) if self.name == "ry" else rz(angle)
+            return {"rx": rx, "ry": ry, "rz": rz}[self.name](angle)
         if self.name == "cx":
             return CNOT
         if self.name == "h":
@@ -130,7 +135,7 @@ def garbage_fold(gates: Sequence[Gate], factor: int, seed: int) -> list[Gate]:
     output = list(gates)
     for _ in range((factor - 1) // 2):
         for gate in reversed(gates):
-            if gate.name in ("ry", "rz"):
+            if gate.name in ("rx", "ry", "rz"):
                 output.append(Gate(gate.name, gate.qubits, float(rng.uniform(-np.pi, np.pi))))
             else:
                 output.append(gate)

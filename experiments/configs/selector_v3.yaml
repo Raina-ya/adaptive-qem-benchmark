@@ -1,0 +1,52 @@
+{
+  "version": "selector_v3",
+  "evidence_label": "noisy_simulated",
+  "selection_rule": "Take the first seeds, in order, whose noiseless candidate values give the wanted top gap. No noisy or mitigation result is read.",
+  "families": ["hardware_efficient", "ghz_rotated", "tfim_trotter", "qaoa_ring"],
+  "widths": [2, 4, 6],
+  "depths": [1, 3],
+  "candidates_per_task": 3,
+  "gap_classes": {"near_tie": [0.005, 0.05], "moderate": [0.05, 0.2], "clear": [0.2, 2.0]},
+  "seed_search_limit": 3000,
+  "split_fractions": {"train": 0.5, "validation": 0.25, "holdout": 0.25},
+  "budgets": [4096, 16384],
+  "repeats": 50,
+  "bootstraps": 2000,
+  "pilot_calibration_fraction": 0.10,
+  "pilot_fold_fraction": 0.20,
+  "baseline_calibration_fraction": 0.20,
+  "factors": [1, 3, 5],
+  "certification": {
+    "batches": 5,
+    "looks": [3, 4, 5],
+    "alpha": 0.05,
+    "calibration_fraction": 0.20,
+    "base_fraction": 0.60,
+    "fold3_fraction": 0.10,
+    "fold5_fraction": 0.10,
+    "drift_z": 3.0,
+    "bound_z": 3.0,
+    "fold_reversal_z": 2.0,
+    "variance_ratio_limit": 3.0,
+    "minimum_batch_sign_agreement": 4
+  },
+  "noise": {
+    "none": {},
+    "depolarizing": {"depolarizing_1q": 0.005, "depolarizing_2q": 0.03, "readout_p01": 0.02, "readout_p10": 0.016},
+    "amplitude_damping": {"damping_1q": 0.005, "damping_2q": 0.03, "readout_p01": 0.02, "readout_p10": 0.016},
+    "dephasing": {"dephasing_1q": 0.005, "dephasing_2q": 0.03, "readout_p01": 0.02, "readout_p10": 0.016},
+    "coherent_overrotation": {"overrotation": 0.05, "readout_p01": 0.02, "readout_p10": 0.016},
+    "mixed": {"depolarizing_1q": 0.002, "depolarizing_2q": 0.012, "damping_1q": 0.002, "damping_2q": 0.012, "dephasing_1q": 0.002, "dephasing_2q": 0.012, "overrotation": 0.01, "detuning": 0.005, "readout_p01": 0.02, "readout_p10": 0.016},
+    "readout_drift": {"depolarizing_1q": 0.002, "depolarizing_2q": 0.012, "readout_p01": 0.06, "readout_p10": 0.048}
+  },
+  "drift": {"condition": "readout_drift", "calibration_scale_first": 0.5, "calibration_scale_last": 1.0},
+  "selector_grid": {
+    "z_separate": [0.0, 1.0, 1.645, 1.96, 2.5],
+    "z_deviate": [2.0, 3.0, 4.0],
+    "allow_raw": [false, true]
+  },
+  "selector_rule": "Choose on training the five lowest mean regrets among rules covering at least minimum_coverage, then the lowest on validation. Ties favour larger z_deviate, then smaller z_separate, then no raw switch. Holdout is read once.",
+  "minimum_coverage": 0.5,
+  "similar_regret": 0.002,
+  "similar_overhead_fraction": 0.10
+}

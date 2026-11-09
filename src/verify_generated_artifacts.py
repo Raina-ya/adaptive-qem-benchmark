@@ -49,6 +49,8 @@ GENERATORS = (
     "src.signal_v2_analysis",
     "src.zne_gate_v2",
     "src.zne_gate_v2_diagnostics",
+    "src.power_analysis_v1",
+    "src.decision_tasks_v3",
     "src.cross_validation",
     "src.verify_final_project",
     "src.claim_ledger",
