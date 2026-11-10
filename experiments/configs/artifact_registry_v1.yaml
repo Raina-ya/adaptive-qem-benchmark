@@ -6,6 +6,7 @@
     "experiments/manifests/qaoa_selection_v1_manifest.csv": "Frozen with the candidate pool and checked by its SHA-256 file.",
     "experiments/manifests/qaoa_selection_v1_manifest.sha256": "Frozen hash of the QAOA manifest.",
     "experiments/manifests/selector_v2_holdout_manifest.csv": "Repository-precommitted manifest; the generator asserts that it is unchanged.",
+    "results/README.md": "Human-maintained index describing the committed result artifacts.",
     "results/processed/day08_12_runtime.csv": "Measured wall-clock timings, which cannot be regenerated."
   },
   "auxiliary_not_regenerated": {
