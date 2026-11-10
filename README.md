@@ -73,6 +73,9 @@ near-tie cell is already inconclusive in simulation. See
 
 ![Operating-regime map with the corrected raw, tie, readout, ZNE, and inconclusive labels](paper/figures/operating_regime_map_v2.png)
 
+Slides for the whole project: **[qem_project_slides.pdf](slides/qem_project_slides.pdf)** (19 slides, source
+`slides/deck.html`, rebuilt with `python slides/build.py`, which needs Playwright).
+
 Read the current paper: **[When Does Quantum Error Mitigation Pay Off Under a Fixed Shot Budget?](paper/main(2).pdf)**
 (source `paper/main_v2.tex`). It covers every study, including the signal, confirmatory,
 selector, certification, and readout-boundary results. The earlier paper,

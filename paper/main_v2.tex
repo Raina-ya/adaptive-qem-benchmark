@@ -566,7 +566,7 @@ one readout, so its bias is common-mode and cancels in the comparison.
 \begin{table}[t]
 \centering
 \caption{Held-out selector comparison, 20 tasks and 14,000 runs. Reliable coverage is the share of
-runs that are covered and correct. The oracle picks the best baseline per condition after scoring. These are Windows results; a Linux rebuild gives a different pilot fit and combined estimate (Section~\ref{sec:verification}).}
+runs that are covered and correct. The oracle picks the best baseline per condition after scoring.}
 \label{tab:selector3}
 \footnotesize
 \setlength{\tabcolsep}{3pt}
@@ -830,15 +830,17 @@ Continuous integration rebuilds every routine generator from a clean clone on ea
 long generators of the release scope are rebuilt by a separate workflow, one job per generator, each
 deleting that generator's committed outputs in a clean clone, running it with the locked
 dependencies, and comparing the result with the committed files, which were generated on Windows.
-Its first run, on Linux, reproduced 11 of the 16 generators within tolerance, including those behind
-the confirmatory, QAOA, decision, combined-QEM, shots-to-reliability, mismatch, and drift results.
-One job failed because the registry assigned a figure to the wrong generator; this is fixed. Four did
-not match the Windows files: the selector-v3 pilot fit and combined estimate, the readout-feasibility
-condition number, the signal study's out-of-bounds rate, and the scalable-readout iterative solver,
-whose convergence status, and with it every summary column, changes between platforms. The last
-three feed no number printed here except the planned repeat count, but the selector-v3 numbers may
-change, by an amount not yet measured. The committed results remain the Windows results, no
-tolerance was changed, and the scalable-readout study should be read as platform dependent. The full
+Two runs on Linux reproduced 12 of the 16 generators within tolerance, including those behind the
+confirmatory, QAOA, decision, combined-QEM, shots-to-reliability, mismatch, and drift results. One
+of these failed in the first run only because the registry assigned a figure to the wrong generator,
+which is now fixed. Four do not match the Windows files. In three the difference changes no reported result:
+the selector-v3 estimates differ only in the sign of a zero, the readout-feasibility condition number
+is infinite on one platform where it is large and finite on the other, and the signal study's
+out-of-bounds rate, which no analysis reads, differs in 9 of 17,640 rows. The fourth is substantive:
+in 29 of 5,760 scalable-readout runs, whether an ill-conditioned correction completes depends on the
+platform, which changes 5 of 192 summary cells. That study, of which this paper prints only the
+planned repeat count, should be read as platform dependent near its conditioning limit. The
+committed results remain the Windows results and no tolerance was changed. The full
 record is in \texttt{docs/release\_rebuild\_v1.md}.
 
 \texttt{src.independent\_reference} reproduces exact values within $10^{-12}$ and, from fixed
