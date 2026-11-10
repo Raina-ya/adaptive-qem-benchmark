@@ -65,7 +65,7 @@ Set-Location "$env:TEMP\qem-regenerated"
 ..\qem-clean\.venv\Scripts\python.exe -m pytest --deselect tests/test_artifact_provenance.py::test_committed_hashes_match_the_tree
 ```
 
-Build the paper in `paper/` with `pdflatex -jobname="main(2)" main_v2.tex`, `bibtex "main(2)"`, then
+Build the paper in `paper/` with `pdflatex main.tex`, `bibtex main`, then
 the `pdflatex` command twice more, and run `python -m src.verify_final_project`.
 
 ## Reading the result

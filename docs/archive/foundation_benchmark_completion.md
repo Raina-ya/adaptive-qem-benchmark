@@ -1,5 +1,10 @@
 # Phase 0 Through Readout Mitigation Completion Checklist
 
+> Historical acceptance checklist for the foundation benchmark through readout
+> mitigation. It records the original build sequence and does not describe the
+> current project scope. See `README.md`, `docs/README.md`, and `paper/main.pdf`
+> for the canonical completed study.
+
 | Requirement | Evidence | Status |
 |---|---|---|
 | Repository terminology, seed policy, labels, dependencies, and non-goals | `AGENTS.md`, `docs/definitions.md`, `docs/limitations.md` | Complete |

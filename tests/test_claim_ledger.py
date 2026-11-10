@@ -234,7 +234,7 @@ ALLOWED_PREREGISTRATION = (
 
 
 def test_preregistration_language_is_qualified() -> None:
-    paths = [ROOT / "README.md", ROOT / "paper/main.tex", ROOT / "paper/main_v2.tex"]
+    paths = [ROOT / "README.md", ROOT / "paper/main.tex"]
     paths += sorted((ROOT / "docs").glob("*.md")) + sorted((ROOT / "paper/generated").glob("*.tex"))
     for path in paths:
         text = " ".join(path.read_text(encoding="utf-8").split()).lower()

@@ -28,12 +28,12 @@ bookkeeping error, not a reproducibility failure.
 
 ## The four differences, measured in the second run
 
-| Generator | What differs | Size | Effect on `main(2).pdf` |
+| Generator | What differs | Size | Effect on `main.pdf` |
 | --- | --- | --- | --- |
 | `generate_selector_v3` | `base_combined` in 1 of 50,400 rows, `pilot_fit` in 4 | Only the sign of zero: `0.000000` against `-0.000000` | None. The values are equal, so every selection, regret, and certificate is unchanged (claims G05, G06). |
 | `generate_readout_feasibility_v2` | `condition_number` in 1,664 of 230,400 rows | One platform reports an infinite condition number where the other reports a large finite one | None. Run status is identical, and claim G07 uses status and shot counts. |
 | `generate_signal_v2` | `out_of_bounds_rate` in 9 of 17,640 rows | Up to 0.97 in a rate | None. No analysis reads this column; the fit RMSE used by claims G01, G04, and G09 is identical. |
-| `generate_readout_scalability_benchmark` | Run status in 29 of 5,760 runs (`complete` against `failed` as ill-conditioned); 5 of 192 summary cells | Corrected estimates otherwise agree within 4.2e-8; in the 5 cells, failure probability changes by up to 1, RMSE by up to 0.071, and decision-error probability by up to 0.1 | None in `main(2).pdf`, which prints only this study's planned repeat count (claim C09). The scalable-readout results of the earlier paper (`main.pdf`) are affected in these 5 cells. |
+| `generate_readout_scalability_benchmark` | Run status in 29 of 5,760 runs (`complete` against `failed` as ill-conditioned); 5 of 192 summary cells | Corrected estimates otherwise agree within 4.2e-8; in the 5 cells, failure probability changes by up to 1, RMSE by up to 0.071, and decision-error probability by up to 0.1 | None in the canonical `main.pdf`, which prints only this study's planned repeat count (claim C09). The earlier pre-cleanup paper, retained in Git history, reported the affected scalable-readout results. |
 
 The first three are differences in how the same number is written or in which side of a numerical
 edge a value lands, and they change no reported result. The fourth is substantive: whether an

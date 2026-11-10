@@ -76,10 +76,10 @@ near-tie cell is already inconclusive in simulation. See
 Slides for the whole project: **[qem_project_slides.pdf](slides/qem_project_slides.pdf)** (19 slides, source
 `slides/deck.html`, rebuilt with `python slides/build.py`, which needs Playwright).
 
-Read the current paper: **[When Does Quantum Error Mitigation Pay Off Under a Fixed Shot Budget?](paper/main(2).pdf)**
-(source `paper/main_v2.tex`). It covers every study, including the signal, confirmatory,
-selector, certification, and readout-boundary results. The earlier paper,
-[Adaptive Quantum Error Mitigation Under Fixed Shot Budgets](paper/main.pdf), is kept unchanged.
+Read the current paper: **[When Does Quantum Error Mitigation Pay Off Under a Fixed Shot Budget?](paper/main.pdf)**
+(source `paper/main.tex`). It covers every study, including the signal, confirmatory,
+selector, certification, and readout-boundary results. The pre-cleanup paper remains
+available from Git history and the `v1.0.0-pre-cleanup` tag.
 
 ## Evidence boundary
 
@@ -142,7 +142,7 @@ $env:MPLCONFIGDIR = ".matplotlib-cache"
 .\.venv\Scripts\python.exe -m src.run_with_log src.hardware_readiness
 .\.venv\Scripts\python.exe -m src.run_with_log src.final_synthesis
 .\.venv\Scripts\python.exe -m src.run_with_log src.generate_paper_v2_assets
-cd paper; pdflatex -jobname="main(2)" main_v2.tex; bibtex "main(2)"; pdflatex -jobname="main(2)" main_v2.tex; pdflatex -jobname="main(2)" main_v2.tex; cd ..
+cd paper; pdflatex main.tex; bibtex main; pdflatex main.tex; pdflatex main.tex; cd ..
 .\.venv\Scripts\python.exe -m src.run_with_log src.verify_final_project
 .\.venv\Scripts\python.exe -m src.run_with_log src.claim_ledger
 ```
@@ -271,9 +271,8 @@ results/raw/                 Immutable repeat-level benchmark rows
 results/processed/           Coverage and runtime summaries
 results/runs/                Per-run generation metadata and output hashes
 figures/                     Generated project figures
-paper/main_v2.tex            Current paper source
-paper/main(2).pdf            Current compiled paper
-paper/main.tex, main.pdf     Earlier paper, kept unchanged
+paper/main.tex               Canonical paper source
+paper/main.pdf               Canonical compiled paper
 paper/generated/             Tables and macros derived from authoritative CSV data
 paper/figures/               Paper figures generated from repository outputs
 ```
